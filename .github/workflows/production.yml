@@ -1,0 +1,42 @@
+name: Node.js Master Deployment 
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+            
+    - name: Build  App
+      run: |
+        cp -f production-env .env
+        npm install
+        npm run build
+        rm -rf ./node_modules
+        rm -rf .git
+    
+    - name: Deploy files to S3 Bucket
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.BUCKET_DEPLOY_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.BUCKET_DEPLOY_SECRET_ACCESS_KEY }}
+      run: |
+        aws --region=us-east-1 s3 sync --delete build s3://${{ secrets.BUCKET_DEPLOY_NAME_PROD }} --exclude "uploads/*"
+   
+    - name: Purge Cloudfront Cache
+      uses: awact/cloudfront-action@master
+      env:
+        SOURCE_PATH: "/*"
+        AWS_REGION: "us-east-1"
+        AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFRONT_PURGE_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFRONT_PURGE_SECRET_ACCESS_KEY }}
+        DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PROD }}

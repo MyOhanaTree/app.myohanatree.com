@@ -1,0 +1,121 @@
+import React, { useState, useEffect, useRef } from "react";
+import Select, { components } from "react-select";
+import { InputWrap, SelectStyles, LabelWrapper, Error } from "./styled";
+import { useThemeUI } from "theme-ui";
+
+import { ChevronIcon, TimesIcon } from "components/svg";
+
+
+const SelectInput = ({
+  name, 
+  label, 
+  options, 
+  value, 
+  description,
+  multiple, 
+  readonly,
+  required,
+  disabled, 
+  clearable,  
+  $customStyles, 
+  $responseErrors, 
+  $errors, 
+  onChange
+}: {
+  name?: string;
+  label?: string | React.ReactNode;
+  options?: any[];
+  value?: string | number;
+  description?: string;
+  required?: boolean;
+  multiple?: boolean;
+  readonly?: boolean;
+  disabled?: boolean;
+  clearable?: boolean;
+  $customStyles?: any;
+  $responseErrors?: any;
+  $errors?: any;
+  onChange?: (e?: any) => void;
+}) => {
+
+  const selectRef = useRef<any>(null);
+  const themeContext = useThemeUI();
+  const { theme } = themeContext;
+  const [borderError, setBorderError] = useState<boolean>(false);  
+  
+  const setSelectValue = function (e: any){  
+    if(disabled) return true;
+
+    let changedValue = e?.value ?? ""
+    if(multiple){
+      const values = e.map((el: any) => el.value).filter((v: any) => v !== "");   
+      changedValue = values; 
+    }
+
+    if(typeof onChange === "function"){
+      onChange(changedValue ?? "")
+    }
+    setTimeout(() => { selectRef?.current?.blur(); },100);
+  }
+
+  useEffect(() => {
+    if($responseErrors || $errors){
+      setBorderError(true);
+    }else{
+      setBorderError(false);
+    }
+  },[$responseErrors, $errors]);
+
+  const MultiValueRemove = (props: any) => {
+    return (      
+        <components.MultiValueRemove {...props}>
+          <TimesIcon  height={"10px"} width={"10px"} fill={theme?.colors?.base_800} />          
+        </components.MultiValueRemove>              
+    );
+  };
+
+  const ClearIndicator = (props: any) => {
+    return (      
+      <components.ClearIndicator {...props}>        
+        <TimesIcon height={"14px"} width={"14px"} fill={theme?.colors?.base_500} />        
+      </components.ClearIndicator>
+    );
+  };
+
+  const DropdownIndicator = (props: any) => {
+    return (      
+      <components.DropdownIndicator {...props}>        
+        <ChevronIcon height={"14px"} width={"14px"} fill={theme?.colors?.base_500} transform={"rotate(-90deg)"} />        
+      </components.DropdownIndicator>
+    );
+  };
+
+  return (
+    <InputWrap $customStyles={$customStyles} $errors={borderError} theme={theme}>
+      {label && 
+        <LabelWrapper theme={theme}>
+          <label>{label}</label>
+          {required ? <span>*</span>  : ''}         
+        </LabelWrapper>
+      }
+      <Select 
+        ref={selectRef}
+        styles={SelectStyles} 
+        menuPlacement="auto"
+        classNamePrefix="react-select"
+        options={options} 
+        name={name} 
+        isMulti={multiple}
+        value={options?.filter((option: any) => (Array.isArray(value)) ? value.includes(option.value) : option.value === value)} 
+        onChange={(e) => setSelectValue(e)}  
+        components={{MultiValueRemove,ClearIndicator,DropdownIndicator}} 
+        isClearable={multiple || clearable}
+        isDisabled={readonly}       
+      />  
+      {description && <p><small>{description}</small></p>}         
+      {$errors && <Error theme={theme}>{$errors}</Error>}
+    </InputWrap>    
+  );
+};
+
+export default SelectInput;

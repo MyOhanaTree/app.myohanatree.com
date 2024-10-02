@@ -1,0 +1,69 @@
+import styled from "styled-components";
+import { themevals as theme } from "theme/themevals";
+
+interface CustomProps {
+  $submitting?: boolean;
+  $customStyles?: any;
+  $errors?: any;
+}
+  
+
+export const ToggleWrapper = styled.div`
+  display: inline-flex;
+  background-color: ${theme.colors.base_100};
+  border: 1px solid ${theme.colors.base_300};    
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  width: auto;
+`;
+
+export const LabelTrue = styled.div<{ $active?: boolean }>`
+  padding: 5px 15px;
+  flex-grow: 1;
+  text-align: center;
+  background-color: ${props => props.$active ? theme.colors.primary : ""};
+  color: ${props => props.$active ? theme.colors.base_100 : ""};
+`;
+
+export const LabelFalse = styled.div<{ $active?: boolean }>`
+  padding: 5px 15px;
+  flex-grow: 1;
+  text-align: center;
+  background-color: ${props => props.$active ? theme.colors.primary : ""};
+  color: ${props => props.$active ? theme.colors.base_100 : ""};
+`;
+
+export const labelStyles = {
+  marginBottom: 0,
+  display: "flex",
+  fontSize: 14,
+  fontWeight: 500
+};
+
+export const LabelWrapper =  styled.div`
+  margin-bottom: 10px;
+  display: flex;
+  width: 100%;
+  label {
+    color: ${props => props.theme.colors.body};
+    ${labelStyles}
+  }
+  small {
+    font-style: italic; font-size: .75rem; color: ${(props) => props.theme.colors.ltgrey};
+  }
+`;
+
+
+
+export const InputWrap = styled.div<CustomProps>`
+  position:relative;
+  margin-bottom: 20px;  
+  ${(props) => props.$customStyles}
+`;
+
+export const Error = styled.div` 
+  color:${(props) => props.theme.colors.danger};
+  margin-top:2px;  
+  font-size:14px;
+`

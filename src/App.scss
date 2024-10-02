@@ -1,0 +1,101 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+html, body {height: 100%;margin: 0;}
+
+body{
+  font-family: Inter;
+  background-color: #fff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  //background-color: #EDF0F7;
+  font-size: 16px;
+
+  @media (min-width: 992px){
+    font-size: 15px;
+  }
+}
+
+#root {min-height: 100%; display: flex; flex-direction: column; flex-grow: 1;}
+
+*:focus-visible{
+  outline:none !important;
+}
+
+p{
+  //color:white;
+  margin-bottom: 1rem;
+}
+
+h2{
+  font-size:1.5rem;
+  font-weight:600;
+  margin-bottom:1rem;
+  letter-spacing:-.5px;
+}
+
+.fade_in {
+  visibility: visible;
+  opacity: 1;
+  top:80px;
+  transition: opacity 0.5s linear, top 0.5s;
+}
+.fade_out {
+  visibility: hidden;
+  opacity: 0;
+  top:-40px;
+  transition: visibility 0s 0.5s, opacity 0.5s linear, top 0.5s;
+}
+
+.align-items-stretch .card {min-height: 100%;}
+
+
+.modal .modal-dialog {
+  @media (min-width: 610px){
+    min-width: 600px;
+  }
+}
+.modal .modal-header {padding: 1rem 1.875rem}
+.modal .modal-body {
+  padding: 1.875rem;
+  &:has(input){padding-bottom: 0;}
+}
+.modal .modal-footer {padding: 1rem 1.875rem}
+.modal .modal-footer>div {margin: 0;}
+
