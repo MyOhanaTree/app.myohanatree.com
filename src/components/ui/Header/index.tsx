@@ -15,7 +15,6 @@ const Header = ({children, title}: any) =>{
   const { theme } = themeContext;
   const { user, setUser }: any = useContext(UserContext);
   const [showUser, setShowUser] = useState<boolean>(false);
-  const [showNotifications, setShowNotifications] = useState<boolean>(false);
 
   const dropdownRef = useRef<any>(null);
   const dropdownRef2 = useRef<any>(null);
@@ -30,9 +29,6 @@ const Header = ({children, title}: any) =>{
     if(dropdownRef.current && !dropdownRef.current.contains(event.target) && showUser) {      
       setShowUser(false);
     }
-    if(dropdownRef2.current && !dropdownRef2.current.contains(event.target) && showNotifications) {
-      setShowNotifications(false);
-    }    
     return true;
   }
 
@@ -60,23 +56,12 @@ const Header = ({children, title}: any) =>{
                   <LinkWrapper>
                     <span className="navTitle">{user.firstName} {user.lastName}</span>
                     <NavLink link={"/profile"} label={"Profile"} />
-                    <NavLink link={"/notifications"} label={"Notifications"} />
                     <NavLink onClick={_logout} icon={LogoutIcon} label={"Log Out"} />
                   </LinkWrapper>
                 </DropDown>
               }           
             </DropDownWrapper>
-          }    
-          <DropDownWrapper ref={dropdownRef2}>                                     
-            <DropDownToggle onClick={() => setShowNotifications(!showNotifications)}><BellIcon width="30px" height="30px" /></DropDownToggle>               
-            {showNotifications && 
-              <DropDown>
-                <LinkWrapper>
-                  <span className="navTitle">No new notifications</span>          
-                </LinkWrapper>
-              </DropDown>
-            }           
-          </DropDownWrapper>    
+          }                
         </HeaderActions>       
       </TitleWrapper>
       {children && 
