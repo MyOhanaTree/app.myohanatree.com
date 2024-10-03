@@ -280,8 +280,8 @@ export default function Users() {
                   </Col>                    
                   {userInfo.status === 2 && (
                     <Col className="text-center">
-                      <p><strong>Activation Link</strong></p>
-                      <p></p>
+                      <p><strong>Send Activation Link</strong></p>
+                      <p>{`${process.env.REACT_APP_BASEURL}/register?token=${userInfo.verifyMeToken}&userId=${userInfo?.id}&email=${userInfo.email}`}</p>
                     </Col>                                                                                                                        
                   )}
                 </Row>                                                                        
