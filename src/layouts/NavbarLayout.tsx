@@ -31,7 +31,7 @@ const NavbarLayout = () => {
         </LogoWrapper>
                 
         <NavInnerMenu>            
-          {(user?.roles?.flatMap((role: any) => role.permissions) || []).find((x: any) => ["userAccess"].includes(x)) &&
+          {(user?.permissions || []).find((x: any) => ["userAccess"].includes(x)) &&
             <LinkWrapper>
               <NavLink link={"/users"} icon={UsersIcon} label={"Users"}></NavLink>
             </LinkWrapper>
