@@ -112,9 +112,7 @@ export default function Users() {
     if(res?.firstName){ 
       toast.add("User updated","var(--theme-ui-colors-green)");
       setRefreshData(true);
-      setTimeout(() => { setRefreshData(false) }, 100);   
-      setUserInfo(res);
-      toggleEditModal(true);
+      setTimeout(() => { setRefreshData(false) }, 100);         
     }else{
       toast.add(res?.message ? res.message : "Error updating user","var(--theme-ui-colors-red)");
     }    
@@ -137,6 +135,9 @@ export default function Users() {
       const res = await inviteUser({ invite });
       if(res?.success){
         toast.add(res?.message ? res.message : "User invited","var(--theme-ui-colors-green)");
+        if(res.link){
+          toast.add(res.link,"var(--theme-ui-colors-green)");
+        }
         toggleInviteModal(false);    
         setRefreshData(true);
         setTimeout(() => { setRefreshData(false) }, 100);   
