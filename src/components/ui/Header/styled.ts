@@ -16,7 +16,6 @@ export const TitleWrapper = styled.div`
   align-items:center;        
   padding: 0 40px;
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
   @media (max-width: 991px)  {    
     padding: 0 25px;

@@ -12,7 +12,6 @@ export const PageWrapper = styled.div`
 `
 
 export const PageInner = styled.div`
-    width: 100%;
-    max-width: 1200px;
+    width: 100%;    
     margin: 0 auto;
 `;

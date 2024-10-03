@@ -11,7 +11,7 @@ const Dashboard = () =>{
 
   return (
     <>
-      <Header title="Dashboard"></Header>
+      <Header title=""></Header>
       <Page>            
         <h1>Coming Soon</h1>    
       </Page>
