@@ -13,6 +13,7 @@ import Register from "./containers/Auth/Register";
 
 import Dashboard from "./containers/Dashboard";
 import Users from "./containers/Users";
+import Profile from "containers/Profile";
 
 // components
 import { withToastProvider } from "./components/toast";
@@ -173,6 +174,7 @@ function App() {
               <Route element={<PrivateRoutes/>}>
                 <Route path="/dashboard" element={error === "404" ? <NotFoundPage /> : <Dashboard />} />                
                 <Route path="/users" element={error === "404" ? <NotFoundPage /> : <Users />} />
+                <Route path="/profile" element={error === "404" ? <NotFoundPage /> : <Profile />} />
                 <Route path="/*" element={<NotFoundPage />} />                           
               </Route>                          
             </Route>
