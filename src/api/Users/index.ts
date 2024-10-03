@@ -76,3 +76,12 @@ export const restoreUser = async ({ data }: any) => {
 		return e?.response?.data ? e.response.data : e;
 	} 
 };
+
+export const allPermissions = async () => {	
+	try {
+		const res: any = await axios.get("/users/permissions");
+		return res?.data;
+	} catch (e) {
+		return e?.response?.data ? e.response.data : e;
+	}
+};

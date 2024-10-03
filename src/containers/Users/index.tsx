@@ -5,8 +5,7 @@ import { Form, Formik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 
-import { getUsers, checkUser, updateUser, inviteUser, deleteUser, resendInvite, restoreUser } from "api/Users";
-import { getRoles } from "api/Roles";
+import { getUsers, checkUser, updateUser, inviteUser, deleteUser, restoreUser, allPermissions } from "api/Users";
 
 import Header from "components/ui/Header";
 import TableData from "components/ui/TableData";
@@ -24,13 +23,11 @@ import UserContext from "context/User";
 
 export default function Users() {
 
-  const navigate = useNavigate();
   const toast = useToast();  
-  const { user }: any = useContext(UserContext);
 
   const [refreshData, setRefreshData] = useState(false);  
+  const [permissions, setPermissions] = useState<any[]>([]);
 
-  const roleList: any[] = useMemo(() => [], []);
   const [editModal, toggleEditModal] = useState<boolean>(false);
   const [inviteModal, toggleInviteModal] = useState<boolean>(false);
 
@@ -38,7 +35,6 @@ export default function Users() {
 
   const [confirmModal, setConfirmModal] = useState<any>(false);
   const [confirmSubmit, setConfirmSubmit] = useState<boolean>(false);
-  const [resendInviteSubmit, setResendInviteSubmit] = useState<boolean>(false);
 
   const columnHelper = createColumnHelper();
 
@@ -69,15 +65,6 @@ export default function Users() {
         </div>
       ),
       header: () => <span>Email</span>,
-    }),
-    columnHelper.accessor("roles", {
-      id: "roles",
-      cell: (info: any) => (        
-        <div onClick={() => setEditModal(info.row.original)}>
-            {info.getValue()?.map((i: any) => i.title).join(', ')}
-        </div>
-      ),     
-      header: () => <span>Roles</span>,
     }),
     columnHelper.accessor("status", {
       id: "status",
@@ -114,7 +101,6 @@ export default function Users() {
     email: Yup.string().email("Invalid email").required("Email is required."),
     firstName: Yup.string().required("First Name is required."),
     lastName: Yup.string().required("Last Name is required."),   
-    roles: Yup.array().required("1 Role is required.").min(1, 'Roles must have at least one item')
   }).noUnknown(true);
 
   const submitUserUpdate = async (values: any, actions: any) => {   
@@ -122,7 +108,7 @@ export default function Users() {
       firstName : values.firstName,
       lastName: values.lastName,
       email: values.email,
-      roles: values.roles,
+      permissions: values.permissions,
     }
     
     const res = await updateUser({ data : userInfo, update });
@@ -130,6 +116,8 @@ export default function Users() {
       toast.add("User updated","var(--theme-ui-colors-green)");
       setRefreshData(true);
       setTimeout(() => { setRefreshData(false) }, 100);   
+      setUserInfo(res);
+      toggleEditModal(true);
     }else{
       toast.add(res?.message ? res.message : "Error updating user","var(--theme-ui-colors-red)");
     }    
@@ -142,7 +130,7 @@ export default function Users() {
       email: values.email,
       firstName: values.firstName,
       lastName: values.lastName,
-      roles: values.roles,
+      permissions: values.permissions,
     };
       
     const check = await checkUser({ invite });
@@ -165,7 +153,6 @@ export default function Users() {
     email: Yup.string().email("Invalid email").required("Email is required."),
     firstName: Yup.string().required("First Name is required."),
     lastName: Yup.string().required("Last Name is required."),
-    roles: Yup.array().required("1 Role is required.").min(1, 'Roles must have at least one item')
   });  
 
   const confirmDeleteUser = async () => { 
@@ -192,18 +179,6 @@ export default function Users() {
       <P>Are you sure you want to delete <strong>{userInfo?.firstName} {userInfo?.lastName}</strong>?</P>
     </BasicModal>);
   }
-  
-  const resendUserInvite = async () => {        
-    setResendInviteSubmit(true);
-    const res = await resendInvite({ data: userInfo });    
-    if(res?.success){ 
-      toggleEditModal(false); 
-      toast.add("User invite resent.","var(--theme-ui-colors-green)");        
-    }else{
-      toast.add(res?.message ? res.message : "Error resending invite","var(--theme-ui-colors-red)");
-    }           
-    setResendInviteSubmit(false);
-  }
 
   const submitRestoreUser = async () => {
     const res = await restoreUser({ data: userInfo });    
@@ -222,18 +197,16 @@ export default function Users() {
 
 
   useEffect(() => {
-    const initRoles = async () => {
+    const initPermissions = async () => {
       try {
-        const res = await getRoles({ query : { recordsPer : 1000}});   
-        if(res.items){
-          for(let i = 0; i < res.items.length; i++){
-            const item = res.items[i];
-            roleList.push({ value : item.id, label : item.title});
-          }
+        const res = await allPermissions();                  
+        if(Array.isArray(res)){
+          const newperms = res.map((r: any) => ({ value : r.id, label : r.title}));
+          setPermissions(newperms);          
         } 
       } catch (e) { }
     };
-    initRoles();    
+    initPermissions();    
   }, []);
 
   useEffect(() => {
@@ -253,20 +226,12 @@ export default function Users() {
               key="1"
               scheme="primary"              
               onClick={toggleInvite} 
-            >Add User</BasicButton>,
-            (user?.roles?.flatMap((role: any) => role.permissions) || []).find((x: any) => ["roleAccess"].includes(x)) ?
-              <BasicButton 
-                key="2"
-                outline
-                scheme="primary"              
-                onClick={() => navigate("/roles")} 
-              >Roles</BasicButton>
-            : null
+            >Add User</BasicButton>,            
           ]} 
         />
       </Page>
       <Modal isOpen={editModal} toggle={toggleEdit} size="lg" centered={true}>
-        <Formik initialValues={{...userInfo, roles : userInfo?.roles?.map((r: any) => r.id), metaData : { languages : userInfo?.data?.find((i: any) => i.key === 'languages')?.value.split(',') }}} onSubmit={submitUserUpdate} validationSchema={UserSchema} >
+        <Formik initialValues={{...userInfo }} onSubmit={submitUserUpdate} validationSchema={UserSchema} >
           {({ isSubmitting, errors, values, submitCount, setFieldValue }: any) => { 
             return (                
             <Form noValidate autoComplete="off">
@@ -302,31 +267,21 @@ export default function Users() {
                     />
                   </Col>
                   <Col lg="6">
-                    {roleList.length === 0 && <LoadingWheel width="15px" stroke="3px" />}
-                    {roleList.length > 0 && <SelectInput 
-                      name="roles" 
-                      label="Roles"                       
-                      value={values?.roles}
-                      onChange={(val: any) => setFieldValue("roles",val)}
-                      options={roleList}  
+                    {permissions.length === 0 && <LoadingWheel width="15px" stroke="3px" />}
+                    {permissions.length > 0 && <SelectInput 
+                      name="permissions" 
+                      label="Permissions"                       
+                      value={values?.permissions}
+                      onChange={(val: any) => setFieldValue("permissions",val)}
+                      options={permissions}  
                       multiple={true} 
-                      $errors={errors.roles && submitCount > 0 ? errors.roles : null}  
+                      $errors={errors.permissions && submitCount > 0 ? errors.permissions : null}  
                     />}
                   </Col>                    
                   {userInfo.status === 2 && (
                     <Col className="text-center">
-                      <BasicButton 
-                        scheme="clear"
-                        styles={{
-                          margin : "0 auto 1rem",
-                          paddingLeft : "1rem",
-                          paddingRight : "1rem",
-                          width : "175px"                        
-                        }}                        
-                        type="button" 
-                        onClick={resendUserInvite} 
-                        $submitting={resendInviteSubmit}
-                      ><SendEmailIcon fill={"var(--theme-ui-colors-body)"} width={"20px"} height={"auto"} mr={"10px"} /><span>Resend Invite</span></BasicButton> 
+                      <p><strong>Activation Link</strong></p>
+                      <p></p>
                     </Col>                                                                                                                        
                   )}
                 </Row>                                                                        
@@ -360,7 +315,7 @@ export default function Users() {
                       outline={true}
                       type="submit" 
                       $submitting={isSubmitting}
-                    >Update User</BasicButton>
+                    >Update</BasicButton>
                   </StyledDiv>
                 </StyledDiv>                
               </ModalFooter>
@@ -370,7 +325,7 @@ export default function Users() {
         </Formik>
       </Modal>
       <Modal isOpen={inviteModal} toggle={toggleInvite} centered={true}>
-        <Formik initialValues={{email:"",roles:[],firstName:"",lastName:""}} onSubmit={submitInviteUser} validationSchema={InviteSchema} >
+        <Formik initialValues={{email:"",permission:[],firstName:"",lastName:""}} onSubmit={submitInviteUser} validationSchema={InviteSchema} >
           {({ isSubmitting, errors, values, submitCount, setFieldValue }) => {
             return (              
             <Form noValidate autoComplete="off">
@@ -388,15 +343,15 @@ export default function Users() {
                       $errors={errors.email && submitCount > 0 ? errors.email : null}  />
                   </Col>
                   <Col lg="6">
-                    {roleList.length === 0 && <LoadingWheel width="15px" stroke="3px" />}
-                    {roleList.length > 0 && <SelectInput 
-                      name="roles" 
-                      label="Roles" 
-                      value={values.roles}
-                      onChange={(val: any) => setFieldValue("roles",val)}
-                      options={roleList}  
+                    {permissions.length === 0 && <LoadingWheel width="15px" stroke="3px" />}
+                    {permissions.length > 0 && <SelectInput 
+                      name="permissions" 
+                      label="Permissions" 
+                      value={values.permissions}
+                      onChange={(val: any) => setFieldValue("permissions",val)}
+                      options={permissions}  
                       multiple={true} 
-                      $errors={errors.roles && submitCount > 0 ? errors.roles : null}  
+                      $errors={errors.permissions && submitCount > 0 ? errors.permissions : null}  
                     />}
                   </Col>                
                   <Col lg="6">
@@ -431,7 +386,7 @@ export default function Users() {
                   scheme="secondary"          
                   type="submit" 
                   $submitting={isSubmitting}
-                >Send Invite</BasicButton>                
+                >Invite</BasicButton>                
               </ModalFooter>
             </Form>
           );
