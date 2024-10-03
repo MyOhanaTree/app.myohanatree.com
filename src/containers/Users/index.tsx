@@ -198,7 +198,7 @@ export default function Users() {
       try {
         const res = await allPermissions();                  
         if(Array.isArray(res)){
-          const newperms = res.map((r: any) => { const [key, value] = Object.entries(res)[0]; return { value : key, label : value} });
+          const newperms = res.map((r: any) => { const [key, value] = Object.entries(r)[0]; return { value : key, label : value} });
           setPermissions(newperms);          
         } 
       } catch (e) { }
