@@ -3,7 +3,6 @@ import { Modal, ModalBody, ModalHeader, ModalFooter, Row, Col } from "reactstrap
 import { createColumnHelper } from "@tanstack/react-table";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-import { useNavigate } from "react-router-dom";
 
 import { getUsers, checkUser, updateUser, inviteUser, deleteUser, restoreUser, allPermissions } from "api/Users";
 
@@ -15,11 +14,9 @@ import TextInput from "components/forms/TextInput";
 import SelectInput from "components/forms/SelectInput";
 import { useToast } from "components/toast";
 import BasicModal from "components/ui/BasicModal";
-import { SendEmailIcon } from "components/svg"
 import StyledDiv from "components/ui/StyledDiv";
 import P from "components/typography/P";
 import LoadingWheel from "components/ui/LoadingWheel";
-import UserContext from "context/User";
 
 export default function Users() {
 
