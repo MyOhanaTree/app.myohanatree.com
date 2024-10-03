@@ -217,6 +217,8 @@ export default function Users() {
       <Page>                
         <TableData 
           api={getUsers} 
+          defaultSortBy="createdAt"
+          defaultSortDir="DESC"
           columns={columns} 
           refresh={refreshData} 
           actions={[
