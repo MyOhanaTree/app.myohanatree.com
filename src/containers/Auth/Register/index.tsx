@@ -66,7 +66,6 @@ const Register = () => {
       <Flex sx={{flexDirection:"column"}}>        
         <Box sx={{ textAlign : "center"}}>            
           <AdminLogo alt="" customStyles={{maxWidth: "300px", margin: "auto"}}/>   
-          <div><b>Admin Portal</b></div>          
         </Box>        
         <Divider />     
         {!validForm && (<>

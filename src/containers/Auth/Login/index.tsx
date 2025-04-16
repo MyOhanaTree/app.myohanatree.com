@@ -62,7 +62,6 @@ const Login = () => {
       <Flex sx={{flexDirection:"column"}}>        
         <Box sx={{ textAlign : "center"}}>            
           <AdminLogo alt="" customStyles={{maxWidth: "300px", margin: "auto"}}/>   
-          <div><b>Admin Portal</b></div>          
         </Box>        
         <Divider />
         <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"} mb={"30px"}>Login</H2>
