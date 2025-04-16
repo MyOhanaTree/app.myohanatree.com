@@ -4,7 +4,7 @@ import { useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import UserContext from "context/User";
-import { getVerification } from "api/Auth";
+import { getProfile } from "api/Auth";
 
 const useAuthService = () => {
 
@@ -19,7 +19,7 @@ const useAuthService = () => {
 
   const authenticate = async (): Promise<boolean> => {
     if (user?.token) {
-      const res = await getVerification();
+      const res = await getProfile();
       if(!res?.id) {
         logout();
         return false;
@@ -35,7 +35,7 @@ const useAuthService = () => {
         logout();
         return false;
       } else {
-        const res = await getVerification();
+        const res = await getProfile();
         if(!res?.id) {
           logout();
           return false;

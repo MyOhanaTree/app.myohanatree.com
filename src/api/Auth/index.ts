@@ -67,15 +67,6 @@ export const checkPasswordResetToken= async ({ token, userId } : { token: string
 	}
 }
 
-export const getVerification = async () =>{
-	try {
-		const res: any = await axios.get("/auth/verify");
-		return res?.data;
-	} catch (e) {
-		return e?.response?.data ? e.response.data : e;
-	}
-}
-
 export const getProfile = async () =>{
 	try {
 		const res: any = await axios.get("/auth/profile");
