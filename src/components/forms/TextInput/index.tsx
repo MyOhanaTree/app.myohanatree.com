@@ -1,37 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { Input } from "reactstrap";
 import { InputWrap, LabelWrapper, Error } from "./styled";
-import { useThemeUI } from "theme-ui";
+import { Input, Label, useThemeUI } from "theme-ui";
 
-const TextInput = ({ 
-  name, 
-  label, 
-  value, 
-  description, 
-  type,   
-  autoComplete, 
+const TextInput = ({
+  name,
+  label,
+  value,
+  description,
+  type,
+  autoComplete,
   required,
-  disabled, 
-  readonly, 
-  placeholder, 
-  min, 
-  max, 
-  step, 
-  $customStyles, 
-  $errors, 
-  $responseErrors, 
-  onChange 
+  disabled,
+  readonly,
+  placeholder,
+  min,
+  max,
+  step,
+  $customStyles,
+  $errors,
+  $responseErrors,
+  onChange
 }:{
   name?: string;
-  label?: string | React.ReactNode;  
+  label?: string | React.ReactNode;
   value?: string | number;
-  description?: string; 
-  type?: any; 
-  autoComplete?: string; 
+  description?: string;
+  type?: any;
+  autoComplete?: string;
   required?: boolean;
   readonly?: boolean;
   disabled?: boolean;
-  placeholder?: string; 
+  placeholder?: string;
   min?: string | number;
   max?: string | number;
   step?: string | number;
@@ -45,17 +44,17 @@ const TextInput = ({
   const { theme } = themeContext;
   const [borderError, setBorderError] = useState(false);
 
-  const setSelectValue = function (e: any){    
+  const setSelectValue = function (e: any){
     if(disabled) return true;
-      
+
     let value = e.target.value;
 
     if(type === "number"){
       value = parseFloat(e.target.value)
       if(min && value < min){ value = min }
-      if(max && value > max){ value = max }      
+      if(max && value > max){ value = max }
     }
-     
+
     if(typeof onChange === "function"){
       onChange(value)
     }
@@ -70,30 +69,30 @@ const TextInput = ({
   },[$responseErrors, $errors]);
 
   return (
-    <InputWrap theme={theme} $customStyles={$customStyles} $errors={borderError}>
-      {label && 
-        <LabelWrapper theme={theme}>
-          <label>{label}</label>
-          {required ? <span>*</span>  : ''}         
+    <InputWrap $customStyles={$customStyles} $errors={borderError}>
+      {label &&
+        <LabelWrapper>
+          <Label>{label}</Label>
+          {required ? <span>*</span>  : ''}
         </LabelWrapper>
       }
-      <Input 
+      <Input
         as={type === "textarea" ? "textarea" : "input"}
-        type={type || "text"} 
-        name={name} 
-        disabled={disabled} 
-        readOnly={readonly} 
-        placeholder={placeholder} 
-        autoComplete={autoComplete} 
+        type={type || "text"}
+        name={name}
+        disabled={disabled}
+        readOnly={readonly}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
         min={min}
         max={max}
         step={step}
-        value={value ?? ""} 
-        onChange={(e: any) => setSelectValue(e)}  
+        value={value ?? ""}
+        onChange={(e: any) => setSelectValue(e)}
       />
-      {description && <p><small>{description}</small></p>}       
-      {$errors && <Error theme={theme}>{$errors}</Error>}
-    </InputWrap>    
+      {description && <p><small>{description}</small></p>}
+      {$errors && <Error>{$errors}</Error>}
+    </InputWrap>
   );
 };
 

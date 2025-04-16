@@ -7,7 +7,7 @@ const ServerErrorPage = () => {
   const { theme } = themeContext;
 
   return (
-    <ErrorWrap theme={theme}>
+    <ErrorWrap>
       <div>
         <h1>500 - Internal Error</h1>
         <p>Oops! something seams to be broken here</p>

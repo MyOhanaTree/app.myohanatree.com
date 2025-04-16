@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Input } from "reactstrap";
-
 import { InputWrap, InputInner, SearchIconWrap } from "./styled";
-import { useThemeUI } from "theme-ui";
+import { Input, useThemeUI } from "theme-ui";
 import { SearchIcon } from "components/svg";
 
 const SearchField = ({
@@ -48,7 +46,7 @@ const SearchField = ({
   },[value]);
 
   return (
-    <InputWrap theme={theme} className={className} $customStyles={{...customStyles, width: width}}>
+    <InputWrap className={className} $customStyles={{...customStyles, width: width}}>
       <InputInner>
         <Input
           type="text"  

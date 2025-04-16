@@ -7,7 +7,7 @@ const NotFoundPage = () => {
   const { theme } = themeContext;
 
   return (
-    <ErrorWrap theme={theme}>
+    <ErrorWrap>
       <div>
         <h1>404 - Not Found</h1>
         <p>Oops! The page you&apos;re looking for does not exist.</p>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ToggleWrapper, LabelTrue, LabelFalse, InputWrap, Error, LabelWrapper } from "./styled";
-import { useThemeUI } from "theme-ui";
+import { Label, useThemeUI } from "theme-ui";
 
 export default function ToggleInput({ 
   label,
@@ -25,8 +25,6 @@ export default function ToggleInput({
   $errors?: any;
   onChange?: (e?: any) => void;
 }) {
-  const themeContext = useThemeUI();
-  const { theme } = themeContext;
   const [borderError, setBorderError] = useState(false);
   const [newChecked,setNewChecked] = useState<boolean>(checked || false);
 
@@ -49,19 +47,19 @@ export default function ToggleInput({
   },[$responseErrors, $errors]);
 
   return (
-    <InputWrap theme={theme} $customStyles={$customStyles} $errors={borderError}>
+    <InputWrap $customStyles={$customStyles} $errors={borderError}>
       {label && 
-        <LabelWrapper theme={theme}>
-          <label>{label}</label>
+        <LabelWrapper>
+          <Label>{label}</Label>
           {required ? <span>*</span>  : ''}         
         </LabelWrapper>
       }      
-      <ToggleWrapper theme={theme} onClick={setSelectValue}>      
+      <ToggleWrapper onClick={setSelectValue}>      
         <LabelTrue $active={newChecked ? true : false}>{labelTrue || "ON"}</LabelTrue>      
         <LabelFalse $active={newChecked ? false : true}>{labelFalse || "OFF"}</LabelFalse>      
       </ToggleWrapper>   
       {description && <p><small>{description}</small></p>}    
-      {$errors && <Error theme={theme}>{$errors}</Error>}
+      {$errors && <Error>{$errors}</Error>}
     </InputWrap>
   );
 }

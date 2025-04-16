@@ -24,7 +24,7 @@ const LoadingWheel = (props?: any) => {
     <LoadingWheelWrap
       style={overrideStyles}
       $customStyles={customStyles}
-      theme={theme}
+     
     >
       <div></div>
       <div></div>

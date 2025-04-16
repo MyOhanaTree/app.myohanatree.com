@@ -16,17 +16,17 @@ const NavLink: React.FC<NavLinkProps> = ({ link, icon: Icon, label, onClick }) =
   const pathname = useLocation().pathname
 
   return (    
-    <NavLinkWrapper theme={theme} $active={link && pathname.startsWith(link) ? true : false}>
+    <NavLinkWrapper $active={link && pathname.startsWith(link) ? true : false}>
       {link &&
         <Link className="link" to={link}>
           {Icon && <Icon fill={pathname.startsWith(link) ? theme?.colors?.body : theme?.colors?.base_500} width={"20px"} height={"23.33px"} mr={"8px"} />}
-          <LinkText theme={theme} $active={pathname.startsWith(link)}>{label}</LinkText>
+          <LinkText $active={pathname.startsWith(link)}>{label}</LinkText>
         </Link>
       }
       {!link &&
         <span className="link" onClick={onClick}>
           {Icon && <Icon fill={theme?.colors?.base_500} width={"20px"} height={"23.33px"} mr={"8px"} />}
-          <LinkText theme={theme}>{label}</LinkText>
+          <LinkText>{label}</LinkText>
         </span>
       }
     </NavLinkWrapper>    

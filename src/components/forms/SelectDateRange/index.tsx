@@ -1,13 +1,13 @@
 import React, { useCallback, useState, useEffect, useRef, useMemo } from "react";
-import { Input } from "reactstrap";
-import { InputWrap, InputDropdown, InputDropdownWrap, InputValue, LabelWrapper, Error } from "./styled";
-import { useThemeUI } from "theme-ui";
+import ReactDOM from 'react-dom';
+
+import { InputWrap, InputDate, InputValue, LabelWrapper, Error } from "./styled";
+import { Button, Input, Label, useThemeUI } from "theme-ui";
 import DatePicker from "react-datepicker";
 import moment from "moment";
 import "moment-timezone";
 
 import { CalendarIcon, ChevronIcon } from "components/svg";
-import BasicButton from "components/forms/BasicButton";
 //import "react-datepicker/dist/react-datepicker.css";
 
 const SelectDateRange = ({
@@ -38,6 +38,35 @@ const SelectDateRange = ({
 
   const [startDateValue, setStartDateValue] = useState(value?.[0] || null)
   const [endDateValue, setEndDateValue] = useState(value?.[1] || null)
+
+
+  const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
+  const inputDateRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+
+  const calculatePosition = () => {
+    if (!triggerRef.current || !inputDateRef.current) return;
+  
+    const triggerRect = triggerRef.current.getBoundingClientRect();
+    const tooltipRect = inputDateRef.current.getBoundingClientRect();
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    const spaceBelow = window.innerHeight - triggerRect.bottom;
+    const spaceAbove = triggerRect.top;
+  
+    let top = triggerRect.bottom + scrollY - 8;
+    if (spaceBelow < tooltipRect.height && spaceAbove >= tooltipRect.height) {
+      top = triggerRect.top + scrollY - (tooltipRect.height + 12);
+    }  
+    const style: React.CSSProperties = { top, left: triggerRect.right - tooltipRect.width };
+  
+    setTooltipStyle(style);
+  };
+  
+  useEffect(() => {
+    if (active) {
+      calculatePosition();
+    }
+  }, [active]);
 
   const predefinedRanges = useMemo(() => [
     {
@@ -73,15 +102,16 @@ const SelectDateRange = ({
   ], []);
 
   const setTempValue = (dates: any) => {   
-    const [start, end] = dates.map((date: any,index: number) => {      
+    const [start, end] = dates.map((date: any,index: number) => {    
+      if(!date) return null;
       const momentDate = moment(date);
       if(index === 0) {
         return momentDate.startOf("day").unix();
       }
       return momentDate.endOf("day").unix();        
     });
-    setStartDateValue(start || "");
-    setEndDateValue(end || "");    
+    setStartDateValue(start || null);
+    setEndDateValue(end || null);    
   }
 
   const setSelectValue = useCallback(async () => {     
@@ -90,13 +120,9 @@ const SelectDateRange = ({
     setTimeout(() => { inputRef.current.blur(); },100);        
 
     if(typeof onChange === "function"){
-      onChange([start, end])      
+      onChange([start, end].filter(Boolean))      
     } 
   },[startDateValue, endDateValue, nameEndDate, nameStartDate, onChange])
-
-  const toggleActive = () => {
-    setActive(!active);         
-  }
 
   useEffect(() => {    
     const handleClickOutside = (event: any) => {
@@ -133,16 +159,17 @@ const SelectDateRange = ({
   }, [value]);
 
   return (
-    <InputWrap $errors={borderError} theme={theme} $customStyles={customStyles} ref={wrapperRef}>
+    <InputWrap $errors={borderError} $customStyles={customStyles}>
       {label && 
-        <LabelWrapper theme={theme}>
-          <label>{label}</label>
+        <LabelWrapper>
+          <Label>{label}</Label>
           {required ? <span>*</span>  : ''}         
         </LabelWrapper>
       }
       <InputValue 
-        theme={theme}
-        onClick={toggleActive}
+        ref={triggerRef}
+        onClick={() => setActive(!active)}
+        $active={active}
       >
         <CalendarIcon fill={theme?.colors?.base_800} />          
         <span>{dateRangeValue}</span>          
@@ -153,7 +180,7 @@ const SelectDateRange = ({
           type={"text"}  
           name={nameStartDate}                       
           value={startDateValue || ""}  
-          innerRef={inputRef}    
+          ref={inputRef}    
           readOnly      
         />      
         <Input 
@@ -163,51 +190,54 @@ const SelectDateRange = ({
           readOnly
         />  
       </div>
-      <InputDropdownWrap $active={active}>
-        <InputDropdown theme={theme}>
-          <div className="react-datepicker-datesets">          
-            {predefinedRanges.map((range, index) => (
-              <span key={index} className={`react-datepicker-datesets-set ${range.label === dateRangeValue ? "active" : ""}`} onClick={() => { setTempValue([range.startDate, range.endDate])}}>{range.label}</span>
-            ))}
-            <span className="react-datepicker-datesets-set react-datepicker-datesets-reset" onClick={() => { setTempValue([moment().tz(TimeZone.current).subtract(30, "days").startOf("day").toDate(),moment().tz(TimeZone.current).endOf("day").toDate()])}}>Reset</span>
-            <BasicButton               
-              type="button" 
-              onClick={() => { setActive(false); setSelectValue(); }} 
-            >Apply</BasicButton>
-          </div>
-          <DatePicker
-            selected={startDateValue ? moment.unix(startDateValue || null).tz(TimeZone.current).toDate() : undefined}            
-            startDate={startDateValue ? moment.unix(startDateValue || null).tz(TimeZone.current).toDate() : undefined}
-            endDate={endDateValue ? moment.unix(endDateValue || null).tz(TimeZone.current).toDate() : undefined} 
-            minDate={minDate ? (minDate.toString().length > 10 ? minDate : minDate * 1000) : undefined}    
-            maxDate={maxDate ? (maxDate.toString().length > 10 ? maxDate : maxDate * 1000) : undefined}    
-            openToDate={startDateValue ? moment.unix(startDateValue).toDate() : moment().toDate()}
-            onChange={setTempValue}                
-            customInput={<></>}
-            selectsRange
-            inline   
-            renderCustomHeader={({
-              date,
-              decreaseYear,
-              increaseYear,
-              decreaseMonth,
-              increaseMonth
-            }) => (
-              <div className="react-datepicker__custom-year-selector">
-                <span className="react-datepicker__current-month">{date.toLocaleDateString('en-US',{ year: 'numeric', month: 'long' })}</span>
-                <div className="react-datepicker__navigation">
-                  <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon-double react-datepicker__navigation-icon--previous" onClick={decreaseYear}>{'<<'}</span>
-                  <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon--previous" onClick={decreaseMonth}>{'<'}</span>                    
-                  <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon--next" onClick={increaseMonth}>{'>'}</span>
-                  <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon-double react-datepicker__navigation-icon--next" onClick={increaseYear}>{'>>'}</span>
+      {active &&
+        ReactDOM.createPortal(
+          <InputDate ref={inputDateRef} style={tooltipStyle} >
+            <div className="react-datepicker-datesets">          
+              {predefinedRanges.map((range, index) => (
+                <span key={index} className={`react-datepicker-datesets-set ${range.label === dateRangeValue ? "active" : ""}`} onClick={() => { setTempValue([range.startDate, range.endDate])}}>{range.label}</span>
+              ))}
+              <span className="react-datepicker-datesets-set react-datepicker-datesets-reset" onClick={() => { setTempValue([])}}>Reset</span>
+              <Button                             
+                type="button" 
+                onClick={() => { setActive(false); setSelectValue(); }} 
+              >Apply</Button>
+            </div>            
+            <DatePicker
+              selected={startDateValue ? moment.unix(startDateValue || null).tz(TimeZone.current).toDate() : undefined}            
+              startDate={startDateValue ? moment.unix(startDateValue || null).tz(TimeZone.current).toDate() : undefined}
+              endDate={endDateValue ? moment.unix(endDateValue || null).tz(TimeZone.current).toDate() : undefined} 
+              minDate={minDate ? (minDate.toString().length > 10 ? minDate : minDate * 1000) : undefined}    
+              maxDate={maxDate ? (maxDate.toString().length > 10 ? maxDate : maxDate * 1000) : undefined}    
+              openToDate={startDateValue ? moment.unix(startDateValue).toDate() : moment().toDate()}
+              onChange={setTempValue}                
+              customInput={<></>}
+              selectsRange
+              inline   
+              renderCustomHeader={({
+                date,
+                decreaseYear,
+                increaseYear,
+                decreaseMonth,
+                increaseMonth
+              }) => (
+                <div className="react-datepicker__custom-year-selector">
+                  <span className="react-datepicker__current-month">{date.toLocaleDateString('en-US',{ year: 'numeric', month: 'long' })}</span>
+                  <div className="react-datepicker__navigation">
+                    <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon-double react-datepicker__navigation-icon--previous" onClick={decreaseYear}>{'<<'}</span>
+                    <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon--previous" onClick={decreaseMonth}>{'<'}</span>                    
+                    <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon--next" onClick={increaseMonth}>{'>'}</span>
+                    <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon-double react-datepicker__navigation-icon--next" onClick={increaseYear}>{'>>'}</span>
+                  </div>
                 </div>
-              </div>
-            )}   
-          />                
-        </InputDropdown>  
-      </InputDropdownWrap>
+              )} 
+            />                
+          </InputDate>,document.body
+        )}
+
+         
       {description && <p><small>{description}</small></p>} 
-      {errors && <Error theme={theme}>{errors}</Error>}
+      {errors && <Error>{errors}</Error>}
     </InputWrap>    
   );
 };

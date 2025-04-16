@@ -16,8 +16,12 @@ export const SelectStyles = {
   }),
   menu: (baseStyles: any, state: any) => ({
     ...baseStyles,
-    marginTop: 5,   
+    marginTop: 2,   
     backgroundColor: "#fff", 
+  }),
+  menuPortal: (baseStyles: any, state: any) => ({
+    ...baseStyles,
+    zIndex: 9999, // Set the z-index for the menu portal
   }),
   option: (styles: any, state: any) => ({
     ...styles, 
@@ -43,58 +47,47 @@ export const InputWrap = styled.div<CustomProps>`
   max-width: 100%;
   .react-select__control { 
     max-width: 100%;
-    border: 1px solid ${(props) => props.$errors ? props.theme.colors.danger : props.theme.colors.base_300}!important;
+    background-color: #fff;
+    border: 1px solid ${(props) => props.$errors ? themevals.colors.danger : themevals.colors.base_300}!important;
     box-shadow: none!important;
-    color: ${props => props.theme.colors.body};  
+    text-align: left;
+    color: ${themevals.colors.body};  
     & .react-select__value-container {
       flex-wrap: ${props => props?.$customStyles?.optionNoWrap ? "nowrap" : "wrap"};
     }      
     & .react-select__multi-value {
       align-items: center;
-      background-color: ${(props) => props.theme.colors.base_200};
+      background-color: ${themevals.colors.base_200};
     }
     & .react-select__indicator {
       padding: 13px 15px;      
     }  
     & .react-select__indicator:hover svg {
       cursor: pointer;
-      fill: ${(props) => props.theme.colors.body};
+      fill: ${themevals.colors.body};
       & path {
-        fill: ${(props) => props.theme.colors.body};
+        fill: ${themevals.colors.body};
       }
     }      
   }
   ${(props) => props.$customStyles}
 `;
 
-export const labelStyles = {
-  marginBottom: 0,
-  display: "flex",
-  fontSize: 14,
-  fontWeight: 500
-};
-
 export const LabelWrapper =  styled.div`
   margin-bottom: 10px;
   display: flex;
   width: 100%;
-  label {
-    color: ${props => props.theme.colors.body};
-    ${labelStyles}
-  }
   small {
-    font-style: italic; font-size: .75rem; color: ${(props) => props.theme.colors.ltgrey};
+    font-style: italic; font-size: .75rem; color: ${themevals.colors.base_600};
   }
 `;
-
-
 
 export const Error = styled.div`
   width: 100%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  color:${(props) => props.theme.colors.danger};
+  color:${themevals.colors.danger};
   margin-top:2px;
   font-size:14px;
 `

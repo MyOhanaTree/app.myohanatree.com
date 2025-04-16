@@ -1,17 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { Input } from "reactstrap";
-import { InputWrap, LabelWrapper, Image, Error } from "./styled";
-import { useThemeUI } from "theme-ui";
-import { v4 as uuidv4 } from 'uuid';
-
-const isImage = (url: string) => {
-  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-  const extension = url.split('.')?.pop()?.toLowerCase() || "";
-  return imageExtensions.includes(extension);
-};
+import React, { useState, useEffect, useRef } from "react";
+import { InputWrap, LabelWrapper, DropArea, DropAreaLabel, Error } from "./styled";
+import { Label, useThemeUI } from "theme-ui";
+import { useToast } from "components/toast";
 
 const FileInput = ({ 
-  connect,
+  api,
+  apiVariables,
   label, 
   value,
   directory,
@@ -20,12 +14,14 @@ const FileInput = ({
   disabled, 
   placeholder,  
   refreshValue,
+  showTitles = true,
   $customStyles, 
   $errors, 
   $responseErrors, 
   onChange 
 }:{
-  connect?: (e: any) => Promise<void>;
+  api: (props?: any) => Promise<void>;
+  apiVariables?: {[key: string]: any},
   label?: string | React.ReactNode;  
   value?: string;
   directory?: string;
@@ -34,47 +30,74 @@ const FileInput = ({
   disabled?: boolean;
   placeholder?: string; 
   refreshValue?: boolean;
+  showTitles?: boolean;
   $customStyles?: any;
   $responseErrors?: any;
   $errors?: any;
-  onChange?: (a?: any, b?: any) => void;
+  onChange?: (a?: any) => void;
 }) => {
 
-  const themeContext = useThemeUI();
-  const { theme } = themeContext;
-  
-  const [tempValue, setTempValue] = useState<any>();
-  const [tempValueUrl, setTempValueUrl] = useState<any>();
-  const [borderError, setBorderError] = useState(false);
+  const toast = useToast();  
+  const fileInputRef = useRef<any>(null);
 
-  const setSelectValue = async (e: any) => {    
-    if(disabled) return true;      
-    const value = e.target.value;
-    setTempValue(value);
+  const [files, setFiles] = useState<any[]>([]);
+  const [values, setValues] = useState<any[]>([]);
+  const [borderError, setBorderError] = useState<any>(false);
 
-    const file = e.target.files[0];    
-    let signedurl: any;
-    if(file){
-      const reader = new FileReader();
-      if(isImage(value)){
-        reader.onloadend = () => setTempValueUrl(reader.result);
-        reader.readAsDataURL(file);
+  const handleDragOver = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setFiles(e.dataTransfer.files);
+  };
+
+  const handleFileChange = (e: any) => {
+    setFiles(e.target.files);
+  };
+
+  const handleUpload = async () => {    
+    if(disabled || files.length === 0) return true;         
+
+    const tempFiles: any[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const res: any = await api({ ...apiVariables, data : { ...apiVariables?.data, directory : directory || "", name : file.name, type : file.type, size : file.size }});    
+      if(res.success){      
+        tempFiles.push({
+          file : file,
+          url : res.url, 
+          title: res.name, 
+          location : res.location
+        })
       } else {
-        setTempValueUrl("");
+        toast.add(res?.message ? res.message : `Error grabbing file ${file.name}`,"var(--theme-ui-colors-red)");
       }
+    } 
+    setValues(tempFiles); 
 
-      const extension = file.name.split('.').pop();
-      signedurl = connect ? await connect({ data : { directory : directory || "", name : `${uuidv4()}.${extension}`, type : file.type, size : file.size }}) : false;      
-    }
-    if(typeof onChange === "function"){      
-      onChange(file, signedurl)
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   }
 
   useEffect(() => {
+    if(typeof onChange === "function"){
+      onChange(values);
+    }
+  },[values]);
+
+  useEffect(() => {
+    handleUpload();
+  },[files]);
+
+  useEffect(() => {
     if(refreshValue){
-      setTempValue("");
-      setTempValueUrl("");
+      setFiles([]);
     }
   },[refreshValue])
 
@@ -87,30 +110,24 @@ const FileInput = ({
   },[$responseErrors, $errors]);
 
   return (
-    <InputWrap theme={theme} $customStyles={$customStyles} $errors={borderError}>
+    <InputWrap $customStyles={$customStyles} $errors={borderError}>
       {label && 
-        <LabelWrapper theme={theme}>
-          <label>{label}</label>
+        <LabelWrapper>
+          <Label>{label}</Label>
           {required ? <span>*</span>  : ''}         
         </LabelWrapper>
       }
-      <Input 
-        type={"file"} 
-        disabled={disabled}         
-        placeholder={placeholder}         
-        value={tempValue ?? ""} 
-        onChange={(e: any) => setSelectValue(e)}  
-      />
-      {(value || tempValueUrl) && 
-        <div>
-          <a href={tempValueUrl || `${process.env.REACT_APP_CDN}/${value}`} target="_blank" rel="noopener noreferrer">
-            {isImage(tempValue || value) && <Image src={tempValueUrl || `${process.env.REACT_APP_CDN}/${value}`} theme={theme} alt="preview" />}
-            {!isImage(tempValue || value) && <span>{tempValueUrl || `${process.env.REACT_APP_CDN}/${value}`}</span>}
-          </a>
-        </div>
-      }
+      <DropArea
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current.click()}
+      >
+        <DropAreaLabel>Drag and drop / or select files here</DropAreaLabel>
+        {(showTitles && values.length > 0) && values.map((file: any, index: number) => <div key={index}>{file.title}</div>)}
+      </DropArea>
+      <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple hidden />
       {description && <p><small>{description}</small></p>}       
-      {$errors && <Error theme={theme}>{$errors}</Error>}
+      {$errors && <Error>{$errors}</Error>}
     </InputWrap>    
   );
 };

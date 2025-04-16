@@ -20,7 +20,7 @@ export const TableHeader = styled.thead`
   th{
     padding:14px 30px;
     font-weight: 600;
-    color: ${theme.colors.base_700};
+    color: ${theme?.colors?.base_700};
   }
 `;
 
@@ -28,16 +28,16 @@ export const TableBody = styled.tbody`
   width: 100%;
   td{
     padding:14px 30px;
-    color:${theme.colors.base_700};
+    color:${theme?.colors?.base_700};
   }
   tr{
-    border-bottom: 1px solid ${theme.colors.base_300};
+    border-bottom: 1px solid ${theme?.colors?.base_300};
     &:hover{
-        background: ${theme.colors.base_100};
+        background: ${theme?.colors?.base_100};
     }
   }
   tr:first-child{
-    border-top: 1px solid ${theme.colors.base_300};
+    border-top: 1px solid ${theme?.colors?.base_300};
   }  
   tr:last-child {
     border-bottom: none;
@@ -53,6 +53,6 @@ export const TableFooter = styled.tfoot`
   th,td {
     padding: 14px 30px;
     font-weight: 600;
-    color: ${theme.colors.base_700};
+    color: ${theme?.colors?.base_700};
   }
 `;

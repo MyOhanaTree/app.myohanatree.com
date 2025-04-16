@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Input } from "reactstrap";
-
 import { InputWrap, LabelWrapper, Error, VisibleWrap, PasswordToggleWrap } from "./styled";
-import { useThemeUI } from "theme-ui";
+import { Input, Label, useThemeUI } from "theme-ui";
 import { EyeIcon, HiddenIcon } from "components/svg";
 
 
@@ -53,9 +51,9 @@ const PasswordInput = ({
   };
 
   return (
-    <InputWrap $errors={borderError} $customStyles={$customStyles} theme={theme}>               
-      <LabelWrapper theme={theme}>
-        <label>{label}</label>
+    <InputWrap $errors={borderError} $customStyles={$customStyles}>               
+      <LabelWrapper>
+        <Label>{label}</Label>
         {required ? <span>*</span>  : ''}         
       </LabelWrapper>
       <PasswordToggleWrap>
@@ -72,7 +70,7 @@ const PasswordInput = ({
         </VisibleWrap>   
       </PasswordToggleWrap> 
       {description && <p><small>{description}</small></p>}
-      {$errors && <Error theme={theme}>{$errors}</Error>}          
+      {$errors && <Error>{$errors}</Error>}          
     </InputWrap>
   );
 };

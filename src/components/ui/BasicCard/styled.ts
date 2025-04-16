@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { themevals } from "theme/themevals";
 
 interface CustomProps {
   $customStyles?: any;
@@ -6,50 +7,37 @@ interface CustomProps {
 
 export const CardWrap = styled.div<CustomProps>`
   margin-bottom: 1rem;
-  box-shadow: 0px 4px 12px 0px rgba(113, 125, 150, 0.05);
-  & > div {
-    box-shadow: none;
-  }
-  & .card {
-    border-radius: 6px; 
-    border-color: ${(props) => props.theme.colors.base_300};
-  }
-  
-  & .card .card-header { 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-  }
-
-  
-  & .card .card-title {
-    font-size: 1.125rem; 
-    font-weight: 600; 
-    margin: 0; 
-    color: ${(props) => props.theme.colors.base_800};
-  }
-
-  & .card .card-title:has(*) {
-    display: flex;
-    align-items: center;
-  }
-  
-  & .card .card-body {
-    padding: 1.5rem;
-  }
-
-  & .card .card-header, 
-  & .card .card-footer {
-    background-color: #fff; padding: 1rem;
-    border: none;
-  }
-  & .card .card-header:first-child { 
-    border-radius: calc(0.35rem - 1px) calc(0.35rem - 1px) 0 0;
-  }
-  & .card .card-footer:first-child { 
-    border-radius: 0 0 calc(0.35rem - 1px) calc(0.35rem - 1px);
-  }  
   ${(props) => props.$customStyles}
-  
+`;
+
+export const CardBody = styled.div`
+  flex: 1 1 auto;
+  padding: 1.5rem;  
+`;
+
+export const CardHeader = styled.div`
+  border-radius: calc(0.35rem - 1px) calc(0.35rem - 1px) 0 0;
+  background-color: #fff;
+  padding: 1rem;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+`;
+
+export const CardTitle = styled.h5`
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  color: ${themevals.colors.base_800};
+`;
+
+
+export const CardFooter = styled.div`
+  background-color: #fff;
+  padding: 1rem;
+  border: none;
+  border-radius: 0 0 calc(0.35rem - 1px) calc(0.35rem - 1px);
 `;

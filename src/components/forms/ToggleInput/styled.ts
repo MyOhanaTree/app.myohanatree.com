@@ -6,7 +6,6 @@ interface CustomProps {
   $customStyles?: any;
   $errors?: any;
 }
-  
 
 export const ToggleWrapper = styled.div`
   display: inline-flex;
@@ -34,27 +33,14 @@ export const LabelFalse = styled.div<{ $active?: boolean }>`
   color: ${props => props.$active ? theme.colors.base_100 : ""};
 `;
 
-export const labelStyles = {
-  marginBottom: 0,
-  display: "flex",
-  fontSize: 14,
-  fontWeight: 500
-};
-
 export const LabelWrapper =  styled.div`
   margin-bottom: 10px;
   display: flex;
   width: 100%;
-  label {
-    color: ${props => props.theme.colors.body};
-    ${labelStyles}
-  }
   small {
-    font-style: italic; font-size: .75rem; color: ${(props) => props.theme.colors.ltgrey};
+    font-style: italic; font-size: .75rem; color: ${theme.colors.base_600};
   }
 `;
-
-
 
 export const InputWrap = styled.div<CustomProps>`
   position:relative;
@@ -63,7 +49,7 @@ export const InputWrap = styled.div<CustomProps>`
 `;
 
 export const Error = styled.div` 
-  color:${(props) => props.theme.colors.danger};
+  color:${theme.colors.danger};
   margin-top:2px;  
   font-size:14px;
 `

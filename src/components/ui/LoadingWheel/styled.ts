@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { themevals } from "theme/themevals";
 
 interface CustomProps {
   $customStyles?: any;
@@ -20,10 +21,10 @@ export const LoadingWheelWrap = styled.div<CustomProps>`
     width: ${({$customStyles}) => $customStyles?.width ? $customStyles.width : "40px"};
     height: ${({$customStyles}) => $customStyles?.width ? $customStyles.width : "40px"};
     margin: 5px;
-    border: ${({$customStyles, theme}) => $customStyles?.stroke ? $customStyles.stroke : "5px"} solid ${({$customStyles, theme}) => $customStyles?.fill ? $customStyles.fill : theme.colors.secondary};
+    border: ${({$customStyles}) => $customStyles?.stroke ? $customStyles.stroke : "5px"} solid ${({$customStyles}) => $customStyles?.fill ? $customStyles.fill : themevals?.colors?.secondary};
     border-radius: 50%;
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-    border-color: ${({$customStyles, theme}) => $customStyles?.fill ? $customStyles.fill : theme.colors.secondary} transparent transparent transparent;
+    border-color: ${({$customStyles}) => $customStyles?.fill ? $customStyles.fill : themevals?.colors?.secondary} transparent transparent transparent;
   }
   div:nth-child(1) {
     animation-delay: -0.45s;

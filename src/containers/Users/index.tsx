@@ -1,22 +1,22 @@
-import React, { useEffect, useMemo, useState, useContext } from "react";
-import { Modal, ModalBody, ModalHeader, ModalFooter, Row, Col } from "reactstrap";
+import React, { useEffect, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
 
 import { getUsers, checkUser, updateUser, inviteUser, deleteUser, restoreUser, allPermissions } from "api/Users";
 
+import { Modal, ModalBody, ModalHeader, ModalFooter } from "components/ui/Modal";
 import Header from "components/ui/Header";
 import TableData from "components/ui/TableData";
 import Page from "components/ui/Page";
-import BasicButton from "components/forms/BasicButton";
 import TextInput from "components/forms/TextInput";
 import SelectInput from "components/forms/SelectInput";
 import { useToast } from "components/toast";
 import BasicModal from "components/ui/BasicModal";
-import StyledDiv from "components/ui/StyledDiv";
 import P from "components/typography/P";
 import LoadingWheel from "components/ui/LoadingWheel";
+import { Box, Button, Flex } from "theme-ui";
+import LoadingButton from "components/ui/LoadingButton";
 
 export default function Users() {
 
@@ -197,11 +197,11 @@ export default function Users() {
   useEffect(() => {
     const initPermissions = async () => {
       try {
-        const res = await allPermissions();                  
-        if(Array.isArray(res)){
-          const newperms = res.map((r: any) => { const [key, value] = Object.entries(r)[0]; return { value : key, label : value} });
+        const res = await allPermissions(); 
+        if(typeof res === "object"){                               
+          const newperms = Object.entries(res).map(([val,key]) => ({ value : val, label : key}));
           setPermissions(newperms);          
-        } 
+        }
       } catch (e) { }
     };
     initPermissions();    
@@ -222,11 +222,12 @@ export default function Users() {
           columns={columns} 
           refresh={refreshData} 
           actions={[
-            <BasicButton 
+            <Button 
               key="1"
-              scheme="primary"              
+              variant="primary"
+              type="button"              
               onClick={toggleInvite} 
-            >Add User</BasicButton>,            
+            >Add User</Button>,            
           ]} 
         />
       </Page>
@@ -237,87 +238,78 @@ export default function Users() {
             <Form noValidate autoComplete="off">
               <ModalHeader toggle={toggleEdit}>Edit User</ModalHeader>
               <ModalBody> 
-                <Row>
-                  <Col lg="6">
-                    <TextInput 
-                      name="firstName"
-                      label="First Name"
-                      value={values.firstName}
-                      onChange={(val: any) => setFieldValue("firstName",val)}
-                      $errors={errors.firstName && submitCount > 0 ? errors.firstName : null}                                    
-                    /> 
-                  </Col>
-                  <Col lg="6">
-                    <TextInput 
-                      name="lastName"
-                      label="Last Name"
-                      value={values.lastName}
-                      onChange={(val: any) => setFieldValue("lastName",val)}
-                      $errors={errors.lastName && submitCount > 0 ? errors.lastName : null}                                    
-                    /> 
-                  </Col>
-                  <Col lg="6">
-                    <TextInput 
-                      type="email" 
-                      name="email" 
-                      label="Email"
-                      value={values.email}
-                      onChange={(val: any) => setFieldValue("email",val)}
-                      $errors={errors.email && submitCount > 0 ? errors.email : null}                                    
-                    />
-                  </Col>
-                  <Col lg="6">
-                    {permissions.length === 0 && <LoadingWheel width="15px" stroke="3px" />}
-                    {permissions.length > 0 && <SelectInput 
-                      name="permissions" 
-                      label="Permissions"                       
-                      value={values?.permissions}
-                      onChange={(val: any) => setFieldValue("permissions",val)}
-                      options={permissions}  
-                      multiple={true} 
-                      $errors={errors.permissions && submitCount > 0 ? errors.permissions : null}  
-                    />}
-                  </Col>                    
-                  {userInfo.status === 2 && (
-                    <Col className="text-center">
-                      <p><strong>Send Activation Link</strong></p>
-                      <p>{`${process.env.REACT_APP_BASEURL}/register?token=${userInfo.verifyMeToken}&userId=${userInfo?.id}&email=${userInfo.email}`}</p>
-                    </Col>                                                                                                                        
-                  )}
-                </Row>                                                                        
+                <Flex sx={{ gap: 2, "> *" : { flex: 1 }}}>                  
+                  <TextInput 
+                    name="firstName"
+                    label="First Name"
+                    value={values.firstName}
+                    onChange={(val: any) => setFieldValue("firstName",val)}
+                    $errors={errors.firstName && submitCount > 0 ? errors.firstName : null}                                    
+                  />                   
+                  <TextInput 
+                    name="lastName"
+                    label="Last Name"
+                    value={values.lastName}
+                    onChange={(val: any) => setFieldValue("lastName",val)}
+                    $errors={errors.lastName && submitCount > 0 ? errors.lastName : null}                                    
+                  /> 
+                </Flex>
+                <Flex sx={{ gap: 2, "> *" : { flex: 1 }}}>                  
+                  <TextInput 
+                    type="email" 
+                    name="email" 
+                    label="Email"
+                    value={values.email}
+                    onChange={(val: any) => setFieldValue("email",val)}
+                    $errors={errors.email && submitCount > 0 ? errors.email : null}                                    
+                  />                  
+                  {permissions.length === 0 && <LoadingWheel width="15px" stroke="3px" />}
+                  {permissions.length > 0 && <SelectInput 
+                    name="permissions" 
+                    label="Permissions"                       
+                    value={values?.permissions}
+                    onChange={(val: any) => setFieldValue("permissions",val)}
+                    options={permissions}  
+                    multiple={true} 
+                    $errors={errors.permissions && submitCount > 0 ? errors.permissions : null}  
+                  />}
+                </Flex>
+                {userInfo.status === 2 && ( 
+                  <>
+                    <p><strong>Send Activation Link</strong></p>
+                    <p>{`${process.env.REACT_APP_BASEURL}/register?token=${userInfo.verifyMeToken}&userId=${userInfo?.id}&email=${userInfo.email}`}</p>                    
+                  </>
+                )}                
               </ModalBody>
               <ModalFooter>
-                <StyledDiv styles={{display: "flex", flexWrap : "wrap-reverse", gap : "20px", justifyContent : "space-between", width : "100%"}}>
-                  <StyledDiv styles={{display: "flex", flexWrap : "wrap-reverse", gap : "20px"}}>                    
-                    <BasicButton 
-                      scheme="danger"
-                      outline={true}
+                <Box sx={{display: "flex", flexWrap : "wrap-reverse", gap : "20px", justifyContent : "space-between", width : "100%"}}>
+                  <Box sx={{display: "flex", flexWrap : "wrap-reverse", gap : "20px"}}>                    
+                    <Button 
+                      variant="danger"
                       type="button" 
                       onClick={submitDeleteUser} 
-                    >Delete</BasicButton> 
+                    >Delete</Button> 
                     {values.status === 0 && <>
-                      <BasicButton 
-                        scheme="warning"
-                        outline={true}
+                      <Button 
+                        variant="warning"
                         type="button" 
                         onClick={submitRestoreUser} 
-                      >Restore</BasicButton> 
+                      >Restore</Button> 
                     </>}
-                  </StyledDiv>
-                  <StyledDiv styles={{display: "flex", flexWrap : "wrap-reverse", gap : "20px"}}>
-                    <BasicButton 
-                      outline={true}                  
+                  </Box>
+                  <Box sx={{display: "flex", flexWrap : "wrap-reverse", gap : "20px"}}>
+                    <Button 
+                      variant="outline.primary"
                       type="button" 
                       onClick={toggleEdit} 
-                    >Cancel</BasicButton>   
-                    <BasicButton 
-                      scheme="secondary"                     
-                      outline={true}
+                    >Cancel</Button>   
+                    <LoadingButton 
+                      variant="outline.secondary"                     
                       type="submit" 
-                      $submitting={isSubmitting}
-                    >Update</BasicButton>
-                  </StyledDiv>
-                </StyledDiv>                
+                      $loading={isSubmitting}
+                    >Update</LoadingButton>
+                  </Box>
+                </Box>                
               </ModalFooter>
             </Form>
             );
@@ -331,62 +323,57 @@ export default function Users() {
             <Form noValidate autoComplete="off">
               <ModalHeader toggle={toggleInvite}>Add User</ModalHeader>
               <ModalBody> 
-                <Row>
-                  <Col lg="6">
-                    <TextInput
-                      type="email" 
-                      name="email" 
-                      label="Email"  
-                      value={values.email}
-                      onChange={(val: any) => setFieldValue("email",val)}
-                      autoComplete="off"
-                      $errors={errors.email && submitCount > 0 ? errors.email : null}  />
-                  </Col>
-                  <Col lg="6">
-                    {permissions.length === 0 && <LoadingWheel width="15px" stroke="3px" />}
-                    {permissions.length > 0 && <SelectInput 
-                      name="permissions" 
-                      label="Permissions" 
-                      value={values.permissions}
-                      onChange={(val: any) => setFieldValue("permissions",val)}
-                      options={permissions}  
-                      multiple={true} 
-                      $errors={errors.permissions && submitCount > 0 ? errors.permissions : null}  
-                    />}
-                  </Col>                
-                  <Col lg="6">
-                    <TextInput 
-                      name="firstName" 
-                      label="First Name" 
-                      value={values.firstName}
-                      onChange={(val: any) => setFieldValue("firstName",val)}
-                      autoComplete="off"
-                      $errors={errors.firstName && submitCount > 0 ? errors.firstName : null}  
-                    />
-                  </Col>
-                  <Col lg="6">
-                    <TextInput 
-                      name="lastName" 
-                      label="Last Name" 
-                      value={values.lastName}
-                      onChange={(val: any) => setFieldValue("lastName",val)}
-                      autoComplete="off"
-                      $errors={errors.lastName && submitCount > 0 ? errors.lastName : null} 
-                    />                                              
-                  </Col>
-                </Row>                
+                <Flex sx={{ gap: 2, "> *" : { flex: 1 }}}>                  
+                  <TextInput
+                    type="email" 
+                    name="email" 
+                    label="Email"  
+                    value={values.email}
+                    onChange={(val: any) => setFieldValue("email",val)}
+                    autoComplete="off"
+                    $errors={errors.email && submitCount > 0 ? errors.email : null}  
+                  />                  
+                  {permissions.length === 0 && <LoadingWheel width="15px" stroke="3px" />}
+                  {permissions.length > 0 && <SelectInput 
+                    name="permissions" 
+                    label="Permissions" 
+                    value={values.permissions}
+                    onChange={(val: any) => setFieldValue("permissions",val)}
+                    options={permissions}  
+                    multiple={true} 
+                    $errors={errors.permissions && submitCount > 0 ? errors.permissions : null}  
+                  />}
+                </Flex>                  
+                <Flex sx={{ gap: 2, "> *" : { flex: 1 }}}>                  
+                  <TextInput 
+                    name="firstName" 
+                    label="First Name" 
+                    value={values.firstName}
+                    onChange={(val: any) => setFieldValue("firstName",val)}
+                    autoComplete="off"
+                    $errors={errors.firstName && submitCount > 0 ? errors.firstName : null}  
+                  />                  
+                  <TextInput 
+                    name="lastName" 
+                    label="Last Name" 
+                    value={values.lastName}
+                    onChange={(val: any) => setFieldValue("lastName",val)}
+                    autoComplete="off"
+                    $errors={errors.lastName && submitCount > 0 ? errors.lastName : null} 
+                  />                                              
+                </Flex>
               </ModalBody>
               <ModalFooter>
-                <BasicButton 
-                  outline={true}                
+                <Button 
+                  variant="outline.primary"
                   type="button" 
                   onClick={toggleInvite} 
-                >Cancel</BasicButton>
-                <BasicButton 
-                  scheme="secondary"          
+                >Cancel</Button>
+                <LoadingButton 
+                  variant="secondary"          
                   type="submit" 
-                  $submitting={isSubmitting}
-                >Invite</BasicButton>                
+                  $loading={isSubmitting}
+                >Invite</LoadingButton>                
               </ModalFooter>
             </Form>
           );

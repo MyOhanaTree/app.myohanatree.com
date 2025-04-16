@@ -1,11 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { LoadingWrapper } from "./styled";
 import { useNavigate } from "react-router-dom";
-import UserContext from "context/User";
-import { getProfile } from "api/Auth";
-import { useThemeUI } from "theme-ui";
-import LoadingWheel from "components/ui/LoadingWheel";
-import StyledDiv from "components/ui/StyledDiv";
+import { Box, Spinner, useThemeUI } from "theme-ui";
 
 const LoadingLayout = () =>{
 
@@ -19,9 +15,9 @@ const LoadingLayout = () =>{
 
   return (        
     <LoadingWrapper theme={theme}>
-      <StyledDiv styles={{flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center",}}>
-        <LoadingWheel />
-      </StyledDiv>
+      <Box sx={{flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center",}}>
+        <Spinner size={24} />
+      </Box>
     </LoadingWrapper>
   )
 }

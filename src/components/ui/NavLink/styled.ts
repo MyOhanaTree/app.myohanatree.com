@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { themevals } from "theme/themevals";
 
 interface CustomProps {
   $active?: boolean;
@@ -16,16 +17,16 @@ export const NavLinkWrapper = styled.div<CustomProps>`
     width: 100%;
     gap: 8px;
     text-decoration: none;
-    background:${props => props.$active ? props.theme.colors.base_200 : "transparent"};
+    background:${props => props.$active ? themevals?.colors?.base_200 : "transparent"};
     &:hover{
-      background:${props => props.theme.colors.base_200};
+      background:${themevals?.colors?.base_200};
       span{
-        color:${props => props.theme.colors.body};
+        color:${themevals?.colors?.body};
       }
       svg{
-        fill:${props => props.theme.colors.body} !important;
+        fill:${themevals?.colors?.body} !important;
         path{
-          fill:${props => props.theme.colors.body} !important;
+          fill:${themevals?.colors?.body} !important;
         }
       }
     }
@@ -35,5 +36,5 @@ export const NavLinkWrapper = styled.div<CustomProps>`
 export const LinkText = styled.span<CustomProps>`
   font-size:1rem;
   font-weight:500;
-  color:${props => props.$active ? props.theme.colors.body : props.theme.colors.base_600};
+  color:${props => props.$active ? themevals?.colors?.body : themevals?.colors?.base_600};
 `

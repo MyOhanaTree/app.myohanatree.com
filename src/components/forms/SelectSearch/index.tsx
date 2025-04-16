@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Select, { components } from "react-select";
-import { InputWrap, SelectStyles, LabelWrapper, Error } from "./styled";
-import { useThemeUI } from "theme-ui";
+import { InputWrap, SelectStyles, colorCodedStyles, LabelWrapper, Error } from "./styled";
+import { Label, useThemeUI } from "theme-ui";
 
 import { TimesIcon } from "components/svg";
 
@@ -46,14 +46,17 @@ const SelectSearch = ({
   name, 
   value,
   label, 
+  placeholder,
   description, 
   required,
   readonly,
   disabled,
+  multiple,
   defaultOption = {value: "", label : ""}, 
   params = {}, 
   sortBy, 
   sortDir, 
+  limit = 10,
   keyValue = "id", 
   keyLabel = ["title"], 
   labelDivider = ", ", 
@@ -61,21 +64,25 @@ const SelectSearch = ({
   $customStyles, 
   $responseErrors, 
   $errors, 
+  colorCoded = false,
   onChange
 }: {
-  api?: any;
+  api?: (props: any) => Promise<any>;
   apiVariables?: any;
   name?: string;
   label?: string | React.ReactNode;  
-  value?: string | number;
+  value?: string | string[] | number;
+  placeholder?: string;
   description?: string;  
   required?: boolean;
   readonly?: boolean;
   disabled?: boolean;
+  multiple?: boolean;
   defaultOption?: any;
   params?: any;
   sortBy?: string;
   sortDir?: string;
+  limit?: number;
   keyValue?: string;
   keyLabel?: string[]; 
   labelDivider?: string;
@@ -83,10 +90,10 @@ const SelectSearch = ({
   $customStyles?: any;
   $responseErrors?: any;
   $errors?: any;
+  colorCoded?: boolean;
   onChange?: (e?: any) => void;
 }) => {
 
-  const callApi = useRef<any>(api);
   const selectRef = useRef<any>(null);
   const controller = useRef<any>(null);
   const loadTimer = useRef<any>(null);
@@ -98,6 +105,9 @@ const SelectSearch = ({
   const [inputValue, setInputValue] = useState<any>();
   const [options,setOptions] = useState<any[]>([]);
   const [items,setItems] = useState<any[]>([]);
+  const [nextPageNum, setNextPageNum] = useState<number>(1);
+  const [hasMore,setHasMore] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
   const prevParamsRef = useRef<any>(params);
 
@@ -107,13 +117,13 @@ const SelectSearch = ({
         fetchOptions(newValue);
       }
       if(newValue.length == 0 && preload) { 
-        fetchOptions("");
+        fetchOptions();
       }
     }
     setInputValue(newValue);
   }
 
-  const fetchOptions = async (inputValue?: any) => {     
+  const fetchOptions = async (queryValue?: any, pageNum = 1, recordsPer = 10) => {     
     if(controller.current){
       controller?.current?.abort(); 
       controller.current = null;
@@ -121,56 +131,94 @@ const SelectSearch = ({
     clearTimeout(loadTimer?.current);  
 
     loadTimer.current = setTimeout(async () => {        
-      setOptions([]);
       controller.current = new AbortController();
-      const query = {              
-        ...params,
-        ...(!!!inputValue ? setNestedValue({}, keyValue, value) : {}),
-        searchString : inputValue ?? null,        
+      const { filters: paramFilters, ...restParams } = params;
+      const query = { 
+        filters : {              
+          ...paramFilters,
+          ...(!!queryValue ? setNestedValue({}, keyValue, value) : {}),
+        },
+        search : inputValue ?? null,        
         sortBy : sortBy,
         sortDir : sortDir,
-        pageNum : 1,
-        recordsPer : 10,
-      } 
+        pageNum,
+        recordsPer : limit || 10,
+        ...restParams
+      }
 
       try {
-        if(callApi.current){
-          const apiCall = callApi.current;
-          const res = await apiCall({...apiVariables, query, controller : controller.current, excludeInterceptor : true}); 
+        if(api){
+          setLoading(true);
+
+          const res = await api({...apiVariables, query, controller : controller.current, excludeInterceptor : true}); 
           if(res.items){      
             setItems(res.items);       
             const newOptions = res.items.map((item: any) => {
               const label = Array.isArray(keyLabel) ? keyLabel.map(key => getNestedValue(item, key) ?? "").join(labelDivider) : getNestedValue(item, keyLabel);
-              return { "value": getNestedValue(item, keyValue), "label": label };
+              return { "value": getNestedValue(item, keyValue), "label": label, color: (colorCoded && item.color) ? item.color : item.color || theme?.colors?.base_500 };
             });       
-            setOptions(newOptions);                        
+            setOptions((old) => {
+              const merged = [...(pageNum > 1 ? old : []), ...newOptions];
+              const unique = Array.from(new Map(merged.map(item => [item.value, item])).values());
+              return unique;
+          });
+
+            setHasMore((res?.page || 1) < (res.pages || 1));  
+            setNextPageNum((res?.page || 1) + 1);                   
           } else {
             if(Array.isArray(res)){
               setItems(res);
               const newOptions = res.map((item: any) => {
                 const label = Array.isArray(keyLabel) ? keyLabel.map(key => getNestedValue(item, key) ?? "").join(labelDivider) : getNestedValue(item, keyLabel);
-                return {"value" : getNestedValue(item, keyValue), "label" : label}
+                return {"value" : getNestedValue(item, keyValue), "label" : label, color: (colorCoded && item.color) ? item.color : item.color || theme?.colors?.base_500}
               })        
-              setOptions(newOptions);                        
-            }
-          }
+              
+              setOptions((old) => {
+                const merged = [...(pageNum > 1 ? old : []), ...newOptions];
+                const unique = Array.from(new Map(merged.map(item => [item.value, item])).values());
+                return unique;
+              });                      
+            }            
+            setHasMore(false);
+          }          
+          setLoading(false);
         }
       } catch (e) { }            
     }, 500); 
     return true;
   };
 
-  const setSelectValue = function (e: any){ 
-    if(disabled) return true;
-     
-    
+  const setSelectValue = async (e: any) => { 
+    if (disabled) return;   
+  
 
-    if(typeof onChange === "function"){
-      const res = findNestedValue(items, keyValue, e?.value);
-      console.log(res);
-      onChange(res ?? "")
+    let changedValue;
+  
+    if(e === null){
+      fetchOptions();    
+    } else {
+      if (multiple) {
+        const selectedValues = await Promise.all(e.map((el: any) => el.value).filter((v: any) => v !== ""));  
+        changedValue = [...new Set([...selectedValues])];
+      } else {
+        changedValue = findNestedValue(items, keyValue, e?.value);
+      }
     }
-    setTimeout(() => { selectRef?.current?.blur(); },100);
+  
+    if (typeof onChange === "function") {
+      onChange(changedValue ?? "");
+    }
+  
+    setTimeout(() => {
+      selectRef?.current?.blur();
+    }, 100);
+  };
+  
+
+  const scrollBottom = () => {
+    if(hasMore){
+      fetchOptions(inputValue,nextPageNum);
+    }
   }
 
   useEffect(() => { 
@@ -193,17 +241,17 @@ const SelectSearch = ({
     }
   },[preload]);
 
-  useEffect(() => {
+  useEffect(() => {    
     if (preload && !inputValue && !(JSON.stringify(params) === JSON.stringify(prevParamsRef.current))) {
       fetchOptions(inputValue);
       prevParamsRef.current = params;
     }
-  }, [params, preload, inputValue]);
+  }, [params, preload, inputValue]);  
 
   const ClearIndicator = (props: any) => {
     return (      
       <components.ClearIndicator {...props}>        
-        <TimesIcon height={"14px"} width={"14px"} fill={theme?.colors?.base_500} />        
+        <TimesIcon height={"12px"} width={"12px"} fill={theme?.colors?.base_500} />        
       </components.ClearIndicator>
     );
   };
@@ -214,32 +262,40 @@ const SelectSearch = ({
   };
 
   return (
-    <InputWrap $customStyles={$customStyles} $errors={borderError} theme={theme}>
+    <InputWrap sx={$customStyles} $errors={borderError}>
       {label && 
-        <LabelWrapper theme={theme}>
-          <label>{label}</label>
+        <LabelWrapper>
+          <Label>{label}</Label>
           {required ? <span>*</span>  : ''}         
         </LabelWrapper>
       }
       <Select 
         ref={selectRef}
-        styles={SelectStyles} 
+        styles={
+          colorCoded
+            ? colorCodedStyles // Apply color coding if enabled
+            : SelectStyles
+        }
         menuPlacement="auto"
         classNamePrefix="react-select"
         value={options?.filter((option: any) => (Array.isArray(value)) ? value.includes(option.value) : option.value === value)} 
         options={options} 
         name={name} 
-        placeholder="Search for more..."
-        noOptionsMessage={() => (inputValue ?? "")?.toString().length < 3 ? "Type to start searching" : "No options available"}
-        isClearable
+        placeholder={placeholder ?? "Search for more..."}
+        noOptionsMessage={() => (inputValue ?? "")?.toString().length < 3 ? "Type to start searching" : "No options available"}        
         onChange={(e) => setSelectValue(e)}  
-        onInputChange={handleInputChange}
+        onInputChange={handleInputChange}        
+        onMenuScrollToBottom={scrollBottom}   
         inputValue={inputValue ?? ""}
-        components={customComponents} 
-        isDisabled={readonly}                 
+        components={customComponents}              
+        isClearable
+        isDisabled={readonly}   
+        isLoading={loading}     
+        isMulti={multiple} 
+        menuPortalTarget={document.body}                     
       />    
       {description && <p><small>{description}</small></p>}       
-      {$errors && <Error theme={theme}>{$errors}</Error>}
+      {$errors && <Error>{$errors}</Error>}
     </InputWrap>
   );
 };

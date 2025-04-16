@@ -1,18 +1,14 @@
 import styled from "styled-components";
+import { themevals } from "theme/themevals";
 
-export const LoginContainerStyles = {
-    display:"flex",
-    flexDirection:"column"
-}
-
-export const LoginFooterStyles = {
-    flex:1,
-    display:"flex",
-    alignItems:"flex-end"
-}
+export const LoginFooterStyles = styled.div`
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+`;
 
 export const FooterCreds = styled.p`
-    color:${props => props.theme.colors.base_600};
+    color:${themevals.colors.base_600};
     font-size:0.75rem;
     text-align:center;
     font-weight:500;
@@ -25,7 +21,7 @@ export const ForgotPasswordLink = styled.div`
     text-align:center;
     a{
         text-decoration:none;
-        color:${props => props.theme?.colors?.body};
+        color:${themevals?.colors?.body};
         font-size:14px;
         font-weight:500;
     }

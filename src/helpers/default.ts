@@ -1,5 +1,7 @@
 export const darken = (darkenAmount: number, originalColor: string) => {
 
+  originalColor = originalColor.length === 4 ? `#${originalColor[1]}${originalColor[1]}${originalColor[2]}${originalColor[2]}${originalColor[3]}${originalColor[3]}` : originalColor;
+
   // Parse the hex color to RGB components
   const r = parseInt(originalColor.slice(1, 3), 16);
   const g = parseInt(originalColor.slice(3, 5), 16);
@@ -41,4 +43,47 @@ export const filterNestedKeys = (obj: any, keys: string[]): any => {
   });
 
   return result;
+};
+
+export const getNestedValue = (obj: any, key: any) => {
+  return key.split('.').reduce((acc: any, part: any) => acc && acc[part], obj);
+};
+
+export const findNestedValue = (arr: any[], key: string, value: string) => {
+  return arr.find(obj => {
+    const keys = key.split('.');
+    let current = obj;
+
+    for (const k of keys) {
+      if (current && k in current) {
+        current = current[k];
+      } else {
+        return false;
+      }
+    }
+
+    return current === value;
+  });
+}
+
+export const setNestedValue = (obj: any, path: any, value: any) => {
+  const keys = path.split('.');
+  let current = obj;
+  keys.forEach((key: any, index: any) => {
+      if (index === keys.length - 1) {
+          current[key] = value;
+      } else {
+          current[key] = current[key] || {};
+          current = current[key];
+      }
+  });
+  return obj;
+};
+
+export const findInNestedArray = (filters: any, key: string, value: string | number): any => {
+  return Array.isArray(filters)
+    ? filters.flatMap(item =>
+        Array.isArray(item) ? findInNestedArray(item, key, value) : item
+      ).find(item => item?.[key] === value)
+    : null;
 };

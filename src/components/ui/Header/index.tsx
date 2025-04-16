@@ -42,8 +42,8 @@ const Header = ({children, title}: any) =>{
   }, [dropdownRef.current,dropdownRef2.current]);
 
   return (
-    <HeaderWrapper theme={theme}>
-      <TitleWrapper theme={theme}>
+    <HeaderWrapper>
+      <TitleWrapper>
          <TitleInner>
           <H1 fontSize={"22px"} color={theme?.colors?.base_800}>{title}</H1>            
         </TitleInner> 
@@ -65,7 +65,7 @@ const Header = ({children, title}: any) =>{
         </HeaderActions>       
       </TitleWrapper>
       {children && 
-        <SubHeaderWrapper theme={theme}>
+        <SubHeaderWrapper>
           <SubHeaderInner>
             {children}
           </SubHeaderInner>

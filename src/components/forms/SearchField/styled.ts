@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { themevals } from "theme/themevals";
 
 interface CustomProps {
   $submitting?: boolean;
@@ -21,8 +22,9 @@ export const InputWrap = styled.div<CustomProps>`
     padding-left: 40px;
     padding-right: 10px;   
     width: 100%;
-    border: 1px solid ${props => props.theme.colors.base_300};
-    color: ${props => props.theme.colors.body};
+    background-color: #fff;
+    border: 1px solid ${themevals.colors.base_300};
+    color: ${themevals.colors.body};
   }  
 `;
 

@@ -8,7 +8,7 @@ const LoginCard = ({children}: any) =>{
   const { theme } = themeContext;
 
   return (
-    <LoginMat theme={theme}>{children}</LoginMat>
+    <LoginMat>{children}</LoginMat>
   )
 }
 

@@ -93,30 +93,29 @@ export const TableBtns = styled.div`
   }
 `;
 
-export const TablePagination = styled.div`
-  border-top: 1px solid ${theme.colors.base_300};
-  padding-top: 1rem;
+export const TablePagination = styled.div`  
   display:flex;
   flex-wrap: wrap;
   align-items: center;     
-  color: ${theme.colors.base_700}!important;
+  color: ${theme?.colors?.base_700}!important;
+  gap: 10px 20px;
+  font-size: .875rem;
   & .btn {    
-    width: 44px;
+    width: 40px;
     text-align: center;
-    margin: .25rem;
     border-radius: 4px;
-    border-color: ${theme.colors.base_300}!important;
-    background-color: ${theme.colors.white};
-    & svg {max-height: 15px; width: auto; fill:  ${theme.colors.base_500}!important;}
+    padding: 3px!important;
+    border-color: ${theme?.colors?.base_300}!important;
+    background-color: ${theme?.colors?.white};
+    & svg {height: 10px; width: auto; fill:  ${theme?.colors?.base_500}!important;}
     &.btn-next svg ,&.btn-last svg {transform: scaleX(-1);}
   }
-  & .react-select__control {   
-    margin: .25rem; 
-    & .react-select__indicator-separator {
-      display: none;
-    }    
+  & .react-select__control {  
+    min-height: auto;
+    margin: 0 .25rem;  
+    & .react-select__indicator {padding: 1px 8px!important;}
+    & .react-select__indicator svg {height: 10px!important; width: auto!important;}
+    & .react-select__indicator-separator {display: none;}    
   }
-  & > div {margin: 0 .75rem; display:flex; flex-wrap: no-wrap; align-items: center;}
-  & > div:first-child {margin-left: 0;}  
-  & > div:last-child {margin-right: 0;}  
+  & > div {display:flex; flex-wrap: no-wrap; align-items: center;}  
 `;

@@ -1,30 +1,36 @@
-import React, { useState, useContext, useEffect } from "react";
-import { Container, Row, Col } from "reactstrap";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Form, Formik } from "formik";
-import { useThemeUI } from "theme-ui";
+import { Box, Divider, Flex, useThemeUI } from "theme-ui";
 import * as Yup from "yup";
 import axios from "axios";
 
-import { LoginFooterStyles, FooterCreds, ForgotPasswordLink } from "./styled";
+import { FooterCreds, ForgotPasswordLink, LoginFooterStyles } from "./styled";
+
+import { doLogin } from "api/Auth";
+import UserContext from "context/User";
 
 import AdminLogo from "components/img/AdminLogo";
 import TextInput from "components/forms/TextInput";
-import BasicButton from "components/forms/BasicButton";
+import LoadingButton from "components/ui/LoadingButton";
 import PasswordInput from "components/forms/PasswordInput";
 import Checkbox from "components/forms/Checkbox";
 import LoginCard from "components/ui/LoginCard";
 import H2 from "components/typography/H2";
 import { useToast } from "components/toast";
 
-import { doLogin } from "api/Auth";
-import UserContext from "context/User";
+
 
 const Login = () => {
   const themeContext = useThemeUI();
   const { theme } = themeContext;
   const { setUser } = useContext<any>(UserContext);
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const redirectUrl = queryParams.get('redirect');
+
   const toast = useToast();
 
   const [responseErrors, setResponseErrors] = useState(false);
@@ -37,7 +43,7 @@ const Login = () => {
       setUser({ ...res?.user });
       localStorage.setItem("user", JSON.stringify({user_id : res.user.id, tokens : {...res.tokens}}));
       axios.defaults.headers.common["Authorization"] = `Bearer ${res.tokens.accessToken}`;
-      navigate("/");
+      navigate(redirectUrl || "/");
     } else {
       localStorage.removeItem("user");
       toast.add(res?.message ? res.message : "Error loging in, please try again later" , "var(--theme-ui-colors-red)");
@@ -51,74 +57,61 @@ const Login = () => {
     password: Yup.string().required("This field is required."),
   });
 
-  useEffect(() => { 
-    document.title = process.env.REACT_APP_NAME + " | Login"; 
-  }, []);
-
   return (
     <LoginCard>
-      <Container style={{display: "flex",flexDirection:"column"}}>
-      <Row>
-          <Col className="text-center">            
-            <AdminLogo alt="" customStyles={{maxWidth: "300px", margin: "auto"}}/>                     
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <hr />
-            <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"} mb={"30px"}>
-              Login
-            </H2>
-            <Formik initialValues={{ email: "", password: "" }} onSubmit={_onSubmit} validationSchema={LoginSchema}>
-              {({ isSubmitting, errors, submitCount, values, setFieldValue }) => {
-                return (
-                  <Form noValidate autoComplete="off">
-                    <TextInput 
-                      name="email" 
-                      label="Email" 
-                      value={values.email || ""}
-                      onChange={(val: any) => setFieldValue("email",val)}
-                      $errors={errors.email && submitCount > 0 ? errors.email : null} 
-                      $responseErrors={responseErrors}
-                    />
-                    <PasswordInput 
-                      name="password" 
-                      label="Password" 
-                      value={values.password || ""}
-                      onChange={(val: any) => setFieldValue("password",val)}
-                      $errors={errors.password && submitCount > 0 ? errors.password : null} 
-                      $responseErrors={responseErrors}
-                    />
-                    <Checkbox 
-                      label="Remember Me" 
-                      name="rememberMe" 
-                      checked={values.rememberMe}
-                      onChange={(val: any) => { setFieldValue("rememberMe",val);}}
-                    />
-                    <BasicButton
-                      type="submit"
-                      $submitting={isSubmitting}                      
-                      styles={{width:"100%",margin : "40px auto 0px auto"}}
-                    >Login</BasicButton>
-                  </Form>
-                );
-              }}
-            </Formik>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <ForgotPasswordLink theme={theme}>
-              <Link to={"/forgot-password"}>Forgot password?</Link>
-            </ForgotPasswordLink>
-          </Col>
-        </Row>
-        <Row style={LoginFooterStyles}>
-          <Col>
-            <FooterCreds theme={theme}>© {process.env.REACT_APP_NAME}, 2023 & beyond. All Rights Reserved</FooterCreds>
-          </Col>
-        </Row>
-      </Container>
+      <Flex sx={{flexDirection:"column"}}>        
+        <Box sx={{ textAlign : "center"}}>            
+          <AdminLogo alt="" customStyles={{maxWidth: "300px", margin: "auto"}}/>   
+          <div><b>Admin Portal</b></div>          
+        </Box>        
+        <Divider />
+        <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"} mb={"30px"}>Login</H2>
+        <Formik initialValues={{ email: "", password: "" }} onSubmit={_onSubmit} validationSchema={LoginSchema}>
+          {({ isSubmitting, errors, submitCount, values, setFieldValue }) => {
+            return (
+              <Form noValidate autoComplete="off">
+                <TextInput 
+                  type="email"
+                  name="email" 
+                  label="Email" 
+                  value={values.email || ""}
+                  onChange={(val: any) => setFieldValue("email",val)}
+                  $errors={errors.email && submitCount > 0 ? errors.email : null} 
+                  $responseErrors={responseErrors}
+                />
+                <PasswordInput 
+                  name="password" 
+                  label="Password" 
+                  value={values.password || ""}
+                  onChange={(val: any) => setFieldValue("password",val)}
+                  $errors={errors.password && submitCount > 0 ? errors.password : null} 
+                  $responseErrors={responseErrors}
+                />
+                <Checkbox 
+                  label="Remember Me" 
+                  name="rememberMe" 
+                  checked={values.rememberMe}
+                  onChange={(val: any) => { setFieldValue("rememberMe",val);}}
+                />
+                <LoadingButton
+                  type="submit"
+                  disabled={isSubmitting}           
+                  $loading={isSubmitting}           
+                  sx={{width:"100%",margin : "40px auto 0px auto"}}
+                >
+                  Login                  
+                </LoadingButton>
+              </Form>
+            );
+          }}
+        </Formik>
+        <ForgotPasswordLink>
+          <Link to={"/forgot-password"}>Forgot password?</Link>
+        </ForgotPasswordLink>      
+        <LoginFooterStyles>
+          <FooterCreds>© {process.env.REACT_APP_NAME}, 2023 & beyond. All Rights Reserved</FooterCreds>        
+        </LoginFooterStyles>          
+      </Flex>
     </LoginCard>
   );
 };

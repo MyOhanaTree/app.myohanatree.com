@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { themevals } from "theme/themevals";
 
 interface CustomProps {
   $submitting?: boolean;
@@ -22,55 +23,43 @@ export const InputWrap = styled.div<CustomProps>`
     height: 44px;
     min-width: 175px;
     max-width: 100%;
-    border: 1px solid ${(props) => props.$errors ? props.theme.colors.danger + "!important" : props.theme.colors.base_300};
-    color: ${props => props.theme.colors.body};
+    background-color: #fff;
+    border: 1px solid ${(props) => props.$errors ? themevals.colors.danger + "!important" : themevals.colors.base_300};
+    color: ${themevals.colors.body};
     ${inputStyles}
   }
   textarea {    
     height: 100px;
     min-width: 175px;    
     max-width: 100%;
-    border: 1px solid ${(props) => props.$errors ? props.theme.colors.danger + "!important" : props.theme.colors.base_300};
-    color: ${props => props.theme.colors.body};
+    background-color: #fff;
+    border: 1px solid ${(props) => props.$errors ? themevals.colors.danger + "!important" : themevals.colors.base_300};
+    color: ${themevals.colors.body};
+    ${inputStyles}
   }
   select{
     height: 44px;
     min-width: 175px;
     max-width: 100%;
-    border: 1px solid ${(props) => props.$errors ? props.theme.colors.danger + "!important" : props.theme.colors.base_300};
-    color: ${props => props.theme.colors.body};
+    background-color: #fff;
+    border: 1px solid ${(props) => props.$errors ? themevals.colors.danger + "!important" : themevals.colors.base_300};
+    color: ${themevals.colors.body};
+    ${inputStyles}
   }
   ${(props) => props.$customStyles}
 `;
-
-
-
-export const labelStyles = {
-  marginBottom: 0,
-  display: "flex",
-  justifyContent : "space-between",
-  alignItems: "flex-end",
-  fontSize: 14,
-  fontWeight: 500
-};
 
 export const LabelWrapper =  styled.div`
   margin-bottom: 10px;
   display: flex;
   width: 100%;
-  label {
-    color: ${props => props.theme.colors.body};
-    ${labelStyles}
-  }
   small {
-    font-style: italic; font-size: .75rem; color: ${(props) => props.theme.colors.ltgrey};
+    font-style: italic; font-size: .75rem; color: ${themevals.colors.base_600};
   }
 `;
 
-
-
 export const Error = styled.div` 
-  color:${(props) => props.theme.colors.danger};
+  color:${themevals.colors.danger};
   margin-top:2px; 
   font-size:14px;
 `
