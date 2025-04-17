@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import { Formik, Form } from "formik";
 import { Box, Button, Flex, IconButton, Spinner } from "theme-ui";
@@ -18,7 +18,6 @@ import {
   TableBtns,
   Table,
   TPdiv,
-  TPdivMobileHidden,
 } from "./styled";
 
 import { ArrowIcon, ChevronIcon, FilterIcon } from "components/svg";
@@ -69,7 +68,6 @@ const TableData = ({
   enableSearch = true,
   enablePaging = true,
   enableFooter = false,
-  pagingIfPaged = false,
   isFixed = false,
   forceQueryVariables = {},
   returnData,
@@ -92,7 +90,6 @@ const TableData = ({
   enableSearch?: boolean;
   enablePaging?: boolean;
   enableFooter?: boolean;
-  pagingIfPaged?: boolean;
   isFixed?: boolean;
   pageSizes?: number[];
   forceQueryVariables?: object;
@@ -102,8 +99,6 @@ const TableData = ({
   onRowClick?: (e: React.MouseEvent<HTMLTableRowElement>, row: Row<any>) => void;
   endpoint?: string; // Add endpoint as a prop
 }) => {
-  const LOCAL_STORAGE_KEY = `tableDataState`; // Use endpoint in key
-
   const callApi = useRef(api);
   const callReturnData = useRef(returnData);
   const callReturnQuery = useRef(returnQuery);
@@ -115,58 +110,29 @@ const TableData = ({
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [tableData, setTableData] = useState<any[]>([]);
   const [sorting, setSorting] = useState<any[]>([]);
-  const [pagination, setPagination] = useState<any>({});
-  const [pageCount, setPageCount] = useState<number>(1);
+  const [pagination, setPagination] = useState<any>({ from: null, page: 0, limit: defaultPageSize || 15});
+  const [paging, setPaging] = useState<{previous: any, next: any}>({ previous: null, next: null});
+
   const [columnFilters, setColumnFilters] = useState<any>(preFilters || {});
   const [globalFilter, setGlobalFilter] = useState<any>(null);
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
-  const [showRecordsOptions, setShowRecordsOptions] = useState(
+  const showRecordsOptions = useMemo(() =>
     pageSizes
       ? [...pageSizes.map((p) => ({ value: p, label: p })), { value: 1000, label: "All" }]
       : [
+          { value: 1, label: 1 },
           { value: 15, label: 15 },
           { value: 50, label: 50 },
           { value: 100, label: 100 },
-          { value: 1000, label: "All" },
+          { value: 1000, label: 1000 },
         ]
-  );
+  ,[]);
 
   const fuzzyFilter = (row: any, columnId: any, value: any, addMeta: any) => {
     const itemRank = rankItem(row.getValue(columnId), value);
     addMeta({ itemRank });
     return itemRank.passed;
-  };
-
-  const saveStateToLocalStorage = () => {
-    if (!(pagination.pageIndex >= 0)) return;
-
-    const state = {
-      api: api.name || "",
-      timestamp: moment().valueOf(),
-      sorting,
-      pagination,
-      columnFilters,
-      globalFilter,
-    };
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
-  };
-
-  useEffect(() => saveStateToLocalStorage(), [sorting, pagination, columnFilters, globalFilter]);
-
-  const loadStateFromLocalStorage = () => {
-    const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (savedState) {
-      const state = JSON.parse(savedState);
-      if (state.timestamp && moment(state.timestamp).isBefore(moment().subtract(12, "hours"))) return;
-      if (state.api !== api.name) return;
-
-      setSorting(state.sorting || [{ id: defaultSortBy, desc: defaultSortDir?.toLowerCase() === "desc" }]);
-      setPagination(state.pagination || { pageIndex: 0, pageSize: defaultPageSize || 15 });
-      setColumnFilters(state.columnFilters || preFilters || {});
-      setGlobalFilter(state.globalFilter || null);
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-    }
   };
 
   const table = useReactTable({
@@ -177,14 +143,9 @@ const TableData = ({
       fuzzy: fuzzyFilter,
     },
     state: {
-      sorting,
-      pagination: {
-        pageIndex: pagination?.pageIndex || 0,
-        pageSize: pagination?.pageSize || defaultPageSize || 15,
-      },
+      sorting,      
       globalFilter,
     },
-    pageCount: pageCount,
     manualSorting: true,
     manualPagination: true,
     onSortingChange: (s) => {
@@ -220,7 +181,6 @@ const TableData = ({
       if (JSON.stringify(columnFilters) !== JSON.stringify(newFilters)) {
         clearTimeout(columnTimer);
         columnTimer = setTimeout(() => {
-          table.setPageIndex(0);
           setColumnFilters(newFilters);
         }, 500);
       } else {
@@ -238,7 +198,6 @@ const TableData = ({
 
     clearTimeout(typingTimer);
     typingTimer = setTimeout(() => {
-      table.setPageIndex(0);
       const value = e.target.value;
       if (value.length >= 3 || code === 13) {
         setGlobalFilter(value);
@@ -278,28 +237,24 @@ const TableData = ({
         search: globalFilter || null,
         sortBy: sorting[0] ? (sorting[0]["id"] ? sorting[0]["id"] : defaultSortBy) : defaultSortBy || "id",
         sortDir: getSortDir(sorting, defaultSortDir),
-        pageNum: (pagination.pageIndex || 0) + 1,
-        recordsPer: pagination.pageSize || defaultPageSize || 15,
+        from: pagination.from ?? undefined,
+        limit: pagination.limit || defaultPageSize || 15,
       };
 
       try {
         const apiCall = callApi.current;
         const res = await apiCall({ ...apiVariables, query, controller: controller.current, excludeInterceptor: true });
         if (res.items) {
-          setTableData(res.items ? res.items : []);
-          setPageCount(res.pages || 1);
-          setShowRecordsOptions((old) => {
-            const all = old.find((i) => i.label === "All");
-            if (all) {
-              all.value = res.total || all.value;
-            }
-            return old;
-          });
+          setTableData((old: any) => {
+            const key = res?.lastEvaluatedKey ? Object.keys(res?.lastEvaluatedKey)?.[0] : false;
+            const previous = pagination.page > 1 ? (key ? { [key]: old?.[0]?.[key] ?? null } : null) : null;
+            console.log({previous, next: res.lastEvaluatedKey})
+            setPaging({previous, next: res.lastEvaluatedKey});
+            return res.items ? res.items : []
+          });          
         } else {
           if (Array.isArray(res)) {
             setTableData(res);
-            setPageCount(1);
-            table.setPageIndex(0);
           }
         }
 
@@ -317,7 +272,7 @@ const TableData = ({
       setLoadingData(false);
     }, 500);
     return true;
-  }, [sorting, pagination.pageIndex, pagination.pageSize, globalFilter, columnFilters]);
+  }, [sorting, pagination.from, pagination.limit, globalFilter, columnFilters]);
 
   
 
@@ -343,16 +298,12 @@ const TableData = ({
     getData();
   }, [getData, columnFilters]);
 
-  useEffect(() => {
-    loadStateFromLocalStorage();
-  }, []);
-
   return (
     <>
       {title && <H5>{title}</H5>}
       <TableTop>        
-        {(enablePaging && (!pagingIfPaged || pagingIfPaged && table.getPageCount() > 1)) &&
-          <Pagination {...{ table, pagination, showRecordsOptions, defaultPageSize }} />
+        {enablePaging &&
+          <Pagination {...{ paging, pagination, setPagination, showRecordsOptions }} />
         }
         <Formik initialValues={{}} onSubmit={onFormChange}>
           {({ values, setFieldValue, submitForm, resetForm }) => {
@@ -519,8 +470,8 @@ const TableData = ({
         </Table>
       </TableWrapper>
       <TableBottom>
-        {(enablePaging && (!pagingIfPaged || pagingIfPaged && table.getPageCount() > 1)) &&
-          <Pagination {...{ table, pagination, showRecordsOptions, defaultPageSize }} />
+        {enablePaging &&
+          <Pagination {...{ paging, pagination, setPagination, showRecordsOptions }} />
         }
       </TableBottom>
     </>
@@ -529,64 +480,33 @@ const TableData = ({
 
 export default TableData;
 
-const Pagination = ({ table, pagination, defaultPageSize, showRecordsOptions }: any) => (
+const Pagination = ({ paging, pagination, setPagination, showRecordsOptions }: any) => (
   <TablePagination>
     <TPdiv>
-      <button className="btn btn-first" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
-        <ChevronIcon />
-        <ChevronIcon />
-      </button>
+      <SelectInput
+        name="pageSize"
+        options={showRecordsOptions}
+        value={pagination.limit || 15}
+        onChange={(e: any) => setPagination((old: any) => ({...old, page: 0, from: null, limit: e }))}
+        $customStyles={{ padding: 0, margin: 0, minWidth: "auto" }}
+      />
+    </TPdiv>
+    <TPdiv>      
       <button
         className="btn btn-prev"
-        onClick={() => table.setPageIndex(table.getState().pagination.pageIndex - 1)}
-        disabled={!table.getCanPreviousPage()}
+        onClick={() => setPagination((old: any) => ({...old, page: old.page - 1,from: paging.previous }))}
+        disabled={!(pagination.page)}
       >
         <ChevronIcon />
       </button>
       <button
         className="btn btn-next"
-        onClick={() => table.setPageIndex(table.getState().pagination.pageIndex + 1)}
-        disabled={!table.getCanNextPage()}
+        onClick={() => setPagination((old: any) => ({...old, page: old.page + 1, from: paging.next }))}
+        disabled={!paging.next}
       >
         <ChevronIcon />
       </button>
-      <button
-        className="btn btn-last"
-        onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-        disabled={!table.getCanNextPage()}
-      >
-        <ChevronIcon />
-        <ChevronIcon />
-      </button>
-    </TPdiv>
-    <TPdivMobileHidden>
-      <div className="page-count">
-        Page
-        <SelectInput
-          name="pageIndex"
-          options={Array.from(Array(table.getPageCount() || 1).keys()).map((v) => ({ value: v, label: v + 1 }))}
-          value={pagination.pageIndex || 0}
-          onChange={(e: any) => {
-            table.setPageIndex(Number(e));
-          }}
-          $customStyles={{ padding: 0, margin: 0, minWidth: "auto" }}
-        />
-        of {table.getPageCount() || 1}
-      </div>
-    </TPdivMobileHidden>
-    <TPdiv>
-      <span>Count &nbsp;</span>
-      <SelectInput
-        name="pageSize"
-        options={showRecordsOptions}
-        value={pagination.pageSize || defaultPageSize || 15}
-        onChange={(e: any) => {
-          table.setPageIndex(0);
-          table.setPageSize(Number(e));
-        }}
-        $customStyles={{ padding: 0, margin: 0, minWidth: "auto" }}
-      />
-    </TPdiv>
+    </TPdiv>    
   </TablePagination>
 );
 
