@@ -31,10 +31,9 @@ const Register = () => {
   const [errorMessage, setErrorMessage] = useState<any>(null);
   const [successMessage, setSuccessMessage] = useState<any>("");
 
-  const _onSubmit = async (values: any, actions: any) => {
-    const userId = searchParams.get("userId");
+  const _onSubmit = async (values: any) => {
     const token = searchParams.get("token");
-    const res = await completeRegistration({ token : token || "", userId :  userId || "", password : values.password, passwordConfirm: values.passwordConfirm, email : values.email});
+    const res = await completeRegistration({ token : token || "", password : values.password, passwordConfirm: values.passwordConfirm, email : values.email});
     if (res?.success) {      
       setSuccessMessage("Success! You are officially registered.");
     } else {      
@@ -53,9 +52,8 @@ const Register = () => {
 
   useEffect(() => { 
     const token = searchParams.get("token");
-    const userId = searchParams.get("userId");  
     setEmail(searchParams.get("email"));
-    if (!token || !userId) {
+    if (!token) {
       setValidForm(false);
       setErrorMessage("Invalid Link.");
     }

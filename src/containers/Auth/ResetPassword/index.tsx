@@ -30,7 +30,7 @@ const ResetPassword = () => {
   const _onSubmit = async (values: any) => {
     const userId = searchParams.get("userId");
     const token = searchParams.get("token");
-    const res = await resetPassword({ token : token?.toString() || "" , userId : userId?.toString() || "" , password : values.password, passwordConfirm : values.passwordConfirm });
+    const res = await resetPassword({ token : token?.toString() || "", password : values.password, passwordConfirm : values.passwordConfirm });
     if(res?.success){
       toast.add(res.message, "var(--theme-ui-colors-green)");
       navigate("/login");

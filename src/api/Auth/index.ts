@@ -37,10 +37,9 @@ export const sendForgotPassword = async ({ email } : {email: string}) =>{
 	}
 }
 
-export const resetPassword = async ({token, userId, password, passwordConfirm} : { token: string, userId: string, password: string, passwordConfirm: string }) =>{
+export const resetPassword = async ({token, password, passwordConfirm} : { token: string, password: string, passwordConfirm: string }) =>{
 	const vals = {
 		token:token,
-		userId:userId,
 		password:password,    
 		passwordConfirm:passwordConfirm,    
 	}
@@ -85,10 +84,9 @@ export const profileUpdate = async ({ update }: any) =>{
 	}
 }
 
-export const completeRegistration = async ({ token, userId, password, passwordConfirm, email } : { token: string, userId: string, password: string, passwordConfirm: string, email: string }) =>{
+export const completeRegistration = async ({ token, password, passwordConfirm, email } : { token: string, password: string, passwordConfirm: string, email: string }) =>{
 	const vals = {
 		token:token,
-		userId:userId,
 		password:password,    
 		passwordConfirm:passwordConfirm,    
 		email: email

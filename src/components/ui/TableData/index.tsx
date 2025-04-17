@@ -110,8 +110,7 @@ const TableData = ({
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [tableData, setTableData] = useState<any[]>([]);
   const [sorting, setSorting] = useState<any[]>([]);
-  const [pagination, setPagination] = useState<any>({ from: null, page: 0, limit: defaultPageSize || 15});
-  const [paging, setPaging] = useState<{previous: any, next: any}>({ previous: null, next: null});
+  const [pagination, setPagination] = useState<any>({ from: null, next: null, limit: defaultPageSize || 15});
 
   const [columnFilters, setColumnFilters] = useState<any>(preFilters || {});
   const [globalFilter, setGlobalFilter] = useState<any>(null);
@@ -245,13 +244,8 @@ const TableData = ({
         const apiCall = callApi.current;
         const res = await apiCall({ ...apiVariables, query, controller: controller.current, excludeInterceptor: true });
         if (res.items) {
-          setTableData((old: any) => {
-            const key = res?.lastEvaluatedKey ? Object.keys(res?.lastEvaluatedKey)?.[0] : false;
-            const previous = pagination.page > 1 ? (key ? { [key]: old?.[0]?.[key] ?? null } : null) : null;
-            console.log({previous, next: res.lastEvaluatedKey})
-            setPaging({previous, next: res.lastEvaluatedKey});
-            return res.items ? res.items : []
-          });          
+          setTableData(res.items ? res.items : []);          
+          setPagination((old: any) => ({...old, next: res.lastEvaluatedKey}));
         } else {
           if (Array.isArray(res)) {
             setTableData(res);
@@ -303,7 +297,7 @@ const TableData = ({
       {title && <H5>{title}</H5>}
       <TableTop>        
         {enablePaging &&
-          <Pagination {...{ paging, pagination, setPagination, showRecordsOptions }} />
+          <Pagination {...{ pagination, setPagination, showRecordsOptions }} />
         }
         <Formik initialValues={{}} onSubmit={onFormChange}>
           {({ values, setFieldValue, submitForm, resetForm }) => {
@@ -471,7 +465,7 @@ const TableData = ({
       </TableWrapper>
       <TableBottom>
         {enablePaging &&
-          <Pagination {...{ paging, pagination, setPagination, showRecordsOptions }} />
+          <Pagination {...{ pagination, setPagination, showRecordsOptions }} />
         }
       </TableBottom>
     </>
@@ -480,33 +474,53 @@ const TableData = ({
 
 export default TableData;
 
-const Pagination = ({ paging, pagination, setPagination, showRecordsOptions }: any) => (
-  <TablePagination>
-    <TPdiv>
-      <SelectInput
-        name="pageSize"
-        options={showRecordsOptions}
-        value={pagination.limit || 15}
-        onChange={(e: any) => setPagination((old: any) => ({...old, page: 0, from: null, limit: e }))}
-        $customStyles={{ padding: 0, margin: 0, minWidth: "auto" }}
-      />
-    </TPdiv>
-    <TPdiv>      
-      <button
-        className="btn btn-prev"
-        onClick={() => setPagination((old: any) => ({...old, page: old.page - 1,from: paging.previous }))}
-        disabled={!(pagination.page)}
-      >
-        <ChevronIcon />
-      </button>
-      <button
-        className="btn btn-next"
-        onClick={() => setPagination((old: any) => ({...old, page: old.page + 1, from: paging.next }))}
-        disabled={!paging.next}
-      >
-        <ChevronIcon />
-      </button>
-    </TPdiv>    
-  </TablePagination>
-);
+const Pagination = ({ pagination, setPagination, showRecordsOptions }: any) => {
+  const [pageStack, setPageStack] = useState<any[]>([]);
+
+  const goNext = () => {
+    if (pagination.next) {
+      setPageStack((prev: any) => [...prev, pagination.from]);
+      setPagination((old: any) => ({...old, from: pagination.next }))
+    }
+  };
+
+  const goPrevious = () => {
+    if (pageStack.length > 0) {
+      const prevStack = [...pageStack];
+      const prevKey = prevStack.pop();
+      setPageStack(prevStack);
+      setPagination((old: any) => ({...old, from: prevKey }));
+    }
+  };
+
+  return (
+    <TablePagination>
+      <TPdiv>
+        <SelectInput
+          name="pageSize"
+          options={showRecordsOptions}
+          value={pagination.limit || 15}
+          onChange={(e: any) => setPagination((old: any) => ({...old, from: null, limit: e }))}
+          $customStyles={{ padding: 0, margin: 0, minWidth: "auto" }}
+        />
+      </TPdiv>
+      <TPdiv>      
+        <button
+          className="btn btn-prev"
+          onClick={goPrevious}
+          disabled={!(pageStack.length > 0)}
+        >
+          <ChevronIcon />
+        </button>
+        <button
+          className="btn btn-next"
+          onClick={goNext}
+          disabled={!pagination.next}
+        >
+          <ChevronIcon />
+        </button>
+      </TPdiv>    
+    </TablePagination>
+  )
+};
 
