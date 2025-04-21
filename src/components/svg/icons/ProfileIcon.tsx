@@ -3,8 +3,8 @@ import React from "react";
 export default function ProfileIcon(props?: any) {
 
   const svgStyles: any = {
-    width: props.width ? props.width : null,
-    height: props.height ? props.height : null,
+    width: props.width ?? props.height ?? null,
+    height: props.height ?? props.width ?? null,
     fill: props.fill ? props.fill : null,
     margin: props.margin ? props.margin : null,
   };
@@ -18,22 +18,13 @@ export default function ProfileIcon(props?: any) {
 
   return (
     <svg 
-      viewBox="0 0 40 40" 
+      viewBox="0 0 15 15"
       style={{...filteredStyles, fill : "none"}}
       className={props.className}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <circle cx="20" cy="20" r="18" stroke={filteredStyles.fill || "#3B4559"} strokeWidth={2}/>
-      <mask id="mask0_75_1232" style={{maskType: "alpha"}} maskUnits="userSpaceOnUse" x="0" y="0" width="40" height="40">
-        <circle cx="20" cy="20" r="18" fill={filteredStyles.fill || "#3B4559"} />
-      </mask>
-      <g mask="url(#mask0_75_1232)">
-        <path d="M20.5017 11.228C16.2727 11.228 12.8322 14.6685 12.8322 18.8974C12.8322 23.1264 16.2727 26.5668 20.5017 26.5668C24.7306 26.5668 28.1711 23.1264 28.1711 18.8974C28.1711 14.6685 24.7306 11.228 20.5017 11.228Z" fill={filteredStyles.fill || "#3B4559"} />
-        <path 
-          d="M30.0439 31.5774C27.9442 29.4455 25.1606 28.2714 22.206 28.2714H18.7973C15.8427 28.2714 13.0591 29.4455 10.9594 31.5774C8.86999 33.699 7.7193 36.4994 7.7193 39.463C7.7193 39.9336 8.10084 40.3152 8.57146 
-          40.3152H32.4318C32.9025 40.3152 33.284 39.9336 33.284 39.463C33.284 36.4994 32.1333 33.699 30.0439 31.5774Z" fill={filteredStyles.fill || "#3B4559"}
-        />
-      </g>
+      <path d="M5 5.5C5 4.11929 6.11929 3 7.5 3C8.88071 3 10 4.11929 10 5.5C10 6.88071 8.88071 8 7.5 8C6.11929 8 5 6.88071 5 5.5Z" fill={filteredStyles.fill || "#3B4559"}/>
+      <path fillRule="evenodd" clipRule="evenodd" d="M7.5 0C3.35786 0 0 3.35786 0 7.5C0 11.6421 3.35786 15 7.5 15C11.6421 15 15 11.6421 15 7.5C15 3.35786 11.6421 0 7.5 0ZM1 7.5C1 3.91015 3.91015 1 7.5 1C11.0899 1 14 3.91015 14 7.5C14 9.34956 13.2275 11.0187 11.9875 12.2024C11.8365 10.4086 10.3328 9 8.5 9H6.5C4.66724 9 3.16345 10.4086 3.01247 12.2024C1.77251 11.0187 1 9.34956 1 7.5Z" fill={filteredStyles.fill || "#3B4559"}/>
     </svg>
   )
 }
