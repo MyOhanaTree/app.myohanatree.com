@@ -10,7 +10,7 @@ const BaseLayout = () =>{
   const { theme } = themeContext;
  
   return (        
-    <PageWrapper>
+    <PageWrapper theme={theme}>
       <NavbarLayout/>
       <PageContent>
         <Outlet/>

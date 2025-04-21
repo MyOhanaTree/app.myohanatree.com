@@ -9,7 +9,7 @@ const LoginLayout = () =>{
   const { theme } = themeContext;
 
   return (
-    <LoginWrapper>
+    <LoginWrapper theme={theme}>
       <Outlet/>
     </LoginWrapper>
   )

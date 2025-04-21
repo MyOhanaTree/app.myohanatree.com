@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { themevals } from "theme/themevals";
 
 export const PageWrapper = styled.div`
-  background: linear-gradient(180deg, ${themevals?.colors?.base_100} 0%, ${themevals?.colors?.base_100} 100%);
+  background: linear-gradient(180deg, ${themevals.colors.base_100} 0%, ${themevals.colors.base_100} 100%);
   width: 100%;
   min-height: 100%;
   flex-grow: 1;
@@ -26,14 +26,14 @@ export const NavWrapper = styled.div`
   z-index: 1; 
   min-height: 100%;
   background-color: white;
-  border-right: 1px solid ${themevals?.colors?.base_300};
+  border-right: 1px solid ${themevals.colors.base_300};
   box-shadow: 4px 0px 8px 0px rgba(113, 125, 150, 0.05);
   display: flex;
   flex-direction: column;
   
-  & .navbar-toggle {cursor: pointer; display: none; content: ""; position: absolute; top: 23px; right: -20px; width: 20px; height: 20px; background-color: ${themevals?.colors?.base_800}; border: 2px solid ${themevals?.colors?.base_800}; transition: all 150ms ease-in;}
-  & .navbar-toggle:before {content: ""; display: block; height: 2px; width: calc(100% - 4px); background: ${themevals?.colors?.white}; position: absolute; top: calc(50% - 2px); left: 2px;  transform: rotate(-90deg); transition: all 150ms ease-in;}
-  & .navbar-toggle:after {content: ""; display: block; height: 2px; width: calc(100% - 4px); background: ${themevals?.colors?.white}; position: absolute; top: calc(50% - 2px); left: 2px;transition: all 150ms ease-in;}
+  & .navbar-toggle {cursor: pointer; display: none; content: ""; position: absolute; top: 23px; right: -20px; width: 20px; height: 20px; background-color: ${themevals.colors.base_800}; border: 2px solid ${themevals.colors.base_800}; transition: all 150ms ease-in;}
+  & .navbar-toggle:before {content: ""; display: block; height: 2px; width: calc(100% - 4px); background: ${themevals.colors.white}; position: absolute; top: calc(50% - 2px); left: 2px;  transform: rotate(-90deg); transition: all 150ms ease-in;}
+  & .navbar-toggle:after {content: ""; display: block; height: 2px; width: calc(100% - 4px); background: ${themevals.colors.white}; position: absolute; top: calc(50% - 2px); left: 2px;transition: all 150ms ease-in;}
   .navbar-open & .navbar-toggle:before {transform: rotate(-45deg);}
   .navbar-open & .navbar-toggle:after {transform: rotate(45deg);}
 
@@ -66,15 +66,16 @@ export const NavInnerMenu = styled.div`
 `;
 
 export const LoadingWrapper = styled.div`
-  background: linear-gradient(180deg, ${themevals?.colors?.base_100} 0%, ${themevals?.colors?.base_100} 100%);  
+  background: linear-gradient(180deg, ${themevals.colors.base_100} 0%, ${themevals.colors.base_100} 100%);  
   display: flex;
   flex-direction: column;
   flex-grow: 1;  
 `;
 
 export const LoginWrapper = styled.div`
+  position: relative;
   width: 100%;
-  background: linear-gradient(180deg, ${themevals?.colors?.base_200} 0%, ${themevals?.colors?.base_200} 100%);
+  background: linear-gradient(180deg, ${themevals.colors.base_200} 0%, ${themevals.colors.base_200} 100%);
   transition: background 0.3s linear;
   min-height: 100%;
   display: flex;
@@ -91,7 +92,7 @@ export const LogoWrapper = styled.div`
   align-items: center;
   justify-content: center;
   margin-bottom: .5rem;
-  border-bottom:1px solid ${themevals?.colors?.base_300};    
+  border-bottom:1px solid ${themevals.colors.base_300};    
   & img { 
     height: auto;
     max-height: 35px;

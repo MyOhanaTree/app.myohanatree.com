@@ -16,8 +16,8 @@ const LoadingLayout = () =>{
   return (        
     <LoadingWrapper theme={theme}>
       <Box sx={{flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center",}}>
-        <Spinner size={24} />
-      </Box>
+        <Spinner size={54} />
+      </Box>      
     </LoadingWrapper>
   )
 }
