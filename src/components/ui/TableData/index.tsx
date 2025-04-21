@@ -228,6 +228,9 @@ const TableData = ({
       setLoadingData(true);
       controller.current = new AbortController();
 
+      const key = pagination.from ? Object.keys(pagination.from)?.[0] : null;
+      const from = pagination?.from?.[key ?? ""] || null;
+
       const query = {
         filters : {
           ...columnFilters,
@@ -236,7 +239,8 @@ const TableData = ({
         search: globalFilter || null,
         sortBy: sorting[0] ? (sorting[0]["id"] ? sorting[0]["id"] : defaultSortBy) : defaultSortBy || "id",
         sortDir: getSortDir(sorting, defaultSortDir),
-        from: pagination.from ?? undefined,
+        from: from ?? undefined,
+        key: key ?? undefined,
         limit: pagination.limit || defaultPageSize || 15,
       };
 
