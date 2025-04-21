@@ -28,7 +28,6 @@ const ResetPassword = () => {
   const [responseErrors] = useState<any>(false);
 
   const _onSubmit = async (values: any) => {
-    const userId = searchParams.get("userId");
     const token = searchParams.get("token");
     const res = await resetPassword({ token : token?.toString() || "", password : values.password, passwordConfirm : values.passwordConfirm });
     if(res?.success){
@@ -50,13 +49,12 @@ const ResetPassword = () => {
   useEffect(() => { 
     const checkToken = async () => {
       const token = searchParams.get("token");
-      const userId = searchParams.get("userId");
   
-      if (!token || !userId) {
+      if (!token) {
         setValidForm(false);
         setErrorMessage("Password Reset Link is invalid.");
       } else {
-        const res = await checkPasswordResetToken({ token, userId });
+        const res = await checkPasswordResetToken({ token });
         if(res.success){
           setValidForm(true);
         }else{

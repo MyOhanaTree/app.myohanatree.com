@@ -52,10 +52,9 @@ export const resetPassword = async ({token, password, passwordConfirm} : { token
 	}
 }
 
-export const checkPasswordResetToken= async ({ token, userId } : { token: string, userId: string }) =>{
+export const checkPasswordResetToken= async ({ token } : { token: string }) =>{
 	const vals = {
 		token:token,
-		userId:userId,		
 	}
 
 	try {
