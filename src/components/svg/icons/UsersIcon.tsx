@@ -3,8 +3,8 @@ import React from "react";
 export default function UsersIcon(props?: any) {
 
   const svgStyles: any = {
-    width: props.width ? props.width : null,
-    height: props.height ? props.height : null,
+    width: props.width ?? props.height ?? null,
+    height: props.height ?? props.width ?? null,
     fill: props.fill ? props.fill : null,
     margin: props.margin ? props.margin : null,
   };
