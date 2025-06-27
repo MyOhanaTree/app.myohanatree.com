@@ -85,7 +85,6 @@ export default function Users() {
 
   const setEditModal = (the_user: any) => {      
     if(the_user){
-      the_user.metaData = { languages : (((the_user?.data || [])?.find((i: any) => i.key === "languages"))?.value || "").split(",")}
       setUserInfo(the_user);
       toggleEditModal(true);
     } else {
