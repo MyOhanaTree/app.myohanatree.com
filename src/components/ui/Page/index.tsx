@@ -4,9 +4,7 @@ import { PageWrapper, PageInner } from "./styled";
 const Page = ({children}: any) =>{
   return (
     <PageWrapper>
-      <PageInner>
-        {children}
-      </PageInner>
+      {children}
     </PageWrapper>
   )
 }

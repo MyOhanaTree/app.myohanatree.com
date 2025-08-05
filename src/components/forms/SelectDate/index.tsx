@@ -94,7 +94,6 @@ const SelectDate = ({
     if (disabled) return true;
 
     const momentDate = startOfDay ? moment(date).startOf("day").unix() : moment(date).endOf("day").unix();
-    console.log(date, momentDate)
     if ((!minDate || minDate <= momentDate) && (!maxDate || maxDate >= momentDate)) {
       setDateValue(momentDate);
       if (typeof onChange === "function") {
