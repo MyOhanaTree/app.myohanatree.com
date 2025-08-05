@@ -14,7 +14,7 @@ jobs:
     - name: Use Node.js 20.x
       uses: actions/setup-node@v3
       with:
-        node-version: 20.x
+        node-version: 20.19.0
 
     - name: Build App
       run: |
@@ -24,7 +24,6 @@ jobs:
         echo "VITE_REACT_APP_LOGO=" >> .env
         echo "VITE_REACT_APP_CDN=https://www.myohanatree.com" >> .env
 
-        export NODE_ENV=production
         npm ci
         npm run build
         rm -rf ./node_modules
