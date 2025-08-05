@@ -122,7 +122,7 @@ const Dashboard = () =>{
             <Form noValidate autoComplete="off">
               <ModalHeader toggle={toggleModal}>New</ModalHeader>
               <ModalBody> 
-                <Flex sx={{ gap: 2, "> *" : { flex: 1 }}}>                  
+                <Flex sx={{display : ["block","flex"], gap: 2, "> *" : { flex: 1 }}}>                  
                   <TextInput 
                     name="firstName"
                     label="First Name"
