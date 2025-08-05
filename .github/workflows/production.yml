@@ -30,12 +30,6 @@ jobs:
         rm -rf ./node_modules
         rm -rf .git
 
-        export NODE_ENV=production
-        npm ci
-        npm run build
-        rm -rf ./node_modules
-        rm -rf .git
-
     - name: Deploy files to S3 Bucket
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.BUCKET_DEPLOY_ACCESS_KEY }}
