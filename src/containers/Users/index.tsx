@@ -47,34 +47,34 @@ export default function Users() {
     columnHelper.accessor("firstName", {
       id: "firstName",
       cell: (info) => (
-        <div onClick={() => setEditModal(info.row.original)}>
+        <Box onClick={() => setEditModal(info.row.original)}>
           {info.getValue()}
-        </div>
+        </Box>
       ),
       header: () => <span>First Name</span>,
     }),
     columnHelper.accessor("lastName", {
       id: "lastName",
       cell: (info) => (
-        <div onClick={() => setEditModal(info.row.original)}>
+        <Box sx={{textWrap:"nowrap"}} onClick={() => setEditModal(info.row.original)}>
           {info.getValue()}
-        </div>
+        </Box>
       ),
       header: () => <span>Last Name</span>,
     }),
     columnHelper.accessor("email", {
       id: "email",
       cell: (info) => (
-        <div onClick={() => setEditModal(info.row.original)}>
+        <Box onClick={() => setEditModal(info.row.original)}>
           {info.getValue()}
-        </div>
+        </Box>
       ),
       header: () => <span>Email</span>,
     }),
     columnHelper.accessor("status", {
       id: "status",
       cell: (info) => (        
-        <div onClick={() => setEditModal(info.row.original)}>
+        <Box onClick={() => setEditModal(info.row.original)}>
             {(() => {
               switch(info.getValue()){
                 case(1):
@@ -85,7 +85,7 @@ export default function Users() {
                   return "Inactive";            
               }
             })()}
-        </div>
+        </Box>
       ),     
       header: () => <span>Status</span>,
     }),
@@ -222,7 +222,7 @@ export default function Users() {
             <Form noValidate autoComplete="off">
               <ModalHeader toggle={toggleEdit}>Edit User</ModalHeader>
               <ModalBody> 
-                <Flex sx={{ gap: 2, "> *" : { flex: 1 }}}>                  
+                <Flex sx={{display : ["block","flex"], gap: 2, "> *" : { flex: 1 }}}>                  
                   <TextInput 
                     name="firstName"
                     label="First Name"
