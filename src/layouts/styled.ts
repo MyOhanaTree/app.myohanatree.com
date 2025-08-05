@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { themevals } from "theme/themevals";
+import { themevals } from "@/theme/themevals";
 
 export const PageWrapper = styled.div`
   background: linear-gradient(180deg, ${themevals.colors.base_100} 0%, ${themevals.colors.base_100} 100%);
@@ -38,7 +38,7 @@ export const NavWrapper = styled.div`
   .navbar-open & .navbar-toggle:after {transform: rotate(45deg);}
 
   @media (max-width: 991px)  {
-    z-index: 3;
+    z-index: 1999;
     width: 250px; 
     min-width: 250px;
     max-width: calc(100% - 25px);
@@ -50,10 +50,11 @@ export const NavWrapper = styled.div`
 `;
 
 export const NavInner = styled.div`
-  height: 100vh;
+  height: 100%;
   width: 100%;
   position: sticky;
-  top: 0;  
+  top: 0; 
+  padding-top: 10px; 
   display: flex;
   flex-direction: column;  
 `;

@@ -21,4 +21,5 @@ export { default as QuestionMarkIcon } from './icons/QuestionMarkIcon';
 export { default as SearchIcon } from './icons/SearchIcon';
 export { default as SendEmailIcon } from './icons/SendEmailIcon';
 export { default as TimesIcon } from './icons/TimesIcon';
+export { default as TreeIcon } from './icons/TreeIcon';
 export { default as UsersIcon } from './icons/UsersIcon';

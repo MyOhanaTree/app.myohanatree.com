@@ -5,16 +5,15 @@ import * as Yup from "yup";
 import { Box, Divider, Flex, useThemeUI } from "theme-ui";
 
 import { LoginFooterStyles, FooterCreds, BackButton } from "./styled";
-import { sendForgotPassword } from "api/Auth";
 
-import LoginCard from "components/ui/LoginCard";
-import AdminLogo from "components/img/AdminLogo";
-import H2 from "components/typography/H2";
-import P from "components/typography/P";
-import TextInput from "components/forms/TextInput";
-import LoadingButton from "components/ui/LoadingButton";
-import { BackArrowIcon } from "components/svg";
-import { useToast } from "components/toast";
+import LoginCard from "@/components/ui/LoginCard";
+import H2 from "@/components/typography/H2";
+import P from "@/components/typography/P";
+import TextInput from "@/components/forms/TextInput";
+import LoadingButton from "@/components/ui/LoadingButton";
+import { BackArrowIcon } from "@/components/svg";
+import { useToast } from "@/components/toast";
+import axios from "axios";
 
 
 const ForgotPassword = () => {
@@ -24,18 +23,16 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
   const [responseErrors,setResponseErrors] = useState(false);
 
-  const _onSubmit = async (values: any, actions: any) => {
-    try {
-      const res = await sendForgotPassword({ email : values.email });   
-      if(res?.success){
-        toast.add(res?.message,"var(--theme-ui-colors-green)");
-        navigate("/login");
-      }else{        
-        toast.add(res?.message,"var(--theme-ui-colors-red)");
-        setResponseErrors(true);
-      }
-    } catch(err){      
-      toast.add(err.message || "Error requesting password reset.","var(--theme-ui-colors-red)");
+  const _onSubmit = async (values: any) => {
+    const { data: res} = await axios.post("/auth/forgot-password", {
+      email: values.email
+    }).catch((err) => ({ data : { success : false}}));
+    
+    if(res?.success){
+      toast.add(res?.message,"var(--theme-ui-colors-green)");
+      navigate("/login");
+    }else{        
+      toast.add(res?.message ?? "Internal Error","var(--theme-ui-colors-red)");
       setResponseErrors(true);
     }
   };
@@ -47,10 +44,6 @@ const ForgotPassword = () => {
   return (
     <LoginCard>
       <Flex sx={{flexDirection:"column"}}>        
-        <Box sx={{ textAlign : "center"}}>            
-          <AdminLogo alt="" customStyles={{maxWidth: "300px", margin: "auto"}}/>   
-        </Box>        
-        <Divider />
         <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"}>
           Forgot Password?
         </H2>
@@ -88,7 +81,7 @@ const ForgotPassword = () => {
           </Link>
         </BackButton>      
         <LoginFooterStyles>          
-          <FooterCreds>© {process.env.REACT_APP_NAME}, 2023 & beyond. All Rights Reserved</FooterCreds>          
+          <FooterCreds>© {import.meta.env.VITE_REACT_APP_NAME}, 2023 & beyond. All Rights Reserved</FooterCreds>          
         </LoginFooterStyles>
       </Flex>
     </LoginCard>

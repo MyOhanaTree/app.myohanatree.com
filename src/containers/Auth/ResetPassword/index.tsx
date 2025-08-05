@@ -5,17 +5,16 @@ import * as Yup from "yup";
 import { Box, Divider, Flex, useThemeUI } from "theme-ui";
 
 import { LoginFooterStyles, FooterCreds, BackButton } from "./styled";
-import { resetPassword, checkPasswordResetToken } from "api/Auth";
 
-import AdminLogo from "components/img/AdminLogo";
-import LoginCard from "components/ui/LoginCard";
-import H2 from "components/typography/H2";
-import P from "components/typography/P";
-import { useToast } from "components/toast";
-import Subtext from "components/typography/Subtext";
-import PasswordInput from "components/forms/PasswordInput";
-import { BackArrowIcon } from "components/svg";
-import LoadingButton from "components/ui/LoadingButton";
+import LoginCard from "@/components/ui/LoginCard";
+import H2 from "@/components/typography/H2";
+import P from "@/components/typography/P";
+import { useToast } from "@/components/toast";
+import Subtext from "@/components/typography/Subtext";
+import PasswordInput from "@/components/forms/PasswordInput";
+import { BackArrowIcon } from "@/components/svg";
+import LoadingButton from "@/components/ui/LoadingButton";
+import axios from "axios";
 
 const ResetPassword = () => {
   const themeContext = useThemeUI();
@@ -29,13 +28,20 @@ const ResetPassword = () => {
 
   const _onSubmit = async (values: any) => {
     const token = searchParams.get("token");
-    const res = await resetPassword({ token : token?.toString() || "", password : values.password, passwordConfirm : values.passwordConfirm });
+
+    const { data: res } = await axios.post("/auth/reset-password", {
+      token:token,
+      password: values.password,    
+      passwordConfirm: values.passwordConfirm,    
+    }).catch((err) => ({ data: err?.response?.data }));
+
+
     if(res?.success){
       toast.add(res.message, "var(--theme-ui-colors-green)");
       navigate("/login");
     } else {      
       setValidForm(false);      
-      setErrorMessage(res?.message || "Error resetting password.");      
+      setErrorMessage(res?.error?.message || "Error resetting password.");      
     }    
   };
   
@@ -54,12 +60,15 @@ const ResetPassword = () => {
         setValidForm(false);
         setErrorMessage("Password Reset Link is invalid.");
       } else {
-        const res = await checkPasswordResetToken({ token });
+        const { data: res } = await axios.post("/auth/reset-password-check", { 
+          token 
+        }).catch((err) => ({ data: err?.response?.data }));
+
         if(res.success){
           setValidForm(true);
         }else{
           setValidForm(false);
-          setErrorMessage(res.message);
+          setErrorMessage(res?.error?.message ?? "Internal Error");
         }
       }
     };
@@ -69,10 +78,6 @@ const ResetPassword = () => {
   return (
     <LoginCard>
       <Flex sx={{flexDirection:"column"}}>        
-        <Box sx={{ textAlign : "center"}}>            
-          <AdminLogo alt="" customStyles={{maxWidth: "300px", margin: "auto"}}/>   
-        </Box>        
-        <Divider />
         {validForm && (<>
           <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"}>
             Password Reset
@@ -132,7 +137,7 @@ const ResetPassword = () => {
           </Link>
         </BackButton>        
         <LoginFooterStyles>          
-          <FooterCreds>© {process.env.REACT_APP_NAME}, 2023 & beyond. All Rights Reserved</FooterCreds>        
+          <FooterCreds>© {import.meta.env.VITE_REACT_APP_NAME}, 2023 & beyond. All Rights Reserved</FooterCreds>        
         </LoginFooterStyles>
       </Flex>
     </LoginCard>

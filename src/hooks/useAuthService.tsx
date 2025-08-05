@@ -1,16 +1,17 @@
 // useAuthService.ts
+import { useContext } from "react";
 
-import { useContext, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-
-import UserContext from "context/User";
-import { getProfile } from "api/Auth";
+import UserContext from "../context/User";
+import axios from "axios";
 
 const useAuthService = () => {
 
   const { user, setUser } = useContext<any>(UserContext);
-  const authenticatingRef = useRef(false);
-  const navigate = useNavigate();
+
+  const getProfile = async () => {
+    const res: any = await axios.get("/auth/profile").catch((err) => ({ data : { success : false}}));
+    return res?.data;
+  }
 
   const logout = (): void => {
     setUser(null);
@@ -24,25 +25,20 @@ const useAuthService = () => {
         logout();
         return false;
       }
-      setUser(res)
+      setUser({...res, token: user.token })
       return true;
     }
 
     const authorized = localStorage.getItem("user");
     const data = JSON.parse(authorized || "{}");
-    if (!!data?.tokens) {
-      if (data?.tokens?.expires < Date.now()) {
+    if (!!data?.token) {
+      const res = await getProfile();
+      if(!res?.id) {
         logout();
         return false;
-      } else {
-        const res = await getProfile();
-        if(!res?.id) {
-          logout();
-          return false;
-        }
-        setUser(res)
-        return true;
       }
+      setUser({...res, token: data.token})
+      return true;      
     }
 
     logout();
@@ -50,7 +46,6 @@ const useAuthService = () => {
 
   }
   
-
   return { authenticate };
 };
 

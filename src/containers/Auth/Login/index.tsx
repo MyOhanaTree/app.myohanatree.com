@@ -7,17 +7,15 @@ import axios from "axios";
 
 import { FooterCreds, ForgotPasswordLink, LoginFooterStyles } from "./styled";
 
-import { doLogin } from "api/Auth";
-import UserContext from "context/User";
+import UserContext from "@/context/User";
 
-import AdminLogo from "components/img/AdminLogo";
-import TextInput from "components/forms/TextInput";
-import LoadingButton from "components/ui/LoadingButton";
-import PasswordInput from "components/forms/PasswordInput";
-import Checkbox from "components/forms/Checkbox";
-import LoginCard from "components/ui/LoginCard";
-import H2 from "components/typography/H2";
-import { useToast } from "components/toast";
+import TextInput from "@/components/forms/TextInput";
+import LoadingButton from "@/components/ui/LoadingButton";
+import PasswordInput from "@/components/forms/PasswordInput";
+import Checkbox from "@/components/forms/Checkbox";
+import LoginCard from "@/components/ui/LoginCard";
+import H2 from "@/components/typography/H2";
+import { useToast } from "@/components/toast";
 
 
 
@@ -37,16 +35,20 @@ const Login = () => {
 
   const _onSubmit = async (values: any, actions: any) => {
     localStorage.removeItem("user");
-    const res = await doLogin({ email: values.email, password: values.password, rememberMe : values.rememberMe ? values.rememberMe : false });
+  
+    const { data: res } = await axios.post(`/auth/login`, {
+      email: values.email,
+      password: values.password,
+    }).catch((err) => ({ data: err?.response?.data }));
 
     if (res?.success) {      
-      setUser({ ...res?.user });
-      localStorage.setItem("user", JSON.stringify({user_id : res.user.id, tokens : {...res.tokens}}));
-      axios.defaults.headers.common["Authorization"] = `Bearer ${res.tokens.accessToken}`;
+      setUser({ ...res?.user, token: res.token });
+      localStorage.setItem("user", JSON.stringify({user_id : res.user.id, token : res.token}));
+      axios.defaults.headers.common["Authorization"] = `Bearer ${res.token}`;
       navigate(redirectUrl || "/");
     } else {
       localStorage.removeItem("user");
-      toast.add(res?.message ? res.message : "Error loging in, please try again later" , "var(--theme-ui-colors-red)");
+      toast.add(res?.error?.message ?? "Error loging in, please try again later" , "var(--theme-ui-colors-red)");
       setResponseErrors(true);
       setUser(null);      
     }
@@ -60,12 +62,8 @@ const Login = () => {
   return (
     <LoginCard>
       <Flex sx={{flexDirection:"column"}}>        
-        <Box sx={{ textAlign : "center"}}>            
-          <AdminLogo alt="" customStyles={{maxWidth: "300px", margin: "auto"}}/>   
-        </Box>        
-        <Divider />
         <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"} mb={"30px"}>Login</H2>
-        <Formik initialValues={{ email: "", password: "" }} onSubmit={_onSubmit} validationSchema={LoginSchema}>
+        <Formik initialValues={{ email: "", password: "", rememberMe: false }} onSubmit={_onSubmit} validationSchema={LoginSchema}>
           {({ isSubmitting, errors, submitCount, values, setFieldValue }) => {
             return (
               <Form noValidate autoComplete="off">
@@ -108,7 +106,7 @@ const Login = () => {
           <Link to={"/forgot-password"}>Forgot password?</Link>
         </ForgotPasswordLink>      
         <LoginFooterStyles>
-          <FooterCreds>© {process.env.REACT_APP_NAME}, 2023 & beyond. All Rights Reserved</FooterCreds>        
+          <FooterCreds>© {import.meta.env.VITE_REACT_APP_NAME}, 2023 & beyond. All Rights Reserved</FooterCreds>        
         </LoginFooterStyles>          
       </Flex>
     </LoginCard>

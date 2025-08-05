@@ -1,7 +1,0 @@
-REACT_APP_NAME="MyOhanaTree"
-REACT_APP_BASEURL=https://www.myohanatree.com
-REACT_APP_BACKEND=https://sg4aet5un735iwuwsbkuommvri0jjyvm.lambda-url.us-east-1.on.aws/
-
-REACT_APP_LOGO=
-
-REACT_APP_CDN=https://www.myohanatree.com

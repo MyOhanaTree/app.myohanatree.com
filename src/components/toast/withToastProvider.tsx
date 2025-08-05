@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
-import RenderCompleted from "hooks/RenderCompleted";
-import ToastContext from "context/Toast";
+import RenderCompleted from "@/hooks/RenderCompleted";
+import ToastContext from "@/context/Toast";
 import Toast from "./Toast";
 
 // Create a random ID

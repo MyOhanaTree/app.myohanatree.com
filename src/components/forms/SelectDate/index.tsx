@@ -5,7 +5,7 @@ import DatePicker from "react-datepicker";
 import moment from "moment";
 import ReactDOM from "react-dom";
 
-import { CalendarIcon, ChevronIcon } from "components/svg";
+import { CalendarIcon, ChevronIcon } from "@/components/svg";
 
 const SelectDate = ({
   label,
@@ -20,7 +20,7 @@ const SelectDate = ({
   disabled = false,
   startOfDay = true,
   showTime = false,
-  $customStyles,
+  sx,
   $errors,
   $responseErrors,
   closeOnSelect = false,
@@ -38,7 +38,7 @@ const SelectDate = ({
   disabled?: boolean;
   startOfDay?: boolean;
   showTime?: boolean;
-  $customStyles?: any;
+  sx?: any;
   $errors?: any;
   $responseErrors?: any;
   closeOnSelect?: boolean;
@@ -94,6 +94,7 @@ const SelectDate = ({
     if (disabled) return true;
 
     const momentDate = startOfDay ? moment(date).startOf("day").unix() : moment(date).endOf("day").unix();
+    console.log(date, momentDate)
     if ((!minDate || minDate <= momentDate) && (!maxDate || maxDate >= momentDate)) {
       setDateValue(momentDate);
       if (typeof onChange === "function") {
@@ -151,7 +152,7 @@ const SelectDate = ({
   }, [$responseErrors, $errors]);
 
   return (
-    <InputWrap $errors={borderError} $customStyles={$customStyles} disabled={disabled} ref={wrapperRef}>
+    <InputWrap $errors={borderError} sx={sx} disabled={disabled} ref={wrapperRef}>
       {label && (
         <LabelWrapper>
           <Label>{label}</Label>

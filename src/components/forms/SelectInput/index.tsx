@@ -3,7 +3,7 @@ import Select, { components } from "react-select";
 import { InputWrap, SelectStyles, LabelWrapper, Error } from "./styled";
 import { Label, useThemeUI } from "theme-ui";
 
-import { ChevronIcon, TimesIcon } from "components/svg";
+import { ChevronIcon, TimesIcon } from "@/components/svg";
 
 const SelectInput = ({
   name,
@@ -17,15 +17,15 @@ const SelectInput = ({
   required,
   disabled,
   clearable,
-  $customStyles,
+  sx,
   $responseErrors,
   $errors,
   onChange,
 }: {
   name?: string;
   label?: string | React.ReactNode;
-  options?: any[];
-  value?: string | number;
+  options?: { value: string | number; label?: string }[];
+  value?: string | number | string[] | number[];
   description?: string;
   placeholder?: React.ReactNode;
   required?: boolean;
@@ -33,7 +33,7 @@ const SelectInput = ({
   readonly?: boolean;
   disabled?: boolean;
   clearable?: boolean;
-  $customStyles?: any;
+  sx?: any;
   $responseErrors?: any;
   $errors?: any;
   onChange?: (e?: any) => void;
@@ -93,7 +93,7 @@ const SelectInput = ({
   };
 
   return (
-    <InputWrap $customStyles={$customStyles} $errors={borderError} theme={theme}>
+    <InputWrap sx={sx} $errors={borderError} theme={theme}>
       {label && (
         <LabelWrapper theme={theme}>
           <Label>{label}</Label>
@@ -109,7 +109,7 @@ const SelectInput = ({
         name={name}
         placeholder={placeholder || "Select..."}
         isMulti={multiple}
-        value={options?.filter((option: any) => (Array.isArray(value) ? value.includes(option.value) : option.value === value))}
+        value={options?.filter((option) => Array.isArray(value) ? (value as (string | number)[]).includes(option.value) : option.value === value)}
         onChange={(e) => setSelectValue(e)}
         components={{ MultiValueRemove, ClearIndicator, DropdownIndicator }}
         isClearable={multiple || clearable}

@@ -1,4 +1,4 @@
-import { darken } from "helpers/default";
+import { darken } from "@/helpers/default";
 
 const baseButton = (color: any = "primary", outline?: boolean) => {
   return {

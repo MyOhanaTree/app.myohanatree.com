@@ -14,13 +14,14 @@ const NavLink: React.FC<NavLinkProps> = ({ link, icon: Icon, label, onClick }) =
   const themeContext = useThemeUI();
   const { theme } = themeContext;
   const pathname = useLocation().pathname
+  const isActive = link ? link === '/' ? pathname === '/' : pathname.startsWith(link ?? "") : false;
 
   return (    
-    <NavLinkWrapper $active={link && pathname.startsWith(link) ? true : false}>
+    <NavLinkWrapper $active={isActive}>
       {link &&
         <Link className="link" to={link}>
-          {Icon && <Icon fill={pathname.startsWith(link) ? theme?.colors?.body : theme?.colors?.base_500} width={"20px"} height={"23.33px"} mr={"8px"} />}
-          <LinkText $active={pathname.startsWith(link)}>{label}</LinkText>
+          {Icon && <Icon fill={isActive ? theme?.colors?.body : theme?.colors?.base_500} width={"20px"} height={"23.33px"} mr={"8px"} />}
+          <LinkText $active={isActive}>{label}</LinkText>
         </Link>
       }
       {!link &&

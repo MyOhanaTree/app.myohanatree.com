@@ -3,7 +3,7 @@ import Select, { components } from "react-select";
 import { InputWrap, SelectStyles, colorCodedStyles, LabelWrapper, Error } from "./styled";
 import { Label, useThemeUI } from "theme-ui";
 
-import { TimesIcon } from "components/svg";
+import { TimesIcon } from "@/components/svg";
 
 const getNestedValue = (obj: any, key: any) => {
   return key.split('.').reduce((acc: any, part: any) => acc && acc[part], obj);
@@ -61,7 +61,7 @@ const SelectSearch = ({
   keyLabel = ["title"], 
   labelDivider = ", ", 
   preload = false,
-  $customStyles, 
+  sx, 
   $responseErrors, 
   $errors, 
   colorCoded = false,
@@ -87,7 +87,7 @@ const SelectSearch = ({
   keyLabel?: string[]; 
   labelDivider?: string;
   preload?: boolean;
-  $customStyles?: any;
+  sx?: any;
   $responseErrors?: any;
   $errors?: any;
   colorCoded?: boolean;
@@ -105,25 +105,23 @@ const SelectSearch = ({
   const [inputValue, setInputValue] = useState<any>();
   const [options,setOptions] = useState<any[]>([]);
   const [items,setItems] = useState<any[]>([]);
-  const [nextPageNum, setNextPageNum] = useState<number>(1);
+  const [lastKey, setLastKey] = useState<number>(1);
   const [hasMore,setHasMore] = useState<boolean>(true);
-  const [loading, setLoading] = useState(true);
-
-  const prevParamsRef = useRef<any>(params);
+  const [loading, setLoading] = useState(preload);
 
   const handleInputChange = (newValue: any, { action }: any) => {   
     if (action === "input-change") {
-      if(newValue.length > 3) {   
+      if(newValue.length > 2) {   
         fetchOptions(newValue);
       }
       if(newValue.length == 0 && preload) { 
         fetchOptions();
       }
+      setInputValue(newValue);
     }
-    setInputValue(newValue);
   }
 
-  const fetchOptions = async (queryValue?: any, pageNum = 1, recordsPer = 10) => {     
+  const fetchOptions = async (queryValue?: any, lastKey?: any) => {     
     if(controller.current){
       controller?.current?.abort(); 
       controller.current = null;
@@ -138,11 +136,9 @@ const SelectSearch = ({
           ...paramFilters,
           ...(!!queryValue ? setNestedValue({}, keyValue, value) : {}),
         },
-        search : inputValue ?? null,        
-        sortBy : sortBy,
-        sortDir : sortDir,
-        pageNum,
-        recordsPer : limit || 10,
+        search : queryValue ?? null,        
+        lastKey,
+        limit : limit || 10,
         ...restParams
       }
 
@@ -158,13 +154,13 @@ const SelectSearch = ({
               return { "value": getNestedValue(item, keyValue), "label": label, color: (colorCoded && item.color) ? item.color : item.color || theme?.colors?.base_500 };
             });       
             setOptions((old) => {
-              const merged = [...(pageNum > 1 ? old : []), ...newOptions];
+              const merged = [...old, ...newOptions];
               const unique = Array.from(new Map(merged.map(item => [item.value, item])).values());
               return unique;
           });
 
-            setHasMore((res?.page || 1) < (res.pages || 1));  
-            setNextPageNum((res?.page || 1) + 1);                   
+            setHasMore(res?.lastKey);  
+            setLastKey(res?.lastKey );                   
           } else {
             if(Array.isArray(res)){
               setItems(res);
@@ -174,7 +170,7 @@ const SelectSearch = ({
               })        
               
               setOptions((old) => {
-                const merged = [...(pageNum > 1 ? old : []), ...newOptions];
+                const merged = [...old, ...newOptions];
                 const unique = Array.from(new Map(merged.map(item => [item.value, item])).values());
                 return unique;
               });                      
@@ -189,35 +185,32 @@ const SelectSearch = ({
   };
 
   const setSelectValue = async (e: any) => { 
-    if (disabled) return;   
-  
+    if (disabled) return; 
 
     let changedValue;
   
-    if(e === null){
-      fetchOptions();    
-    } else {
+    if(e !== null){
       if (multiple) {
         const selectedValues = await Promise.all(e.map((el: any) => el.value).filter((v: any) => v !== ""));  
         changedValue = [...new Set([...selectedValues])];
       } else {
         changedValue = findNestedValue(items, keyValue, e?.value);
       }
+      setInputValue(null);
+      if (typeof onChange === "function") {
+        onChange(changedValue ?? "");
+      }
+    
+      setTimeout(() => {
+        selectRef?.current?.blur();
+      }, 100);
     }
-  
-    if (typeof onChange === "function") {
-      onChange(changedValue ?? "");
-    }
-  
-    setTimeout(() => {
-      selectRef?.current?.blur();
-    }, 100);
   };
   
 
   const scrollBottom = () => {
     if(hasMore){
-      fetchOptions(inputValue,nextPageNum);
+      fetchOptions(inputValue,lastKey);
     }
   }
 
@@ -235,18 +228,12 @@ const SelectSearch = ({
     }
   },[$responseErrors, $errors]);
 
-  useEffect(() => {
-    if(preload){
-      fetchOptions(inputValue);
-    }
-  },[preload]);
 
   useEffect(() => {    
-    if (preload && !inputValue && !(JSON.stringify(params) === JSON.stringify(prevParamsRef.current))) {
-      fetchOptions(inputValue);
-      prevParamsRef.current = params;
+    if (preload || inputValue) {
+      fetchOptions(inputValue);      
     }
-  }, [params, preload, inputValue]);  
+  }, [preload, inputValue]);  
 
   const ClearIndicator = (props: any) => {
     return (      
@@ -262,7 +249,7 @@ const SelectSearch = ({
   };
 
   return (
-    <InputWrap sx={$customStyles} $errors={borderError}>
+    <InputWrap sx={sx} $errors={borderError}>
       {label && 
         <LabelWrapper>
           <Label>{label}</Label>

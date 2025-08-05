@@ -5,19 +5,18 @@ import { Box, Divider, Flex, useThemeUI } from "theme-ui";
 import * as Yup from "yup";
 
 import { FooterCreds, RegisterFooterStyles, BackButton } from "./styled";
-import { completeRegistration } from "api/Auth";
 
-import AdminLogo from "components/img/AdminLogo";
-import LoadingButton from "components/ui/LoadingButton";
-import PasswordInput from "components/forms/PasswordInput";
-import LoginCard from "components/ui/LoginCard";
-import H2 from "components/typography/H2";
-import { useToast } from "components/toast";
+import LoadingButton from "@/components/ui/LoadingButton";
+import PasswordInput from "@/components/forms/PasswordInput";
+import LoginCard from "@/components/ui/LoginCard";
+import H2 from "@/components/typography/H2";
+import { useToast } from "@/components/toast";
 
-import Subtext from "components/typography/Subtext";
-import P from "components/typography/P";
-import TextInput from "components/forms/TextInput";
-import { BackArrowIcon } from "components/svg";
+import Subtext from "@/components/typography/Subtext";
+import P from "@/components/typography/P";
+import TextInput from "@/components/forms/TextInput";
+import { BackArrowIcon } from "@/components/svg";
+import axios from "axios";
 
 const Register = () => {
   const themeContext = useThemeUI();
@@ -25,7 +24,6 @@ const Register = () => {
   const [searchParams] = useSearchParams();
   const toast = useToast();
 
-  const [regEmail,setEmail] = useState(searchParams.get("email"));
   const [validForm, setValidForm] = useState<boolean>(true);
   const [responseErrors, setResponseErrors] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<any>(null);
@@ -33,11 +31,17 @@ const Register = () => {
 
   const _onSubmit = async (values: any) => {
     const token = searchParams.get("token");
-    const res = await completeRegistration({ token : token || "", password : values.password, passwordConfirm: values.passwordConfirm, email : values.email});
+		const { data: res } = await axios.post("/auth/register",{ 
+      token : token || "", 
+      password : values.password, 
+      passwordConfirm: values.passwordConfirm, 
+    }).catch((err) => ({ data: err?.response?.data }));
+
+
     if (res?.success) {      
       setSuccessMessage("Success! You are officially registered.");
     } else {      
-      toast.add(res?.message ? res.message : "Error finishing registration, please try again later" , "var(--theme-ui-colors-red)");
+      toast.add(res?.error?.message ?? "Error finishing registration, please try again later" , "var(--theme-ui-colors-red)");
       setResponseErrors(true);
     }
   };
@@ -52,7 +56,6 @@ const Register = () => {
 
   useEffect(() => { 
     const token = searchParams.get("token");
-    setEmail(searchParams.get("email"));
     if (!token) {
       setValidForm(false);
       setErrorMessage("Invalid Link.");
@@ -61,11 +64,7 @@ const Register = () => {
 
   return (
     <LoginCard>
-      <Flex sx={{flexDirection:"column"}}>        
-        <Box sx={{ textAlign : "center"}}>            
-          <AdminLogo alt="" customStyles={{maxWidth: "300px", margin: "auto"}}/>   
-        </Box>        
-        <Divider />     
+      <Flex sx={{flexDirection:"column"}}>           
         {!validForm && (<>
           <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"}>   
             Registration Link Error    
@@ -100,21 +99,10 @@ const Register = () => {
                 Registration
               </H2>                               
               <Subtext color={theme?.colors?.base_600} align="center">Passwords must be a minimum of 5 characters, include 1 uppercase letter, 1 lowercase letter, and 1 numeric digit.</Subtext>            
-              <Formik initialValues={{ email: regEmail?.replace(" ","+"), password: "", passwordConfirm: "" }} onSubmit={_onSubmit} validationSchema={UserSchema} enableReinitialize={true}>
+              <Formik initialValues={{ password: "", passwordConfirm: "" }} onSubmit={_onSubmit} validationSchema={UserSchema} enableReinitialize={true}>
                 {({ isSubmitting, errors, values, submitCount, setFieldValue }) => {
                   return (
                     <Form noValidate autoComplete="off">
-                      <TextInput 
-                        type="email" 
-                        name="email" 
-                        label="Email" 
-                        value={values.email}
-                        onChange={(val: any) => setFieldValue("email",val)}
-                        readonly={true} 
-                        autoComplete="off" 
-                        $errors={errors.email && submitCount > 0 ? errors.email : null} 
-                        $responseErrors={responseErrors}
-                      />
                       <PasswordInput 
                         name="password" 
                         label="Password" 
@@ -148,7 +136,7 @@ const Register = () => {
           </>
         )}     
         <RegisterFooterStyles>          
-          <FooterCreds>© {process.env.REACT_APP_NAME}, 2023 & beyond. All Rights Reserved</FooterCreds>          
+          <FooterCreds>© {import.meta.env.VITE_REACT_APP_NAME}, 2023 & beyond. All Rights Reserved</FooterCreds>          
         </RegisterFooterStyles>
       </Flex>
     </LoginCard>

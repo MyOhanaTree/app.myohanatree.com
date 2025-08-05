@@ -1,13 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { NavWrapper, NavInner, NavInnerMenu, LogoWrapper, LinkWrapper } from "./styled";
-import { Box, Divider, IconButton } from "theme-ui";
-import UserContext from "context/User";
+import { Box, MenuButton, Divider, IconButton } from "theme-ui";
+import UserContext from "@/context/User";
 
-import AdminLogo from "components/img/AdminLogo";
-import NavLink from "components/ui/NavLink";
+import NavLink from "@/components/ui/NavLink";
 import { useNavigate } from "react-router-dom";
 
-import { LogoutIcon, ProfileIcon, TimesIcon, UsersIcon } from "components/svg";
+import { LogoutIcon, ProfileIcon, TimesIcon, UsersIcon, TreeIcon } from "@/components/svg";
 
 const NavbarLayout = () => {
   const navigate = useNavigate();
@@ -43,39 +42,45 @@ const NavbarLayout = () => {
     setNavbarToggle(false);
   },[location.pathname])
 
+  const toggleNav = () => {        
+    const customEvent = new Event("navBarToggle");
+    document.body.dispatchEvent(customEvent);
+  };    
+
   if(loading) return null  
 
   return (
-    <NavWrapper>      
-      <NavInner>        
-        <LogoWrapper>      
-          <AdminLogo alt="" $customStyles={{width: "auto!important"}} />         
-          <Box sx={{marginLeft : "auto", display : ["block","none"]}}>
-            <IconButton type="button" onClick={() => setNavbarToggle(!navToggle)}><TimesIcon width="15px" height="15px" /></IconButton>             
-          </Box>
-        </LogoWrapper>
-                
-        <NavInnerMenu>            
-
-          {(user?.permissions || []).find((x: any) => ["userAccess"].includes(x)) &&
+    <>
+      <NavWrapper>      
+        <NavInner>                                    
+          <NavInnerMenu>            
+            <Box sx={{marginLeft : "auto", display : ["block","none"]}}>
+              <IconButton type="button" onClick={() => setNavbarToggle(!navToggle)}><TimesIcon width="15px" height="15px" /></IconButton>             
+            </Box>
             <LinkWrapper>
-              <NavLink link={"/users"} icon={UsersIcon} label={"Users"}></NavLink>
+              <NavLink link={"/"} icon={TreeIcon} label={"Tree"} />
             </LinkWrapper>
-          }                        
-
-          <Box sx={{display : ["block","none"], marginTop : "auto"}}>
-            <Divider sx={{marginTop: "auto"}} />                             
-            <LinkWrapper>
-              <NavLink link={"/profile"} icon={ProfileIcon} label={"Profile"} />
-            </LinkWrapper>
-            <LinkWrapper>
-              <NavLink onClick={_logout} icon={LogoutIcon} label={"Log Out"} />
-            </LinkWrapper> 
-          </Box>
-
-        </NavInnerMenu>
-      </NavInner>
-    </NavWrapper>
+            {(user?.permissions || []).find((x: any) => ["userAccess"].includes(x)) &&
+              <LinkWrapper>
+                <NavLink link={"/users"} icon={UsersIcon} label={"Users"} />
+              </LinkWrapper>
+            }                        
+            <Box sx={{marginTop : "auto"}}>
+              <Divider sx={{marginTop: "auto"}} />                             
+              <LinkWrapper>
+                <NavLink link={"/profile"} icon={ProfileIcon} label={"Profile"} />
+              </LinkWrapper>
+              <LinkWrapper>
+                <NavLink onClick={_logout} icon={LogoutIcon} label={"Log Out"} />
+              </LinkWrapper> 
+            </Box>
+          </NavInnerMenu>
+        </NavInner>
+      </NavWrapper>
+      <Box sx={{ position: "absolute", top: 0, left: 0, zIndex: 1998, display : ["block","none"] }}>
+        <MenuButton type="button" onClick={toggleNav} />                             
+      </Box>
+    </>
   );
 };
 export default NavbarLayout;
