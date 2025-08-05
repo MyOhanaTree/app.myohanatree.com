@@ -1,4 +1,4 @@
-name: Node.js Master Deployment 
+name: Node.js Master Deployment
 
 on:
   push:
@@ -6,40 +6,43 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Use Node.js 18.x
       uses: actions/setup-node@v3
       with:
         node-version: 18.x
-            
+
     - name: Build App
       run: |
         echo "Creating .env file"
-        cat <<EOF > .env
-VITE_REACT_APP_NAME=MyOhanaTree
-VITE_REACT_APP_BACKEND=https://sg4aet5un735iwuwsbkuommvri0jjyvm.lambda-url.us-east-1.on.aws/
-VITE_REACT_APP_LOGO=
-VITE_REACT_APP_CDN=https://www.myohanatree.com
-EOF
+        echo "VITE_REACT_APP_NAME=MyOhanaTree" > .env
+        echo "VITE_REACT_APP_BACKEND=https://sg4aet5un735iwuwsbkuommvri0jjyvm.lambda-url.us-east-1.on.aws/" >> .env
+        echo "VITE_REACT_APP_LOGO=" >> .env
+        echo "VITE_REACT_APP_CDN=https://www.myohanatree.com" >> .env
 
         export NODE_ENV=production
         npm ci
         npm run build
         rm -rf ./node_modules
         rm -rf .git
-    
+
+        export NODE_ENV=production
+        npm ci
+        npm run build
+        rm -rf ./node_modules
+        rm -rf .git
+
     - name: Deploy files to S3 Bucket
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.BUCKET_DEPLOY_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.BUCKET_DEPLOY_SECRET_ACCESS_KEY }}
       run: |
         aws --region=us-east-1 s3 sync --delete build s3://${{ secrets.BUCKET_DEPLOY_NAME_PROD }} --exclude "uploads/*"
-   
+
     - name: Purge Cloudfront Cache
       uses: awact/cloudfront-action@master
       env:
