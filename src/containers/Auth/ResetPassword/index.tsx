@@ -52,29 +52,6 @@ const ResetPassword = () => {
     passwordConfirm: Yup.string().oneOf([Yup.ref("password"), undefined], "Passwords don't match.").required("Confirm Password is required."),
   });
 
-  useEffect(() => { 
-    const checkToken = async () => {
-      const token = searchParams.get("token");
-  
-      if (!token) {
-        setValidForm(false);
-        setErrorMessage("Password Reset Link is invalid.");
-      } else {
-        const { data: res } = await axios.post("/auth/reset-password-check", { 
-          token 
-        }).catch((err) => ({ data: err?.response?.data }));
-
-        if(res.success){
-          setValidForm(true);
-        }else{
-          setValidForm(false);
-          setErrorMessage(res?.error?.message ?? "Internal Error");
-        }
-      }
-    };
-    checkToken(); 
-  }, [searchParams]);
-
   return (
     <LoginCard>
       <Flex sx={{flexDirection:"column"}}>        
