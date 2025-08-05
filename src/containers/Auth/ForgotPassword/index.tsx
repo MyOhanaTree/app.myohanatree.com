@@ -29,7 +29,7 @@ const ForgotPassword = () => {
     }).catch((err) => ({ data : { success : false}}));
     
     if(res?.success){
-      toast.add(res?.message,"var(--theme-ui-colors-green)");
+      toast.add(res?.message ?? "Email sent to reset password","var(--theme-ui-colors-green)");
       navigate("/login");
     }else{        
       toast.add(res?.message ?? "Internal Error","var(--theme-ui-colors-red)");
