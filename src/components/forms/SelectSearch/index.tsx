@@ -230,10 +230,10 @@ const SelectSearch = ({
 
 
   useEffect(() => {    
-    if (preload || inputValue) {
+    if (preload || value) {
       fetchOptions(inputValue);      
     }
-  }, [preload, inputValue]);  
+  }, [preload, value]);  
 
   const ClearIndicator = (props: any) => {
     return (      
