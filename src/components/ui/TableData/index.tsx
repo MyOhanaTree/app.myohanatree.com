@@ -297,7 +297,7 @@ const TableData = ({
 
   return (
     <>
-      {title && <Heading as="h5" sx={{ marginBottom: "0" }}>{title}</Heading>}
+      {title && <Heading as="h2" sx={{ marginBottom: "0" }}>{title}</Heading>}
       <TableTop>        
         {enablePaging &&
           <Pagination {...{ pagination, setPagination, showRecordsOptions }} />

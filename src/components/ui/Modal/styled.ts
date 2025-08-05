@@ -84,7 +84,7 @@ export const ModalHeader = styled(Box)<CustomProps>`
   margin-bottom: 0;
 `;
 
-export const ModalTitle = styled.h5`
+export const ModalTitle = styled.h3`
   font-$size: 1.125rem;
   font-weight: 600;
   margin: 0;

@@ -236,7 +236,7 @@ export default function Users() {
                     $errors={errors.lastName && submitCount > 0 ? errors.lastName : null}                                    
                   /> 
                 </Flex>
-                <Flex sx={{ gap: 2, "> *" : { flex: 1 }}}>                  
+                <Flex sx={{display : ["block","flex"], gap: 2, "> *" : { flex: 1 }}}>                  
                   <TextInput 
                     type="email" 
                     name="email" 
@@ -301,7 +301,7 @@ export default function Users() {
             <Form noValidate autoComplete="off">
               <ModalHeader toggle={toggleInvite}>Add User</ModalHeader>
               <ModalBody> 
-                <Flex sx={{ gap: 2, "> *" : { flex: 1 }}}>                  
+                <Flex sx={{display : ["block","flex"], gap: 2, "> *" : { flex: 1 }}}>                  
                   <TextInput
                     type="email" 
                     name="email" 

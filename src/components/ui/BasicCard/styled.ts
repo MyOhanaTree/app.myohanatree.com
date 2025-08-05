@@ -24,7 +24,7 @@ export const CardHeader = styled.div`
   margin-bottom: 0;
 `;
 
-export const CardTitle = styled.h5`
+export const CardTitle = styled.h3`
   font-size: 1.125rem;
   font-weight: 600;
   margin: 0;

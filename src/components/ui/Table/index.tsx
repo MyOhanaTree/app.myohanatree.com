@@ -124,7 +124,7 @@ const TableBasic = ({
       <TableActions>
         {title && (
           <Box>
-            <Heading as="h5" sx={{ marginBottom: "0" }}>{title}</Heading>            
+            <Heading as="h2" sx={{ marginBottom: "0" }}>{title}</Heading>            
           </Box>
         )}
         <Flex
