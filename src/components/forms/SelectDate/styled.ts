@@ -1,21 +1,22 @@
 import styled from "styled-components";
-import { themevals } from "theme/themevals";
+import { themevals } from "@/theme/themevals";
+import { Box } from "theme-ui";
 
 interface CustomProps {
   disabled?: boolean;
   $active?: boolean;
   $submitting?: boolean;
-  $customStyles?: any;
   $errors?: any;
 }
 
 
-export const InputWrap = styled.div<CustomProps>`
+export const InputWrap = styled(Box)<CustomProps>`
+  && {margin-bottom: 20px;}
+  
   display: flex;
   flex-direction: column;
   position:relative;  
   max-width: 100%;    
-  margin-bottom: 20px;
   input {
     border: none!important;
     padding: 0!important;
@@ -23,7 +24,6 @@ export const InputWrap = styled.div<CustomProps>`
     flex-grow: 1;
   }
   ${(props) => props.disabled ? `opacity: .5` : ``}
-  ${(props) => props.$customStyles}
 `;
 
 export const LabelWrapper = styled.div<CustomProps>`

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ToastWrapper, ToastDiv, ToastText, CloseButton, CloseButtonWrap } from "./styled";
-import { CloseIcon } from "components/svg";
+import { CloseIcon } from "@/components/svg";
 
 const Toast = ({ children, remove, color }: any) =>{
 

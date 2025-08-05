@@ -1,9 +1,9 @@
 import styled from "styled-components";
-import { themevals } from "theme/themevals";
+import { themevals } from "@/theme/themevals";
+import { Box } from "theme-ui";
 
 interface CustomProps {
   $submitting?: boolean;
-  $customStyles?: any;
   $errors?: any;
 }
 
@@ -14,11 +14,12 @@ export const inputStyles = {
   minHeight:44,
 };
 
-export const InputWrap = styled.div<CustomProps>`
+export const InputWrap = styled(Box)<CustomProps>`
+  && {margin-bottom: 20px;}
+  
   display: flex;
   flex-direction: column;
   position:relative;
-  margin-bottom: 20px;
   input{
     height: 44px;
     min-width: 175px;
@@ -46,7 +47,6 @@ export const InputWrap = styled.div<CustomProps>`
     color: ${themevals.colors.body};
     ${inputStyles}
   }
-  ${(props) => props.$customStyles}
 `;
 
 export const LabelWrapper =  styled.div`

@@ -7,7 +7,7 @@ import DatePicker from "react-datepicker";
 import moment from "moment";
 import "moment-timezone";
 
-import { CalendarIcon, ChevronIcon } from "components/svg";
+import { CalendarIcon, ChevronIcon } from "@/components/svg";
 //import "react-datepicker/dist/react-datepicker.css";
 
 const SelectDateRange = ({
@@ -20,7 +20,7 @@ const SelectDateRange = ({
   maxDate, 
   description, 
   required, 
-  customStyles, 
+  sx, 
   errors, 
   responseErrors, 
   onChange 
@@ -159,7 +159,7 @@ const SelectDateRange = ({
   }, [value]);
 
   return (
-    <InputWrap $errors={borderError} $customStyles={customStyles}>
+    <InputWrap $errors={borderError} sx={sx}>
       {label && 
         <LabelWrapper>
           <Label>{label}</Label>

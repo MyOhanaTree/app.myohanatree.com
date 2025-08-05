@@ -20,14 +20,14 @@ import {
   TPdiv,
 } from "./styled";
 
-import { ArrowIcon, ChevronIcon, FilterIcon } from "components/svg";
+import { ArrowIcon, ChevronIcon, FilterIcon } from "@/components/svg";
 
-import SearchField from "components/forms/SearchField";
-import SelectInput from "components/forms/SelectInput";
-import H5 from "components/typography/H5";
-import LoadingButton from "components/ui/LoadingButton";
+import SearchField from "@/components/forms/SearchField";
+import SelectInput from "@/components/forms/SelectInput";
+import H5 from "@/components/typography/H5";
+import LoadingButton from "@/components/ui/LoadingButton";
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../Modal";
-import { findInNestedArray, getNestedValue } from "helpers/default";
+import { findInNestedArray, getNestedValue } from "@/helpers/default";
 
 
 interface FilterProps {
@@ -249,7 +249,7 @@ const TableData = ({
         const res = await apiCall({ ...apiVariables, query, controller: controller.current, excludeInterceptor: true });
         if (res.items) {
           setTableData(res.items ? res.items : []);          
-          setPagination((old: any) => ({...old, next: res.lastEvaluatedKey}));
+          setPagination((old: any) => ({...old, next: res.lastKey}));
         } else {
           if (Array.isArray(res)) {
             setTableData(res);

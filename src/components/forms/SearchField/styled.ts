@@ -1,20 +1,19 @@
 import styled from "styled-components";
-import { themevals } from "theme/themevals";
+import { themevals } from "@/theme/themevals";
+import { Box } from "theme-ui";
 
 interface CustomProps {
   $submitting?: boolean;
-  $customStyles?: any;
 }
 
-export const InputWrap = styled.div<CustomProps>`
+export const InputWrap = styled(Box)<CustomProps>`
+  && {margin-bottom: 20px;}
+  
   display: flex;
   flex-direction: column;
   position:relative;    
-  width: ${props => props?.$customStyles?.$width || "250px"};
-  max-width: ${props => props?.$customStyles?.$width || "250px"};
   min-width: 175px; 
   max-width: 100%;
-  ${(props) => props.$customStyles}
   input{    
     height: 44px;
     min-height:44px;

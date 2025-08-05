@@ -1,9 +1,9 @@
 import styled from "styled-components";
-import { themevals } from "theme/themevals";
+import { themevals } from "@/theme/themevals";
+import { Box } from "theme-ui";
 
 interface CustomProps {
   $submitting?: boolean;
-  $customStyles?: any;
   $errors?: any;
 }
 
@@ -39,11 +39,12 @@ export const SelectStyles = {
   }),
 };
 
-export const InputWrap = styled.div<CustomProps>`
+export const InputWrap = styled(Box)<CustomProps>`
+  && {margin-bottom: 20px;}
+
   display: flex;
   flex-direction: column;
   position:relative;  
-  margin-bottom: 20px;
   max-width: 100%;
   .react-select__control { 
     max-width: 100%;
@@ -53,7 +54,7 @@ export const InputWrap = styled.div<CustomProps>`
     text-align: left;
     color: ${themevals.colors.body};  
     & .react-select__value-container {
-      flex-wrap: ${props => props?.$customStyles?.optionNoWrap ? "nowrap" : "wrap"};
+      flex-wrap: wrap;
     }      
     & .react-select__multi-value {
       align-items: center;
@@ -70,7 +71,6 @@ export const InputWrap = styled.div<CustomProps>`
       }
     }      
   }
-  ${(props) => props.$customStyles}
 `;
 
 export const LabelWrapper =  styled.div`

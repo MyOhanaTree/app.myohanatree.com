@@ -2,21 +2,19 @@ import React, { useEffect, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-
-import { getUsers, checkUser, updateUser, inviteUser, deleteUser, restoreUser, allPermissions } from "api/Users";
-
-import { Modal, ModalBody, ModalHeader, ModalFooter } from "components/ui/Modal";
-import Header from "components/ui/Header";
-import TableData from "components/ui/TableData";
-import Page from "components/ui/Page";
-import TextInput from "components/forms/TextInput";
-import SelectInput from "components/forms/SelectInput";
-import { useToast } from "components/toast";
-import BasicModal from "components/ui/BasicModal";
-import P from "components/typography/P";
-import LoadingWheel from "components/ui/LoadingWheel";
 import { Box, Button, Flex } from "theme-ui";
-import LoadingButton from "components/ui/LoadingButton";
+import axios from "axios";
+
+import { Modal, ModalBody, ModalHeader, ModalFooter } from "@/components/ui/Modal";
+import TableData from "@/components/ui/TableData";
+import Page from "@/components/ui/Page";
+import TextInput from "@/components/forms/TextInput";
+import SelectInput from "@/components/forms/SelectInput";
+import { useToast } from "@/components/toast";
+import BasicModal from "@/components/ui/BasicModal";
+import P from "@/components/typography/P";
+import LoadingWheel from "@/components/ui/LoadingWheel";
+import LoadingButton from "@/components/ui/LoadingButton";
 
 export default function Users() {
 
@@ -34,6 +32,16 @@ export default function Users() {
   const [confirmSubmit, setConfirmSubmit] = useState<boolean>(false);
 
   const columnHelper = createColumnHelper();
+
+
+  const getUsers = async ({ query = {}, controller = null, excludeInterceptor = false}: any) => {		
+    const params: any = {params : query, excludeInterceptor}
+    if(controller?.signal){
+      params.signal = controller.signal
+    }
+    const res = await axios.get("/users", params).catch((err) => ({ data: { items: [] } }))
+    return res?.data;
+  };
 
   const columns = [
     columnHelper.accessor("firstName", {
@@ -99,51 +107,44 @@ export default function Users() {
     lastName: Yup.string().required("Last Name is required."),   
   }).noUnknown(true);
 
-  const submitUserUpdate = async (values: any, actions: any) => {   
-    const update = {
+  const submitUserUpdate = async (values: any) => {       
+    const { data: res }: any = await axios.put(`/users/${userInfo?.id}`, {
       firstName : values.firstName,
       lastName: values.lastName,
       email: values.email,
       permissions: values.permissions,
-    }
-    
-    const res = await updateUser({ data : userInfo, update });
+    }).catch((err) => ({ data: err?.response?.data }));
+
     if(res?.firstName){ 
       toast.add("User updated","var(--theme-ui-colors-green)");
       setRefreshData(true);
       setTimeout(() => { setRefreshData(false) }, 100);         
     }else{
-      toast.add(res?.message ? res.message : "Error updating user","var(--theme-ui-colors-red)");
+      toast.add(res?.error?.message ?? "Error updating user","var(--theme-ui-colors-red)");
     }    
     toggleEditModal(false);        
   }; 
 
   const submitInviteUser = async (values: any, { setErrors}: any) => {
-  
-    const invite = {
+            
+    const { data: res }: any = await axios.post("/users/invite", {
       email: values.email,
       firstName: values.firstName,
       lastName: values.lastName,
       permissions: values.permissions,
-    };
-      
-    const check = await checkUser({ invite });
-    if(check.length > 0) {
-      setErrors({ email: `${invite.email} already exists and can't be invited again` });
-    } else {
-      const res = await inviteUser({ invite });
-      if(res?.success){
-        toast.add(res?.message ? res.message : "User invited","var(--theme-ui-colors-green)");
-        if(res.link){
-          toast.add(res.link,"var(--theme-ui-colors-green)");
-        }
-        toggleInviteModal(false);    
-        setRefreshData(true);
-        setTimeout(() => { setRefreshData(false) }, 100);   
-      } else {  
-        toast.add(res?.message ? res.message : "Error inviting user","var(--theme-ui-colors-red)");
+    }).catch((err) => ({ data: err?.response?.data }));
+
+    if(res?.success){
+      toast.add(res?.message ? res.message : "User invited","var(--theme-ui-colors-green)");
+      if(res.link){
+        toast.add(res.link,"var(--theme-ui-colors-green)");
       }
-    } 
+      toggleInviteModal(false);    
+      setRefreshData(true);
+      setTimeout(() => { setRefreshData(false) }, 100);   
+    } else {  
+      toast.add(res?.error?.message ?? "Error inviting user","var(--theme-ui-colors-red)");
+    }     
   };  
 
   const InviteSchema = Yup.object().shape({
@@ -153,14 +154,15 @@ export default function Users() {
   });  
 
   const confirmDeleteUser = async () => { 
-    setConfirmSubmit(true);   
-    const res = await deleteUser({ data: userInfo });
+    setConfirmSubmit(true);       
+
+		const { data: res }: any = await axios.delete(`/users/${userInfo?.id}`).catch((err) => ({ data: err?.response?.data }));
     if(res?.success){ 
       toast.add(res?.message ? res.message : "User deleted","var(--theme-ui-colors-green)");
       setRefreshData(true);    
       setTimeout(() => { setRefreshData(false) }, 100);   
     }else{
-      toast.add(res?.message ? res.message : "Error deleting user","var(--theme-ui-colors-red)");
+      toast.add(res?.error?.message ?? "Error deleting user","var(--theme-ui-colors-red)");
     } 
     setConfirmSubmit(false);   
     setConfirmModal(false)          
@@ -177,42 +179,25 @@ export default function Users() {
     </BasicModal>);
   }
 
-  const submitRestoreUser = async () => {
-    const res = await restoreUser({ data: userInfo });    
-    if(res?.id){ 
-      toggleEditModal(false); 
-      toast.add("User restored.","var(--theme-ui-colors-green)");      
-      setRefreshData(true);
-      setTimeout(() => { setRefreshData(false) }, 100);   
-    }else{
-      toast.add(res?.message ? res.message : "Error restoring user","var(--theme-ui-colors-red)");
-    }           
-  }
-
   const toggleEdit = () => toggleEditModal(!editModal);
   const toggleInvite = () => toggleInviteModal(!inviteModal);
 
 
   useEffect(() => {
     const initPermissions = async () => {
-      try {
-        const res = await allPermissions(); 
-        if(typeof res === "object"){                               
-          const newperms = Object.entries(res).map(([val,key]) => ({ value : val, label : key}));
-          setPermissions(newperms);          
-        }
-      } catch (e) { }
+      const res = await axios.get("/users/permissions").catch((err) => ({ data: [] }));
+      setPermissions(res?.data);
+
     };
     initPermissions();    
   }, []);
 
   useEffect(() => {
-    document.title = process.env.REACT_APP_NAME + " | Users"
+    document.title = import.meta.env.VITE_REACT_APP_NAME + " | Users"
   }, []);
 
   return (
     <>
-      <Header title="Users"></Header>      
       <Page>                
         <TableData 
           api={getUsers} 
@@ -262,22 +247,24 @@ export default function Users() {
                     onChange={(val: any) => setFieldValue("email",val)}
                     $errors={errors.email && submitCount > 0 ? errors.email : null}                                    
                   />                  
-                  {permissions.length === 0 && <LoadingWheel width="15px" stroke="3px" />}
-                  {permissions.length > 0 && <SelectInput 
-                    name="permissions" 
-                    label="Permissions"                       
-                    value={values?.permissions}
-                    onChange={(val: any) => setFieldValue("permissions",val)}
-                    options={permissions}  
-                    multiple={true} 
-                    $errors={errors.permissions && submitCount > 0 ? errors.permissions : null}  
-                  />}
+                  {Object.entries(permissions).length === 0 ? (
+                    <LoadingWheel width="15px" stroke="3px" />
+                  ) : (
+                    <SelectInput 
+                      name="permissions" 
+                      label="Permissions"                       
+                      value={values?.permissions}
+                      onChange={(val: any) => setFieldValue("permissions",val)}
+                      options={Object.entries(permissions).map(([value,label]) => ({ value, label}))}  
+                      multiple={true} 
+                      $errors={errors.permissions && submitCount > 0 ? errors.permissions : null}  
+                    />
+                  )}
                 </Flex>
                 {userInfo.status === 2 && ( 
-                  <>
-                    <p><strong>Send Activation Link</strong></p>
-                    <p>{`${process.env.REACT_APP_BASEURL}/register?token=${userInfo.verifyMeToken}&userId=${userInfo?.id}&email=${userInfo.email}`}</p>                    
-                  </>
+                  <div>
+                    <p><strong>Resend Activation Link</strong></p>                    
+                  </div>
                 )}                
               </ModalBody>
               <ModalFooter>
@@ -288,13 +275,7 @@ export default function Users() {
                       type="button" 
                       onClick={submitDeleteUser} 
                     >Delete</Button> 
-                    {values.status === 0 && <>
-                      <Button 
-                        variant="warning"
-                        type="button" 
-                        onClick={submitRestoreUser} 
-                      >Restore</Button> 
-                    </>}
+                    
                   </Box>
                   <Box sx={{display: "flex", flexWrap : "wrap-reverse", gap : "20px"}}>
                     <Button 
@@ -316,7 +297,7 @@ export default function Users() {
         </Formik>
       </Modal>
       <Modal isOpen={inviteModal} toggle={toggleInvite} centered={true}>
-        <Formik initialValues={{email:"",permission:[],firstName:"",lastName:""}} onSubmit={submitInviteUser} validationSchema={InviteSchema} >
+        <Formik initialValues={{email:"",permissions: [],firstName:"",lastName:""}} onSubmit={submitInviteUser} validationSchema={InviteSchema} >
           {({ isSubmitting, errors, values, submitCount, setFieldValue }) => {
             return (              
             <Form noValidate autoComplete="off">
@@ -336,7 +317,7 @@ export default function Users() {
                   {permissions.length > 0 && <SelectInput 
                     name="permissions" 
                     label="Permissions" 
-                    value={values.permissions}
+                    value={values.permissions ?? []}
                     onChange={(val: any) => setFieldValue("permissions",val)}
                     options={permissions}  
                     multiple={true} 

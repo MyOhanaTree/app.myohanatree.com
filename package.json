@@ -1,19 +1,17 @@
 {
-  "name": "tdp_admin_react_frontend",
+  "name": "myohanatree.com",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@emotion/react": "^11.11.4",
     "@tanstack/match-sorter-utils": "^8.15.1",
     "@tanstack/react-table": "^8.19.3",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.5.2",
+    "@types/react": "^18.3.23",
     "@types/yup": "^0.32.0",
     "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
-    "currency-symbol-map": "^5.1.0",
     "eslint": "^8.57.0",
     "formik": "^2.4.6",
     "moment-timezone": "^0.5.45",
@@ -22,46 +20,30 @@
     "react-dom": "^18.3.1",
     "react-modal": "^3.16.1",
     "react-router-dom": "^6.25.1",
-    "react-scripts": "^5.0.1",
     "react-select": "^5.8.0",
-    "reactstrap": "^9.2.2",
     "theme-ui": "^0.16.2",
     "uuid": "^10.0.0",
-    "web-vitals": "^4.2.2",
     "yup": "^1.4.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "generate-index": "node generateIndex.mjs"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      "react-app"
     ]
   },
   "devDependencies": {
     "@types/node": "^20.14.11",
     "@types/react-datepicker": "^6.2.0",
-    "@types/react-dom": "^18.3.0",
+    "@types/react-dom": "^18.3.7",
     "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
     "eslint-plugin-react": "^7.34.4",
     "sass": "^1.78.0",
-    "styled-components": "^6.1.12"
+    "styled-components": "^6.1.12",
+    "vite": "^7.0.6"
   }
 }

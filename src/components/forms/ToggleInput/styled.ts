@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { themevals as theme } from "theme/themevals";
+import { themevals as theme } from "@/theme/themevals";
 
 interface CustomProps {
   $submitting?: boolean;

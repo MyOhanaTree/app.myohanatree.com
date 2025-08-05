@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { InputWrap, LabelWrapper, DropArea, DropAreaLabel, Error } from "./styled";
 import { Label, useThemeUI } from "theme-ui";
-import { useToast } from "components/toast";
+import { useToast } from "@/components/toast";
 
 const FileInput = ({ 
   api,

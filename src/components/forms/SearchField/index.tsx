@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { InputWrap, InputInner, SearchIconWrap } from "./styled";
 import { Input, useThemeUI } from "theme-ui";
-import { SearchIcon } from "components/svg";
+import { SearchIcon } from "@/components/svg";
 
 const SearchField = ({
   name = "",
   value = "",
   width = "200px",
   className,
-  customStyles,
+  sx,
   onChange,
   onKeyUp,
   onBlur,
@@ -17,7 +17,7 @@ const SearchField = ({
   value?: string | number;
   width?: string;
   className?: string;
-  customStyles?: any;
+  sx?: any;
   onChange?: (e?: any) => void;
   onKeyUp?: (e?: any) => void;
   onBlur?: (e?: any) => void;
@@ -46,7 +46,7 @@ const SearchField = ({
   },[value]);
 
   return (
-    <InputWrap className={className} $customStyles={{...customStyles, width: width}}>
+    <InputWrap className={className} sx={{...sx, width: width}}>
       <InputInner>
         <Input
           type="text"  

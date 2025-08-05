@@ -24,11 +24,11 @@ import {
   TableBtns,
 } from "./styled";
 
-import { ArrowIcon, ChevronIcon } from "components/svg";
+import { ArrowIcon, ChevronIcon } from "@/components/svg";
 
-import SearchField from "components/forms/SearchField";
-import SelectInput from "components/forms/SelectInput";
-import H5 from "components/typography/H5";
+import SearchField from "@/components/forms/SearchField";
+import SelectInput from "@/components/forms/SelectInput";
+import H5 from "@/components/typography/H5";
 
 const TableBasic = ({
   data,

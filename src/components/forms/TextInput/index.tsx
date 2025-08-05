@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { InputWrap, LabelWrapper, Error } from "./styled";
-import { Input, Label, useThemeUI } from "theme-ui";
+import { Input, Label } from "theme-ui";
 
 const TextInput = ({
   name,
@@ -16,7 +16,7 @@ const TextInput = ({
   min,
   max,
   step,
-  $customStyles,
+  sx,
   $errors,
   $responseErrors,
   onChange
@@ -34,14 +34,12 @@ const TextInput = ({
   min?: string | number;
   max?: string | number;
   step?: string | number;
-  $customStyles?: any;
+  sx?: any;
   $responseErrors?: any;
   $errors?: any;
   onChange?: (e?: any) => void;
 }) => {
 
-  const themeContext = useThemeUI();
-  const { theme } = themeContext;
   const [borderError, setBorderError] = useState(false);
 
   const setSelectValue = function (e: any){
@@ -69,7 +67,7 @@ const TextInput = ({
   },[$responseErrors, $errors]);
 
   return (
-    <InputWrap $customStyles={$customStyles} $errors={borderError}>
+    <InputWrap sx={sx} $errors={borderError}>
       {label &&
         <LabelWrapper>
           <Label>{label}</Label>

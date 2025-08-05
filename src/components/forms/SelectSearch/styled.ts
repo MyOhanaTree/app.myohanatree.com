@@ -1,10 +1,9 @@
 import styled from "styled-components";
 import { Box } from "theme-ui";
-import { themevals as theme } from "theme/themevals";
+import { themevals as theme } from "@/theme/themevals";
 
 interface CustomProps {
   $submitting?: boolean;
-  $customStyles?: any;
   $errors?: any;
 }
 
@@ -109,7 +108,7 @@ export const SelectStyles = {
 };
 
 export const InputWrap = styled(Box)<CustomProps>`
-  && {margin-bottom: 30px;}
+  && {margin-bottom: 20px;}
 
   display: flex;
   flex-direction: column;

@@ -15,7 +15,7 @@ const RangeInput = ({
   min, 
   max, 
   step, 
-  $customStyles, 
+  sx, 
   $errors, 
   $responseErrors, 
   onChange 
@@ -32,7 +32,7 @@ const RangeInput = ({
   min?: string | number;
   max?: string | number;
   step?: string | number;
-  $customStyles?: any;
+  sx?: any;
   $responseErrors?: any;
   $errors?: any;
   onChange?: (e?: any) => void;
@@ -72,7 +72,7 @@ const RangeInput = ({
   },[$responseErrors, $errors]);
 
   return (
-    <InputWrap $customStyles={$customStyles} $errors={borderError}> 
+    <InputWrap sx={sx} $errors={borderError}> 
       {label && 
         <LabelWrapper>
           <Label>{label}</Label>

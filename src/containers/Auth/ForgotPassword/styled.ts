@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { themevals } from "theme/themevals";
+import { themevals } from "@/theme/themevals";
 
 export const LoginFooterStyles = styled.div`
     flex: 1;

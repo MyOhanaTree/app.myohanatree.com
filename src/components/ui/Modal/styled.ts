@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { Box } from "theme-ui";
-import { themevals } from "theme/themevals";
+import { themevals } from "@/theme/themevals";
 
 interface CustomProps {
   $size?: "sm" | "lg";

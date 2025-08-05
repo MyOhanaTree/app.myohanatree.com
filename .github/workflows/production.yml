@@ -17,10 +17,18 @@ jobs:
       with:
         node-version: 18.x
             
-    - name: Build  App
+    - name: Build App
       run: |
-        cp -f production-env .env
-        npm install
+        echo "Creating .env file"
+        cat <<EOF > .env
+VITE_REACT_APP_NAME=MyOhanaTree
+VITE_REACT_APP_BACKEND=https://sg4aet5un735iwuwsbkuommvri0jjyvm.lambda-url.us-east-1.on.aws/
+VITE_REACT_APP_LOGO=
+VITE_REACT_APP_CDN=https://www.myohanatree.com
+EOF
+
+        export NODE_ENV=production
+        npm ci
         npm run build
         rm -rf ./node_modules
         rm -rf .git
