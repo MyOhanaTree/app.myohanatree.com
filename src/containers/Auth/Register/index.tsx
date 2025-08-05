@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Form, Formik } from "formik";
-import { Box, Divider, Flex, useThemeUI } from "theme-ui";
+import { Box, Divider, Flex, Heading, Text, useThemeUI } from "theme-ui";
 import * as Yup from "yup";
 
 import { FooterCreds, RegisterFooterStyles, BackButton } from "./styled";
@@ -9,12 +9,7 @@ import { FooterCreds, RegisterFooterStyles, BackButton } from "./styled";
 import LoadingButton from "@/components/ui/LoadingButton";
 import PasswordInput from "@/components/forms/PasswordInput";
 import LoginCard from "@/components/ui/LoginCard";
-import H2 from "@/components/typography/H2";
 import { useToast } from "@/components/toast";
-
-import Subtext from "@/components/typography/Subtext";
-import P from "@/components/typography/P";
-import TextInput from "@/components/forms/TextInput";
 import { BackArrowIcon } from "@/components/svg";
 import axios from "axios";
 
@@ -66,25 +61,17 @@ const Register = () => {
     <LoginCard>
       <Flex sx={{flexDirection:"column"}}>           
         {!validForm && (<>
-          <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"}>   
-            Registration Link Error    
-          </H2>
-          {errorMessage && (                            
-            <P color={theme?.colors?.danger} align={"center"} fontWeight={"600"}>
-              {errorMessage}
-            </P>            
-          )}          
+          <Heading as="h2" sx={{ color: theme?.colors?.base_800, textAlign: "center", marginTop: "30px" }}>Registration Link Error</Heading>                                                        
+          {errorMessage && (<Text sx={{ color: theme?.colors?.danger, textAlign: "center", fontWeight: "600"}}>{errorMessage}</Text>)}          
         </>)}          
         {validForm && (
           <>
           {successMessage && (
             <>
-              <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"}>
-                Registration
-              </H2>                                             
-              <P align={"center"}>
+              <Heading as="h2" sx={{ color: theme?.colors?.base_800, textAlign: "center", marginTop: "30px" }}>Registration</Heading>                                                        
+              <Text sx={{textAlign: "center"}}>
                 {successMessage}
-              </P>              
+              </Text>              
               <BackButton>
                 <Link to={"/login"}>
                   <BackArrowIcon fill={theme?.colors?.body} width={"20px"} height={"auto"} mr={"10px"} />                      
@@ -94,11 +81,10 @@ const Register = () => {
             </>
           )}
           {!successMessage && (
-            <>
-              <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"}>
-                Registration
-              </H2>                               
-              <Subtext color={theme?.colors?.base_600} align="center">Passwords must be a minimum of 5 characters, include 1 uppercase letter, 1 lowercase letter, and 1 numeric digit.</Subtext>            
+            <>     
+              <Heading as="h2" sx={{ color: theme?.colors?.base_800, textAlign: "center", marginTop: "30px" }}>Registration</Heading>                                                        
+                             
+              <Text sx={{color: theme?.colors?.base_600, textAlign: "center", fontSize: "75rem"}}>Passwords must be a minimum of 5 characters, include 1 uppercase letter, 1 lowercase letter, and 1 numeric digit.</Text>            
               <Formik initialValues={{ password: "", passwordConfirm: "" }} onSubmit={_onSubmit} validationSchema={UserSchema} enableReinitialize={true}>
                 {({ isSubmitting, errors, values, submitCount, setFieldValue }) => {
                   return (

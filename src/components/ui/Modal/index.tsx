@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ModalWrapper, ModalBackground, ModalInner, ModalBox, ModalHeader as ModalHeaderSt, ModalTitle, ModalClose, ModalFooter as ModalFooterSt, ModalBody as ModalBodySt } from "./styled";
 
-export const Modal = ({children, isOpen, toggle, size, centered, customStyles} : { children: React.ReactNode; isOpen?: boolean, toggle?: () => void, size?: "sm" | "lg", centered?: boolean, customStyles?: any}) => {
+export const Modal = ({children, isOpen, toggle, size, centered, sx} : { children: React.ReactNode; isOpen?: boolean, toggle?: () => void, size?: "sm" | "lg", centered?: boolean, sx?: any}) => {
   
   const handleToggle = () => {
     if(isOpen) document.body.style.overflow = "hidden";
@@ -21,7 +21,7 @@ export const Modal = ({children, isOpen, toggle, size, centered, customStyles} :
 
   return (
     createPortal(
-      <ModalWrapper $customStyles={customStyles} className="modalWrapper">
+      <ModalWrapper sx={sx} className="modalWrapper">
         <ModalBackground onClick={handleToggle} className="modalBackground" />
         <ModalInner $size={size} $centered={centered} className="modalInner">
           <ModalBox className="modalBox">

@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Form, Formik } from "formik";
-import { Box, Divider, Flex, useThemeUI } from "theme-ui";
+import { Box, Divider, Flex, Heading, useThemeUI } from "theme-ui";
 import * as Yup from "yup";
 import axios from "axios";
 
@@ -14,7 +14,6 @@ import LoadingButton from "@/components/ui/LoadingButton";
 import PasswordInput from "@/components/forms/PasswordInput";
 import Checkbox from "@/components/forms/Checkbox";
 import LoginCard from "@/components/ui/LoginCard";
-import H2 from "@/components/typography/H2";
 import { useToast } from "@/components/toast";
 
 
@@ -61,8 +60,8 @@ const Login = () => {
 
   return (
     <LoginCard>
-      <Flex sx={{flexDirection:"column"}}>        
-        <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"} mb={"30px"}>Login</H2>
+      <Flex sx={{flexDirection:"column"}}>                
+        <Heading as="h2" sx={{ color: theme?.colors?.base_800, textAlign: "center", marginY: "30px" }}>Login</Heading>
         <Formik initialValues={{ email: "", password: "", rememberMe: false }} onSubmit={_onSubmit} validationSchema={LoginSchema}>
           {({ isSubmitting, errors, submitCount, values, setFieldValue }) => {
             return (

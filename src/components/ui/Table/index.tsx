@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Flex } from "theme-ui";
+import { Box, Flex, Heading } from "theme-ui";
 
 import {
   flexRender,
@@ -28,7 +28,6 @@ import { ArrowIcon, ChevronIcon } from "@/components/svg";
 
 import SearchField from "@/components/forms/SearchField";
 import SelectInput from "@/components/forms/SelectInput";
-import H5 from "@/components/typography/H5";
 
 const TableBasic = ({
   data,
@@ -39,7 +38,7 @@ const TableBasic = ({
   defaultPageSize = 20,
   enableSearch = true,
   enablePaging = true,
-  customStyles,
+  sx,
 }: {
   data?: any;
   title?: any;
@@ -49,7 +48,7 @@ const TableBasic = ({
   defaultPageSize?: number;
   enableSearch?: boolean;
   enablePaging?: boolean;
-  customStyles?: any;
+  sx?: any;
 }) => {
   const [sorting, setSorting] = useState<any>([]);
   const [columnFilters, setColumnFilters] = useState<any>([]);
@@ -125,7 +124,7 @@ const TableBasic = ({
       <TableActions>
         {title && (
           <Box>
-            <H5 {...{ marginBottom: "0" }}>{title}</H5>
+            <Heading as="h5" sx={{ marginBottom: "0" }}>{title}</Heading>            
           </Box>
         )}
         <Flex
@@ -170,7 +169,7 @@ const TableBasic = ({
           {actions && <TableBtns>{actions}</TableBtns>}
         </Flex>
       </TableActions>
-      <TableWrapper $customStyles={customStyles}>
+      <TableWrapper sx={sx}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -266,12 +265,12 @@ const Pagination = ({ table, pagination, defaultPageSize, showRecordsOptions }: 
         Page
         <SelectInput
           name="pageIndex"
-          options={Array.from(Array(table.getPageCount() || 1).keys()).map((v) => ({ value: v, label: v + 1 }))}
+          options={Array.from(Array(table.getPageCount() || 1).keys()).map((v) => ({ value: v, label: (v + 1).toString() }))}
           value={pagination.pageIndex || 0}
           onChange={(e: any) => {
             table.setPageIndex(Number(e));
           }}
-          $customStyles={{ padding: 0, margin: 0, minWidth: "auto" }}
+          sx={{ padding: 0, margin: 0, minWidth: "auto" }}
         />
         of {table.getPageCount() || 1}
       </div>
@@ -286,7 +285,7 @@ const Pagination = ({ table, pagination, defaultPageSize, showRecordsOptions }: 
           table.setPageIndex(0);
           table.setPageSize(Number(e));
         }}
-        $customStyles={{ padding: 0, margin: 0, minWidth: "auto" }}
+        sx={{ padding: 0, margin: 0, minWidth: "auto" }}
       />
     </div>
   </TablePagination>

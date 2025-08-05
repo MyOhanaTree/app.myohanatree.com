@@ -15,7 +15,7 @@ const FileInput = ({
   placeholder,  
   refreshValue,
   showTitles = true,
-  $customStyles, 
+  sx, 
   $errors, 
   $responseErrors, 
   onChange 
@@ -31,7 +31,7 @@ const FileInput = ({
   placeholder?: string; 
   refreshValue?: boolean;
   showTitles?: boolean;
-  $customStyles?: any;
+  sx?: any;
   $responseErrors?: any;
   $errors?: any;
   onChange?: (a?: any) => void;
@@ -110,7 +110,7 @@ const FileInput = ({
   },[$responseErrors, $errors]);
 
   return (
-    <InputWrap $customStyles={$customStyles} $errors={borderError}>
+    <InputWrap sx={sx} $errors={borderError}>
       {label && 
         <LabelWrapper>
           <Label>{label}</Label>

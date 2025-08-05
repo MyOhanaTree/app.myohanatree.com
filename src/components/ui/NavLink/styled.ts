@@ -3,7 +3,6 @@ import { themevals } from "@/theme/themevals";
 
 interface CustomProps {
   $active?: boolean;
-  $customStyles?: any;
 }
   
 

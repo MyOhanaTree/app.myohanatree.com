@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-import { Box, Button, Flex, Spinner } from "theme-ui";
+import { Box, Button, Flex, Spinner, Text } from "theme-ui";
 import axios from "axios";
 
 import Page from "@/components/ui/Page";
@@ -10,7 +10,6 @@ import { useToast } from "@/components/toast";
 import TextInput from "@/components/forms/TextInput";
 import LoadingButton from "@/components/ui/LoadingButton";
 import BasicModal from "@/components/ui/BasicModal";
-import P from "@/components/typography/P";
 import BasicCard from "@/components/ui/BasicCard";
 import SelectDate from "@/components/forms/SelectDate";
 import moment from "moment-timezone";
@@ -108,7 +107,7 @@ export default function Person() {
       actions={[<Button variant="secondary" onClick={() => setConfirmModal(false)}>Cancel</Button>,<Button variant="danger" onClick={confirmDelete}>Confirm</Button>]} 
       onCloseClick={() => setConfirmModal(false)}       
     >
-      <P>Are you sure you want to delete {person?.fullName}?</P>
+      <Text>Are you sure you want to delete {person?.fullName}?</Text>
     </BasicModal>);
   }
 

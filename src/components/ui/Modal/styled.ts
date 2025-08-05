@@ -5,10 +5,9 @@ import { themevals } from "@/theme/themevals";
 interface CustomProps {
   $size?: "sm" | "lg";
   $centered?: boolean;
-  $customStyles?: any;
 }
 
-export const ModalWrapper = styled.div<CustomProps>`
+export const ModalWrapper = styled(Box)<CustomProps>`
   position: fixed;
   top: 0;
   left: 0;
@@ -16,7 +15,6 @@ export const ModalWrapper = styled.div<CustomProps>`
   width: 100%;
   height: 100%;  
   padding: 1rem;
-  ${(props) => props.$customStyles}
 `;
 
 export const ModalBackground = styled.div`

@@ -9,7 +9,7 @@ export default function ToggleInput({
   labelFalse,
   required,
   checked, 
-  $customStyles,
+  sx,
   $responseErrors,
   $errors,
   onChange 
@@ -20,7 +20,7 @@ export default function ToggleInput({
   labelFalse?: string;  
   required?: boolean;
   checked?: boolean;
-  $customStyles?: any;
+  sx?: any;
   $responseErrors?: any;
   $errors?: any;
   onChange?: (e?: any) => void;
@@ -47,7 +47,7 @@ export default function ToggleInput({
   },[$responseErrors, $errors]);
 
   return (
-    <InputWrap $customStyles={$customStyles} $errors={borderError}>
+    <InputWrap sx={sx} $errors={borderError}>
       {label && 
         <LabelWrapper>
           <Label>{label}</Label>

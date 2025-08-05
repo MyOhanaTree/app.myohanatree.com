@@ -1,10 +1,10 @@
 import React from "react";
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../Modal";
 
-const BasicModal = ({children, title, actions, onCloseClick, size, centered = true, customStyles }: any) => {
+const BasicModal = ({children, title, actions, onCloseClick, size, centered = true, sx }: any) => {
   
   return (
-    <Modal isOpen={true} toggle={onCloseClick} size={size} centered={centered} customStyles={customStyles}>
+    <Modal isOpen={true} toggle={onCloseClick} size={size} centered={centered} sx={sx}>
       <ModalHeader toggle={onCloseClick}>{title}</ModalHeader>      
       {children &&
         <ModalBody>{children}</ModalBody>

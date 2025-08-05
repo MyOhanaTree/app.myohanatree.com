@@ -8,7 +8,7 @@ const Checkbox = ({
   value,
   checked,
   onChange,
-  $customStyles,
+  sx,
   $disabled,
 }: {
   name?: string;
@@ -17,7 +17,7 @@ const Checkbox = ({
   checked?: boolean;
   className?: string;
   onChange?: (e?: any) => void;
-  $customStyles?: any;
+  sx?: any;
   $disabled?: boolean;
 }) => {
   const themeContext = useThemeUI();
@@ -35,7 +35,7 @@ const Checkbox = ({
   }, [checked]);
 
   return (
-    <CheckboxWrapper $disabled={$disabled} onClick={(e) => e.stopPropagation()} $customStyles={$customStyles}>
+    <CheckboxWrapper $disabled={$disabled} onClick={(e) => e.stopPropagation()} sx={sx}>
       <input disabled={$disabled} type="checkbox" name={name} value={value ?? 1} checked={newChecked} onChange={setSelectValue} />
       {label && <Label onClick={() => typeof onChange === "function" && onChange(!newChecked)}>{label}</Label>}
     </CheckboxWrapper>

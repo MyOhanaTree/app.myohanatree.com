@@ -1,13 +1,10 @@
 import styled from "styled-components";
 import { themevals } from "@/theme/themevals";
+import { Box } from "theme-ui";
 
-interface CustomProps {
-  $customStyles?: any;
-}
 
-export const CardWrap = styled.div<CustomProps>`
-  margin-bottom: 1rem;
-  ${(props) => props.$customStyles}
+export const CardWrap = styled(Box)`
+  && { margin-bottom: 1rem; }
 `;
 
 export const CardBody = styled.div`

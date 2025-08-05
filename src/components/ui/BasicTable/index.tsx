@@ -6,17 +6,17 @@ const BasicTable = ({
   data,
   columns,
   footer,
-  customStyles
+  sx
 } : {
   data: any[];
   columns: {[key: string]: string | ReactNode};
   footer?: string[][];
-  customStyles?: any;
+  sx?: any;
 }) => {
 
 
   return (
-    <TableWrapper $customStyles={customStyles}>
+    <TableWrapper sx={sx}>
       <Table>
         <TableHeader> 
           <tr>

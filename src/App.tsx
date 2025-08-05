@@ -22,6 +22,7 @@ import ResetPassword from "./containers/Auth/ResetPassword";
 import ForbiddenPage from "./containers/Errors/403";
 import NotFoundPage from "./containers/Errors/404";
 import ServerErrorPage from "./containers/Errors/500";
+import Person from "./containers/Family/member";
 
 // Layouts
 import BaseLayout from "./layouts/BaseLayout";
@@ -37,9 +38,7 @@ import { withToastProvider } from "./components/toast";
 import RenderCompleted from "./hooks/RenderCompleted";
 import useAuthService from "./hooks/useAuthService";
 
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.scss";
-import Person from "./containers/Family/member";
 
 axios.defaults.baseURL = import.meta.env.VITE_REACT_APP_BACKEND;
 

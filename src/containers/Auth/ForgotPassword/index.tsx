@@ -2,13 +2,11 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-import { Box, Divider, Flex, useThemeUI } from "theme-ui";
+import { Box, Divider, Flex, Heading, Text, useThemeUI } from "theme-ui";
 
 import { LoginFooterStyles, FooterCreds, BackButton } from "./styled";
 
 import LoginCard from "@/components/ui/LoginCard";
-import H2 from "@/components/typography/H2";
-import P from "@/components/typography/P";
 import TextInput from "@/components/forms/TextInput";
 import LoadingButton from "@/components/ui/LoadingButton";
 import { BackArrowIcon } from "@/components/svg";
@@ -44,12 +42,10 @@ const ForgotPassword = () => {
   return (
     <LoginCard>
       <Flex sx={{flexDirection:"column"}}>        
-        <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"}>
-          Forgot Password?
-        </H2>
-        <P color={theme?.colors?.body} align={"center"}>
+        <Heading as="h2" sx={{ color: theme?.colors?.base_800, textAlign: "center", marginTop: "30px" }}>Forgot Password?</Heading>
+        <Text sx={{color: theme?.colors?.body, textAlign: "center"}}>
           No worries. We will send you reset instructions.
-        </P>        
+        </Text>        
         <Formik initialValues={{ email: "" }} onSubmit={_onSubmit} validationSchema={ResetSchema}>
           {({ isSubmitting, errors, values, submitCount, setFieldValue }) => {
             return (

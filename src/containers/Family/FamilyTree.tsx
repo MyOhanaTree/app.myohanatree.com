@@ -1,9 +1,7 @@
 import React from "react";
 import { TreeWrapper, CarouselRow, Card } from "./styled";
 import moment from "moment-timezone";
-import { Box, Link } from "theme-ui";
-import P from "@/components/typography/P";
-import H5 from "@/components/typography/H5";
+import { Box, Heading, Link, Text } from "theme-ui";
 
 export interface Person {
   id: string;
@@ -28,8 +26,8 @@ interface PersonCardProps {
 
 const PersonCard: React.FC<PersonCardProps> = ({ person, isMain, select }) => (
   <Card $isMain={isMain} onClick={() => select(person.id)}>
-    <H5>{person.fullName}</H5>
-    <P>{moment(person.birthDate).format('LL')}</P>
+    <Heading as="h3">{person.fullName}</Heading>              
+    <Text>{moment(person.birthDate).format('LL')}</Text>
     <Box sx={{marginTop: "auto"}}><Link href={`/family/${person.id}`}>View</Link></Box>
   </Card>
 );

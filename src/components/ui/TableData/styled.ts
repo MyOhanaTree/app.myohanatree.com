@@ -1,10 +1,10 @@
 import styled from "styled-components";
 import { themevals as theme } from "@/theme/themevals";
+import { Box } from "theme-ui";
 
 interface CustomProps {
   $active?: boolean;  
   $submitting?: boolean;
-  $customStyles?: {[key: string]: string};
   $isFixed?: boolean;
 }
 
@@ -41,19 +41,20 @@ export const TableBottom = styled.div<CustomProps>`
   }
 `
 
-export const TableWrapper = styled.div<CustomProps>`
+export const TableWrapper = styled(Box)`
   width: 100%;
   overflow: auto;
   background-color: ${theme?.colors?.white};
   border-radius: 5px;
   border: 1px solid ${theme?.colors?.base_300};
   box-shadow: 0px 4px 12px 0px rgba(113, 125, 150, 0.05);
-
-  ${(props) => props.$customStyles}
 `;
 
 export const Table = styled.table<CustomProps>`
   width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse; 
+  td, th { text-align: left; }
   ${(props) => props.$isFixed ? `table-layout: fixed;` : ``};
 `;
 
@@ -73,6 +74,7 @@ export const TableHeader = styled.thead`
 
 export const TableFooter = styled.tfoot`
   width: 100%;
+  
   th{
     padding:14px 30px;
     font-weight:600;
@@ -91,6 +93,7 @@ export const TableFooter = styled.tfoot`
 
 export const TableBody = styled.tbody`
   width: 100%;
+
   td{
     padding:14px 30px;
     color:${theme?.colors?.base_700};
@@ -104,8 +107,8 @@ export const TableBody = styled.tbody`
     }
     & > a:hover {color: ${theme?.colors?.base_700}; }
   }
+
   tr{
-    border-bottom: 1px solid ${theme?.colors?.base_300};
     &:hover{
       background: ${theme?.colors?.base_100};
     }
@@ -137,10 +140,9 @@ export const TableActions = styled.div`
 export const TableFilters = styled.div<CustomProps>`
   display: ${props => props.$active ? "block" : "none"};
   position: relative;
-  ${props => props.$customStyles};
 `;
 
-export const FiltersWrap = styled.div<CustomProps>`
+export const FiltersWrap = styled.div`
   position: absolute;
   z-index: 9999;
   width: 100%;

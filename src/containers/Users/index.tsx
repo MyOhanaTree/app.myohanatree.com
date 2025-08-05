@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-import { Box, Button, Flex } from "theme-ui";
+import { Box, Button, Flex, Spinner, Text } from "theme-ui";
 import axios from "axios";
 
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "@/components/ui/Modal";
@@ -12,8 +12,6 @@ import TextInput from "@/components/forms/TextInput";
 import SelectInput from "@/components/forms/SelectInput";
 import { useToast } from "@/components/toast";
 import BasicModal from "@/components/ui/BasicModal";
-import P from "@/components/typography/P";
-import LoadingWheel from "@/components/ui/LoadingWheel";
 import LoadingButton from "@/components/ui/LoadingButton";
 
 export default function Users() {
@@ -175,7 +173,7 @@ export default function Users() {
   const submitDeleteUser = async () => {
     toggleEditModal(false);  
     setConfirmModal(<BasicModal title="Delete User?" confirm_click={confirmDeleteUser} cancel_click={cancelDeleteUser} $submitting={confirmSubmit}>
-      <P>Are you sure you want to delete <strong>{userInfo?.firstName} {userInfo?.lastName}</strong>?</P>
+      <Text>Are you sure you want to delete <strong>{userInfo?.firstName} {userInfo?.lastName}</strong>?</Text>
     </BasicModal>);
   }
 
@@ -248,7 +246,7 @@ export default function Users() {
                     $errors={errors.email && submitCount > 0 ? errors.email : null}                                    
                   />                  
                   {Object.entries(permissions).length === 0 ? (
-                    <LoadingWheel width="15px" stroke="3px" />
+                    <Spinner width="15px" stroke="3px" />
                   ) : (
                     <SelectInput 
                       name="permissions" 
@@ -313,7 +311,7 @@ export default function Users() {
                     autoComplete="off"
                     $errors={errors.email && submitCount > 0 ? errors.email : null}  
                   />                  
-                  {permissions.length === 0 && <LoadingWheel width="15px" stroke="3px" />}
+                  {permissions.length === 0 && <Spinner width="15px" stroke="3px" />}
                   {permissions.length > 0 && <SelectInput 
                     name="permissions" 
                     label="Permissions" 

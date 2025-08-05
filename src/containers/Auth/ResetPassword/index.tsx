@@ -2,15 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-import { Box, Divider, Flex, useThemeUI } from "theme-ui";
+import { Box, Divider, Flex, Heading, Text, useThemeUI } from "theme-ui";
 
 import { LoginFooterStyles, FooterCreds, BackButton } from "./styled";
 
 import LoginCard from "@/components/ui/LoginCard";
-import H2 from "@/components/typography/H2";
-import P from "@/components/typography/P";
 import { useToast } from "@/components/toast";
-import Subtext from "@/components/typography/Subtext";
 import PasswordInput from "@/components/forms/PasswordInput";
 import { BackArrowIcon } from "@/components/svg";
 import LoadingButton from "@/components/ui/LoadingButton";
@@ -56,21 +53,15 @@ const ResetPassword = () => {
     <LoginCard>
       <Flex sx={{flexDirection:"column"}}>        
         {validForm && (<>
-          <H2 color={theme?.colors?.base_800} align={"center"} mt={"30px"}>
-            Password Reset
-          </H2>
-          <P color={theme?.colors?.body} align={"center"}>
+          <Heading as="h2" sx={{ color: theme?.colors?.base_800, textAlign: "center", marginTop: "30px" }}>Password Reset</Heading>          
+          <Text sx={{ color: theme?.colors?.body, textAlign: "center"}}>
             Enter and confirm your new password.
-          </P>
-          <Subtext color={theme?.colors?.base_600} align="center">Passwords must be a minimum of 5 characters, include 1 uppercase letter, 1 lowercase letter, and 1 numeric digit.</Subtext>
+          </Text>
+          <Text sx={{ color: theme?.colors?.base_600, textAlign: "center"}}>Passwords must be a minimum of 5 characters, include 1 uppercase letter, 1 lowercase letter, and 1 numeric digit.</Text>
         </>)}
-        {!validForm && errorMessage && <>
-          <H2 color={theme?.colors?.body} align={"center"} mt={"30px"}>
-            Password Reset Link Error
-          </H2>
-          <P color={theme?.colors?.danger} align={"center"} fontWeight={"600"}>
-            {errorMessage}
-          </P>
+        {!validForm && errorMessage && <>          
+          <Heading as="h2" sx={{ color: theme?.colors?.body, textAlign: "center", marginTop: "30px" }}>Password Reset Link Error</Heading>          
+          <Text sx={{ color: theme?.colors?.danger, textAlign: "center", fontWeight: "600"}}>{errorMessage}</Text>
         </>}
         {validForm && (          
         <Formik initialValues={{ password: "", passwordConfirm: "" }} onSubmit={_onSubmit} validationSchema={ResetSchema}>

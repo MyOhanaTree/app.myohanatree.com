@@ -1,18 +1,18 @@
 import styled from "styled-components";
 import { themevals } from "@/theme/themevals";
+import { Box } from "theme-ui";
 
 interface CustomProps {
   $submitting?: boolean;
-  $customStyles?: any;
   $errors?: any;
 }
 
-export const InputWrap = styled.div<CustomProps>`
+export const InputWrap = styled(Box)<CustomProps>`
+  && { margin-bottom: 20px; }
   display: flex;
   flex-direction: column;
   position:relative;
-  margin-bottom: 20px;  
-  ${(props) => props.$customStyles}
+  
 `;
 
 export const LabelWrapper =  styled.div`

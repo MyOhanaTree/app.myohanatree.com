@@ -1,17 +1,14 @@
 import styled from "styled-components";
 import { themevals as theme } from "@/theme/themevals";
+import { Box } from "theme-ui";
 
-interface CustomProps {
-  $customStyles?: any;
-}
 
-export const TableWrapper = styled.div<CustomProps>`
+export const TableWrapper = styled(Box)`
   width: 100%; 
   overflow: auto;   
-  ${(props) => props.$customStyles}
 `;
 
-export const Table = styled.table<CustomProps>`  
+export const Table = styled.table`  
   width: 100%; 
 `;
 

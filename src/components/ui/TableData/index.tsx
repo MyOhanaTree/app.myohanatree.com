@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import { Formik, Form } from "formik";
-import { Box, Button, Flex, IconButton, Spinner } from "theme-ui";
+import { Box, Button, Flex, Heading, IconButton, Spinner } from "theme-ui";
 
 import { flexRender, getCoreRowModel, useReactTable, getSortedRowModel, Row } from "@tanstack/react-table";
 import { rankItem } from "@tanstack/match-sorter-utils";
@@ -24,7 +24,6 @@ import { ArrowIcon, ChevronIcon, FilterIcon } from "@/components/svg";
 
 import SearchField from "@/components/forms/SearchField";
 import SelectInput from "@/components/forms/SelectInput";
-import H5 from "@/components/typography/H5";
 import LoadingButton from "@/components/ui/LoadingButton";
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../Modal";
 import { findInNestedArray, getNestedValue } from "@/helpers/default";
@@ -59,7 +58,7 @@ const TableData = ({
   actions,
   filters,
   preFilters = {},
-  customStyles,
+  sx,
   searchStyles,
   defaultSortBy = "id",
   defaultSortDir = "asc",
@@ -93,7 +92,7 @@ const TableData = ({
   isFixed?: boolean;
   pageSizes?: number[];
   forceQueryVariables?: object;
-  customStyles?: any;
+  sx?: any;
   returnData?: (e?: any) => void;
   returnQuery?: (e?: any) => void;
   onRowClick?: (e: React.MouseEvent<HTMLTableRowElement>, row: Row<any>) => void;
@@ -298,7 +297,7 @@ const TableData = ({
 
   return (
     <>
-      {title && <H5>{title}</H5>}
+      {title && <Heading as="h5" sx={{ marginBottom: "0" }}>{title}</Heading>}
       <TableTop>        
         {enablePaging &&
           <Pagination {...{ pagination, setPagination, showRecordsOptions }} />
@@ -359,7 +358,7 @@ const TableData = ({
           }}
         </Formik>
       </TableTop>
-      <TableWrapper $customStyles={customStyles}>
+      <TableWrapper sx={sx}>
         <Table $isFixed={isFixed}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

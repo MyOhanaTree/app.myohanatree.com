@@ -8,16 +8,16 @@ const BasicCard = ({
   title,
   actions,
   footer,
-  customStyles,
+  sx,
 }: {
   children?: React.ReactNode;
   title?: string | React.ReactNode;
   actions?: React.ReactNode;
   footer?: React.ReactNode;
-  customStyles?: any;
+  sx?: any;
 }) => {
   return (
-    <CardWrap $customStyles={customStyles}>
+    <CardWrap sx={sx}>
       <Card className="cardBox" sx={{ height: "100%" }}>
         {title && (
           <CardHeader className="cardHeader">

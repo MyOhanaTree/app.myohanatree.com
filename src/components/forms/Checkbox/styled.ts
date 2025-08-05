@@ -1,12 +1,12 @@
 import styled from "styled-components";
 import { themevals } from "@/theme/themevals";
+import { Box } from "theme-ui";
 
 interface CustomProps {
-  $customStyles?: any;
   $disabled?: boolean;
 }
 
-export const CheckboxWrapper = styled.div<CustomProps>`
+export const CheckboxWrapper = styled(Box)<CustomProps>`
   --form-check-bg: #fff;
   --form-check-bg-image: none;
 
@@ -63,5 +63,4 @@ export const CheckboxWrapper = styled.div<CustomProps>`
     background-color: ${themevals.colors.body};
     border-color: ${themevals.colors.body} !important;
   }
-  ${(props) => props.$customStyles}
 `;
