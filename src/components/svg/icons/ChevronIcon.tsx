@@ -7,6 +7,7 @@ export default function ChevronIcon(props?: any) {
     height: props.height ? props.height : null,
     fill: props.fill ? props.fill : null,
     margin: props.margin ? props.margin : null,
+    transform: props.transform ? props.transform : null,
   };
 
   const filteredStyles = Object.keys(svgStyles)

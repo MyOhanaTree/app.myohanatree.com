@@ -345,7 +345,7 @@ const TableData = ({
                       <SearchField
                         name="search"
                         value={globalFilter}
-                        sx={searchStyles}
+                        sx={{margin: "0!important",...searchStyles}}
                         onKeyUp={(e: any) => onSearchChange(e)}
                         onChange={() => submitForm()}
                         onBlur={() => submitForm()}
@@ -505,24 +505,24 @@ const Pagination = ({ pagination, setPagination, showRecordsOptions }: any) => {
           options={showRecordsOptions}
           value={pagination.limit || 15}
           onChange={(e: any) => setPagination((old: any) => ({...old, from: null, limit: e }))}
-          sx={{ padding: 0, margin: 0, minWidth: "auto" }}
+          sx={{ padding: 0, margin: "0!important", minWidth: "auto" }}
         />
       </TPdiv>
       <TPdiv>      
-        <button
-          className="btn btn-prev"
+        <Button
+          variant="white"
           onClick={goPrevious}
           disabled={!(pageStack.length > 0)}
         >
           <ChevronIcon />
-        </button>
-        <button
-          className="btn btn-next"
+        </Button>
+        <Button
+          variant="white"
           onClick={goNext}
           disabled={!pagination.next}
         >
-          <ChevronIcon />
-        </button>
+          <ChevronIcon transform="rotate(180deg)"/>
+        </Button>
       </TPdiv>    
     </TablePagination>
   )
