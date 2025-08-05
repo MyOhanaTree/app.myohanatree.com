@@ -134,10 +134,10 @@ const SelectSearch = ({
       const query = { 
         filters : {              
           ...paramFilters,
-          ...(!!queryValue ? setNestedValue({}, keyValue, value) : {}),
+          ...(!!value ? setNestedValue({}, keyValue, value) : {}),
         },
         search : queryValue ?? null,        
-        lastKey,
+        key: lastKey,
         limit : limit || 10,
         ...restParams
       }
@@ -204,6 +204,10 @@ const SelectSearch = ({
       setTimeout(() => {
         selectRef?.current?.blur();
       }, 100);
+    } else {
+      if (typeof onChange === "function") {
+        onChange(null);
+      }
     }
   };
   

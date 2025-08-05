@@ -345,7 +345,7 @@ const TableData = ({
                       <SearchField
                         name="search"
                         value={globalFilter}
-                        customStyles={searchStyles}
+                        sx={searchStyles}
                         onKeyUp={(e: any) => onSearchChange(e)}
                         onChange={() => submitForm()}
                         onBlur={() => submitForm()}
@@ -505,7 +505,7 @@ const Pagination = ({ pagination, setPagination, showRecordsOptions }: any) => {
           options={showRecordsOptions}
           value={pagination.limit || 15}
           onChange={(e: any) => setPagination((old: any) => ({...old, from: null, limit: e }))}
-          $customStyles={{ padding: 0, margin: 0, minWidth: "auto" }}
+          sx={{ padding: 0, margin: 0, minWidth: "auto" }}
         />
       </TPdiv>
       <TPdiv>      
