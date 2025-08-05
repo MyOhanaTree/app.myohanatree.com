@@ -23,6 +23,7 @@ export const CarouselRow = styled.div`
 `;
 
 export const Card = styled.div<{ $isMain?: boolean }>`
+  user-select: none;
   cursor: pointer;
   display: flex;
   flex-direction: column;
