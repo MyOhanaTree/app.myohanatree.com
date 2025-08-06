@@ -1,5 +1,5 @@
 import React from "react";
-import { PageWrapper, PageInner } from "./styled";
+import { PageWrapper } from "./styled";
 
 const Page = ({children}: any) =>{
   return (

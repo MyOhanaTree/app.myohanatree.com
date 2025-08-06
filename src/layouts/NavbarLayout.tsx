@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
-import { NavWrapper, NavInner, NavInnerMenu, LogoWrapper, LinkWrapper } from "./styled";
-import { Box, MenuButton, Divider, IconButton } from "theme-ui";
+import { useContext, useEffect, useState } from "react";
+import { NavWrapper, NavInner, NavInnerMenu, LinkWrapper, MobileNavWrapper, MobileNavInner } from "./styled";
+import { Box, Divider } from "theme-ui";
 import UserContext from "@/context/User";
 
 import NavLink from "@/components/ui/NavLink";
@@ -11,7 +11,6 @@ import { LogoutIcon, ProfileIcon, TimesIcon, UsersIcon, TreeIcon } from "@/compo
 const NavbarLayout = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext<any>(UserContext);
-  const [navToggle, setNavbarToggle] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const _logout = () =>{
@@ -21,31 +20,12 @@ const NavbarLayout = () => {
   }
 
   useEffect(() => {
-    document.body.className= navToggle ? "navbar-open" : "";
-  },[navToggle]);
-
-  useEffect(() => {
     if(user?.id && loading){
       setLoading(false);
     }
   },[user]);
 
-  useEffect(() => {
-    const handleCustomEvent = (e: any) => {
-      setNavbarToggle((old) => !old);
-    };
-    document.body.addEventListener("navBarToggle", handleCustomEvent);
-    return () => { document.body.removeEventListener("navBarToggle", handleCustomEvent); };
-  }, []);
-  
-  useEffect(() => {
-    setNavbarToggle(false);
-  },[location.pathname])
-
-  const toggleNav = () => {        
-    const customEvent = new Event("navBarToggle");
-    document.body.dispatchEvent(customEvent);
-  };    
+ 
 
   if(loading) return null  
 
@@ -54,9 +34,6 @@ const NavbarLayout = () => {
       <NavWrapper>      
         <NavInner>                                    
           <NavInnerMenu>            
-            <Box sx={{marginLeft : "auto", display : ["block","none"]}}>
-              <IconButton type="button" onClick={() => setNavbarToggle(!navToggle)}><TimesIcon width="15px" height="15px" /></IconButton>             
-            </Box>
             <LinkWrapper>
               <NavLink link={"/"} icon={TreeIcon} label={"Tree"} />
             </LinkWrapper>
@@ -77,9 +54,16 @@ const NavbarLayout = () => {
           </NavInnerMenu>
         </NavInner>
       </NavWrapper>
-      <Box sx={{ position: "absolute", top: 0, left: 0, zIndex: 1998, display : ["block","none"] }}>
-        <MenuButton type="button" onClick={toggleNav} />                             
-      </Box>
+      <MobileNavWrapper>
+        <MobileNavInner>                                    
+          <NavLink link={"/"} icon={TreeIcon} label={""} />
+          {(user?.permissions || []).find((x: any) => ["userAccess"].includes(x)) &&
+            <NavLink link={"/users"} icon={UsersIcon} label={""} />
+          }                        
+          <NavLink link={"/profile"} icon={ProfileIcon} label={""} />
+          <NavLink onClick={_logout} icon={LogoutIcon} label={""} />
+        </MobileNavInner>
+      </MobileNavWrapper>
     </>
   );
 };
