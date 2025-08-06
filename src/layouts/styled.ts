@@ -79,7 +79,10 @@ export const MobileNavInner = styled.div`
   margin-inline: 10px;
   padding: 5px;
   background-color: #ffffff; 
-  border-radius: 5px;  
+  border: 1px solid ${themevals.colors.base_300};  
+  border-bottom: none;
+  border-radius: 5px 5px 0 0;  
+  box-shadow: 0px 0px 6px 0px rgba(113, 125, 150, 0.15);
 `
 
 export const LoginWrapper = styled.div`

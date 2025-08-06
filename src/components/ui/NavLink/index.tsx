@@ -21,13 +21,13 @@ const NavLink: React.FC<NavLinkProps> = ({ link, icon: Icon, label, onClick }) =
       {link &&
         <Link className="link" to={link}>
           {Icon && <Icon fill={isActive ? theme?.colors?.body : theme?.colors?.base_500} width={"20px"} height={"23.33px"} mr={"8px"} />}
-          <LinkText $active={isActive}>{label}</LinkText>
+          {label && <LinkText $active={isActive}>{label}</LinkText>}
         </Link>
       }
       {!link &&
         <span className="link" onClick={onClick}>
           {Icon && <Icon fill={theme?.colors?.base_500} width={"20px"} height={"23.33px"} mr={"8px"} />}
-          <LinkText>{label}</LinkText>
+          {label && <LinkText>{label}</LinkText>}
         </span>
       }
     </NavLinkWrapper>    
