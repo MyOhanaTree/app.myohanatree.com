@@ -19,18 +19,20 @@ interface FamilyTreeProps {
 }
 
 interface PersonCardProps {
-  person: Person;
+  person?: Person | null;
   isMain?: boolean;
   select: (id: string) => void
 }
 
-const PersonCard: React.FC<PersonCardProps> = ({ person, isMain, select }) => (
-  <Card $isMain={isMain} onClick={() => select(person.id)}>
+const PersonCard: React.FC<PersonCardProps> = ({ person, isMain, select }) => {
+  if(!person) return <div></div>;
+
+  return <Card $isMain={isMain} onClick={() => select(person.id)}>
     <Heading as="h3">{person.fullName}</Heading>              
     <Text>{moment(person.birthDate).format('LL')}</Text>
     <Box sx={{marginTop: "auto"}}><Link href={`/family/${person.id}`}>View</Link></Box>
   </Card>
-);
+};
 
 const FamilyTree: React.FC<FamilyTreeProps> = ({ person, select }) => {
   const parents = Object.values(person.parents || {});
@@ -41,7 +43,12 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ person, select }) => {
   const children = Object.values(person.children || {});
 
   const renderRow = (people: Person[], highlightId?: string) => {
-    const items = people.map(p => (<PersonCard key={p.id} person={p} isMain={p.id === highlightId} select={select} />))
+    let paddedPeople: (Person | null)[] = [...people];
+    if (paddedPeople.length % 2 === 0) {
+      paddedPeople.push(null); // insert placeholder in center
+    }
+
+    const items = paddedPeople.map(p => (<PersonCard key={p?.id} person={p} isMain={p?.id === highlightId} select={select} />))
     const activeIndex = people.findIndex(p => p.id === highlightId)
 
     let rotated = items;

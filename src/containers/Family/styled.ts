@@ -18,6 +18,9 @@ export const CarouselRow = styled.div`
   padding: 0.5rem 1rem;
   gap: 1rem;
   flex-grow: 1;
+  > div {
+    flex: 0 0 50%;
+  }
 }
 `;
 
@@ -26,7 +29,7 @@ export const Card = styled.div<{ $isMain?: boolean }>`
   cursor: pointer;
   display: flex;
   flex-direction: column;  
-  flex: 0 0 ${({ $isMain }) => ($isMain ? "65%" : "50%")};
+  flex: 0 0 ${({ $isMain }) => ($isMain ? "65%!important" : "50%")};
   padding: 1rem;
   border: 2px solid ${({ $isMain }) => ($isMain ? "#0077ff" : "#ddd")};
   border-radius: 10px;
