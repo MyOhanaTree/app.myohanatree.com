@@ -21,7 +21,7 @@ jobs:
       run: |
         echo "Creating .env file"
         echo "VITE_REACT_APP_NAME=MyOhanaTree" > .env
-        echo "VITE_REACT_APP_BACKEND=https://sg4aet5un735iwuwsbkuommvri0jjyvm.lambda-url.us-east-1.on.aws/" >> .env
+        echo "VITE_REACT_APP_BACKEND=https://api.myohanatree.com" >> .env
         echo "VITE_REACT_APP_LOGO=" >> .env
         echo "VITE_REACT_APP_CDN=https://assets.myohanatree.com" >> .env
 
