@@ -10,26 +10,11 @@ export const TreeWrapper = styled.div`
   flex-grow: 1
 `;
 
-export const CarouselRow = styled.div`
-  display: flex;
-  justify-content: center;
-  flex-wrap: nowrap; 
-  overflow-x: hidden;
-  padding: 0.5rem 1rem;
-  gap: 1rem;
-  flex-grow: 1;
-  > div {
-    flex: 0 0 50%;
-  }
-}
-`;
-
 export const Card = styled.div<{ $isMain?: boolean }>`
   user-select: none;
   cursor: pointer;
   display: flex;
   flex-direction: column;  
-  flex: 0 0 ${({ $isMain }) => ($isMain ? "65%!important" : "50%")};
   padding: 1rem;
   border: 2px solid ${({ $isMain }) => ($isMain ? "#0077ff" : "#ddd")};
   border-radius: 10px;
@@ -41,5 +26,9 @@ export const Card = styled.div<{ $isMain?: boolean }>`
   &:hover {
     background-color: #e6f3ff;
     border-color: #0077ff;
+  }
+
+  @media(width < 991px) {
+    ${({ $isMain }) => ($isMain ? "width: 100%;" : "padding: 2rem; .inner {display: none}")}
   }
 `;

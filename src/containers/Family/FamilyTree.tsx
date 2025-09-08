@@ -1,7 +1,7 @@
 import React from "react";
-import { TreeWrapper, CarouselRow, Card } from "./styled";
+import { TreeWrapper, Card } from "./styled";
 import moment from "moment-timezone";
-import { Box, Heading, Link, Text } from "theme-ui";
+import { Box, Divider, Flex, Grid, Heading, Link, Text } from "theme-ui";
 
 export interface Person {
   id: string;
@@ -28,9 +28,11 @@ const PersonCard: React.FC<PersonCardProps> = ({ person, isMain, select }) => {
   if(!person) return <div></div>;
 
   return <Card $isMain={isMain} onClick={() => select(person.id)}>
-    <Heading as="h3">{person.fullName}</Heading>              
-    <Text>{moment(person.birthDate).format('LL')}</Text>
-    <Box sx={{marginTop: "auto"}}><Link href={`/family/${person.id}`}>View</Link></Box>
+    <div className="inner">
+      <Heading as="h3">{person.fullName}</Heading>              
+      <Text>{moment(person.birthDate).format('LL')}</Text>
+      <Box sx={{marginTop: "auto"}}><Link href={`/family/${person.id}`}>View</Link></Box>
+    </div>
   </Card>
 };
 
@@ -43,35 +45,21 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ person, select }) => {
   const children = Object.values(person.children || {});
 
   const renderRow = (people: Person[], highlightId?: string) => {
-    let paddedPeople: (Person | null)[] = [...people];
-    if (paddedPeople.length % 2 === 0) {
-      paddedPeople.push(null); // insert placeholder in center
-    }
-
-    const items = paddedPeople.map(p => (<PersonCard key={p?.id} person={p} isMain={p?.id === highlightId} select={select} />))
-    const activeIndex = people.findIndex(p => p.id === highlightId)
-
-    let rotated = items;
-    if(activeIndex >= 0){
-      const index = activeIndex ?? 0;
-      const total = items.length;
-      const center = Math.floor(total / 2);
-      let offset = index - center;
-      if (offset < 0) {
-        offset = total + offset; // wrap negative offsets
-      }
-      rotated = [...items.slice(offset), ...items.slice(0, offset)];
-    }
-        
-    return <CarouselRow>{rotated}</CarouselRow>
+    return (
+      <Flex sx={{flexWrap: "wrap", justifyContent:"center", gap: "15px"}}>
+        {people.filter(Boolean).map(p => (<PersonCard key={p?.id} person={p} isMain={p?.id === highlightId} select={select} />))}
+      </Flex>
+    );
   };
 
   return (
-    <TreeWrapper>
-      {parents.length > 0 ? renderRow(parents) : <CarouselRow></CarouselRow>}
+    <Grid sx={{justifyContent:"center", alignItems: "center", margin: "auto", gap: "25px", padding: ["10px","2rem"]}}>
+      {parents.length > 0 && renderRow(parents)}
+      <Divider />
       {renderRow(siblings, person.id)}
-      {children.length > 0 ? renderRow(children) : <CarouselRow></CarouselRow>}
-    </TreeWrapper>
+      <Divider />
+      {children.length > 0 && renderRow(children)}
+    </Grid>
   );
 };
 
