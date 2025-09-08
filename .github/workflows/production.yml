@@ -2,11 +2,12 @@ name: Node.js Master Deployment
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master" ]    
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: master
 
     steps:
     - uses: actions/checkout@v3
@@ -22,7 +23,7 @@ jobs:
         echo "VITE_REACT_APP_NAME=MyOhanaTree" > .env
         echo "VITE_REACT_APP_BACKEND=https://sg4aet5un735iwuwsbkuommvri0jjyvm.lambda-url.us-east-1.on.aws/" >> .env
         echo "VITE_REACT_APP_LOGO=" >> .env
-        echo "VITE_REACT_APP_CDN=https://www.myohanatree.com" >> .env
+        echo "VITE_REACT_APP_CDN=https://assets.myohanatree.com" >> .env
 
         npm ci
         npm run build
@@ -34,7 +35,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.BUCKET_DEPLOY_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.BUCKET_DEPLOY_SECRET_ACCESS_KEY }}
       run: |
-        aws --region=us-east-1 s3 sync --delete build s3://${{ secrets.BUCKET_DEPLOY_NAME_PROD }} --exclude "uploads/*"
+        aws --region=us-east-1 s3 sync --delete build s3://${{ secrets.BUCKET_DEPLOY_NAME }} --exclude "uploads/*"
 
     - name: Purge Cloudfront Cache
       uses: awact/cloudfront-action@master
@@ -43,4 +44,4 @@ jobs:
         AWS_REGION: "us-east-1"
         AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFRONT_PURGE_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFRONT_PURGE_SECRET_ACCESS_KEY }}
-        DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PROD }}
+        DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
