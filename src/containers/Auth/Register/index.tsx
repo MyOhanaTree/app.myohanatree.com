@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Form, Formik } from "formik";
-import { Box, Divider, Flex, Heading, Text, useThemeUI } from "theme-ui";
+import { Flex, Heading, Text, useThemeUI } from "theme-ui";
 import * as Yup from "yup";
 
 import { FooterCreds, RegisterFooterStyles, BackButton } from "./styled";
@@ -10,8 +10,8 @@ import LoadingButton from "@/components/ui/LoadingButton";
 import PasswordInput from "@/components/forms/PasswordInput";
 import LoginCard from "@/components/ui/LoginCard";
 import { useToast } from "@/components/toast";
-import { BackArrowIcon } from "@/components/svg";
 import axios from "axios";
+import { GoArrowLeft } from "react-icons/go";
 
 const Register = () => {
   const themeContext = useThemeUI();
@@ -74,7 +74,7 @@ const Register = () => {
               </Text>              
               <BackButton>
                 <Link to={"/login"}>
-                  <BackArrowIcon fill={theme?.colors?.body} width={"20px"} height={"auto"} mr={"10px"} />                      
+                  <GoArrowLeft />                      
                   <span>Back to Login</span>
                 </Link>
               </BackButton>              

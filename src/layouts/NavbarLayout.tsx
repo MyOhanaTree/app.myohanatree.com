@@ -6,7 +6,8 @@ import UserContext from "@/context/User";
 import NavLink from "@/components/ui/NavLink";
 import { useNavigate } from "react-router-dom";
 
-import { LogoutIcon, ProfileIcon, TimesIcon, UsersIcon, TreeIcon } from "@/components/svg";
+import { BiLogOut } from "react-icons/bi";
+import { PiUsersFill, PiTreeFill, PiUserCircle } from "react-icons/pi";
 
 const NavbarLayout = () => {
   const navigate = useNavigate();
@@ -35,20 +36,20 @@ const NavbarLayout = () => {
         <NavInner>                                    
           <NavInnerMenu>            
             <LinkWrapper>
-              <NavLink link={"/"} icon={TreeIcon} label={"Tree"} />
+              <NavLink link={"/"} icon={PiTreeFill} label={"Tree"} />
             </LinkWrapper>
             {(user?.permissions || []).find((x: any) => ["userAccess"].includes(x)) &&
               <LinkWrapper>
-                <NavLink link={"/users"} icon={UsersIcon} label={"Users"} />
+                <NavLink link={"/users"} icon={PiUsersFill} label={"Users"} />
               </LinkWrapper>
             }                        
             <Box sx={{marginTop : "auto"}}>
               <Divider sx={{marginTop: "auto"}} />                             
               <LinkWrapper>
-                <NavLink link={"/profile"} icon={ProfileIcon} label={"Profile"} />
+                <NavLink link={"/profile"} icon={PiUserCircle} label={"Profile"} />
               </LinkWrapper>
               <LinkWrapper>
-                <NavLink onClick={_logout} icon={LogoutIcon} label={"Log Out"} />
+                <NavLink onClick={_logout} icon={BiLogOut} label={"Log Out"} />
               </LinkWrapper> 
             </Box>
           </NavInnerMenu>
@@ -56,12 +57,12 @@ const NavbarLayout = () => {
       </NavWrapper>
       <MobileNavWrapper>
         <MobileNavInner>                                    
-          <NavLink link={"/"} icon={TreeIcon} label={""} />
+          <NavLink link={"/"} icon={PiTreeFill} label={""} />
           {(user?.permissions || []).find((x: any) => ["userAccess"].includes(x)) &&
-            <NavLink link={"/users"} icon={UsersIcon} label={""} />
+            <NavLink link={"/users"} icon={PiUsersFill} label={""} />
           }                        
-          <NavLink link={"/profile"} icon={ProfileIcon} label={""} />
-          <NavLink onClick={_logout} icon={LogoutIcon} label={""} />
+          <NavLink link={"/profile"} icon={PiUserCircle} label={""} />
+          <NavLink onClick={_logout} icon={BiLogOut} label={""} />
         </MobileNavInner>
       </MobileNavWrapper>
     </>

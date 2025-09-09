@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Select, { components } from "react-select";
 import { InputWrap, SelectStyles, LabelWrapper, Error } from "./styled";
 import { Label, useThemeUI } from "theme-ui";
+import { MdClose, MdChevronRight } from "react-icons/md";
 
-import { ChevronIcon, TimesIcon } from "@/components/svg";
 
 const SelectInput = ({
   name,
@@ -71,7 +71,7 @@ const SelectInput = ({
   const MultiValueRemove = (props: any) => {
     return (
       <components.MultiValueRemove {...props}>
-        <TimesIcon height={"10px"} width={"10px"} fill={theme?.colors?.base_800} />
+        <MdClose fontSize={"12px"} color={String(theme?.colors?.base_500)} />
       </components.MultiValueRemove>
     );
   };
@@ -79,7 +79,7 @@ const SelectInput = ({
   const ClearIndicator = (props: any) => {
     return (
       <components.ClearIndicator {...props}>
-        <TimesIcon height={"14px"} width={"14px"} fill={theme?.colors?.base_500} />
+        <MdClose fontSize={"12px"} color={String(theme?.colors?.base_500)} />
       </components.ClearIndicator>
     );
   };
@@ -87,7 +87,7 @@ const SelectInput = ({
   const DropdownIndicator = (props: any) => {
     return (
       <components.DropdownIndicator {...props}>
-        <ChevronIcon height={"14px"} width={"14px"} fill={theme?.colors?.base_500} transform={"rotate(-90deg)"} />
+        <MdChevronRight fontSize={"12px"} color={String(theme?.colors?.base_500)} />
       </components.DropdownIndicator>
     );
   };

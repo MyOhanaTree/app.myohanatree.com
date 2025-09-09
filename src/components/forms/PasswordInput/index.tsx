@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { InputWrap, LabelWrapper, Error, VisibleWrap, PasswordToggleWrap } from "./styled";
 import { Input, Label, useThemeUI } from "theme-ui";
-import { EyeIcon, HiddenIcon } from "@/components/svg";
-
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
 const PasswordInput = ({ 
   name, 
@@ -65,8 +64,8 @@ const PasswordInput = ({
           autoComplete={autoComplete} 
         />
         <VisibleWrap onClick={showPassword}>
-          {!visible && <EyeIcon fill={theme?.colors?.base_400}  width={"20px"} height={"20px"} />}
-          {visible && <HiddenIcon  fill={theme?.colors?.base_400}  width={"20px"} height={"20px"} />}          
+          {!visible && <IoMdEye color={String(theme?.colors?.base_400)} fontSize={"20px"} />}
+          {visible && <IoMdEyeOff color={String(theme?.colors?.base_400)} fontSize={"20px"} />}          
         </VisibleWrap>   
       </PasswordToggleWrap> 
       {description && <p><small>{description}</small></p>}

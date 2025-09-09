@@ -2,16 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-import { Box, Divider, Flex, Heading, Text, useThemeUI } from "theme-ui";
+import { Flex, Heading, Text, useThemeUI } from "theme-ui";
 
 import { LoginFooterStyles, FooterCreds, BackButton } from "./styled";
 
 import LoginCard from "@/components/ui/LoginCard";
 import { useToast } from "@/components/toast";
 import PasswordInput from "@/components/forms/PasswordInput";
-import { BackArrowIcon } from "@/components/svg";
 import LoadingButton from "@/components/ui/LoadingButton";
 import axios from "axios";
+import { GoArrowLeft } from "react-icons/go";
 
 const ResetPassword = () => {
   const themeContext = useThemeUI();
@@ -100,7 +100,7 @@ const ResetPassword = () => {
         )}
         <BackButton>
           <Link to={validForm ? "/login" : "/forgot-password"}>                
-            <BackArrowIcon fill={theme?.colors?.body} width={"15px"} height={"auto"} mr={"10px"} />                
+            <GoArrowLeft />                
             <span>{validForm ? "Back to Login" : "Send New Password Reset"}</span>
           </Link>
         </BackButton>        

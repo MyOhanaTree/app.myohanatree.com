@@ -4,8 +4,7 @@ import { Label, useThemeUI } from "theme-ui";
 import DatePicker from "react-datepicker";
 import moment from "moment";
 import ReactDOM from "react-dom";
-
-import { CalendarIcon, ChevronIcon } from "@/components/svg";
+import { MdChevronRight, MdCalendarMonth } from "react-icons/md";
 
 const SelectDate = ({
   label,
@@ -159,9 +158,9 @@ const SelectDate = ({
         </LabelWrapper>
       )}
       <InputValue ref={triggerRef} onClick={() => setActive(!active)} $active={active}>
-        <CalendarIcon fill={theme?.colors?.base_800} />
+        <MdCalendarMonth color={String(theme?.colors?.base_800)} />
         <input onChange={(e) => inputChange(e)} value={inputLabel} />
-        <ChevronIcon fill={active ? theme?.colors?.base_800 : theme?.colors?.base_300} transform={"rotate(-90deg)"} />
+        <MdChevronRight color={String(active ? theme?.colors?.base_800 : theme?.colors?.base_300)} style={{ transform: active ? "rotate(90deg)" : ""}} />
       </InputValue>
       {active &&
         ReactDOM.createPortal(

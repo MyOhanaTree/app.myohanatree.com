@@ -24,10 +24,10 @@ import {
   TableBtns,
 } from "./styled";
 
-import { ArrowIcon, ChevronIcon } from "@/components/svg";
-
 import SearchField from "@/components/forms/SearchField";
 import SelectInput from "@/components/forms/SelectInput";
+import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 
 const TableBasic = ({
   data,
@@ -182,25 +182,22 @@ const TableBasic = ({
                           {flexRender(header.column.columnDef.header, header.getContext())}
                           {{
                             asc: (
-                              <ArrowIcon
-                                direction="up"
-                                fill="var(--theme-ui-colors-base_500)"
-                                width="12px"
-                                height="auto"
-                                ml="10px"
+                              <TiArrowSortedUp
+                                color={"var(--theme-ui-colors-base_500)"}
+                                fontSize="12px"                                
                               />
                             ),
                             desc: (
-                              <ArrowIcon
-                                direction="down"
-                                fill="var(--theme-ui-colors-base_500)"
-                                width="12px"
-                                height="auto"
-                                ml="10px"
+                              <TiArrowSortedDown
+                                color={"var(--theme-ui-colors-base_500)"}
+                                fontSize="12px"                                
                               />
-                            ),
+                            )
                           }[header?.column?.getIsSorted() as "asc" | "desc"] ?? (
-                            <ArrowIcon fill="white" width="12px" height="auto" ml="10px" />
+                            <TiArrowSortedUp
+                              color={"transparent"}
+                              fontSize="12px"                                
+                            />
                           )}
                         </CellInner>
                       )}
@@ -234,30 +231,30 @@ const Pagination = ({ table, pagination, defaultPageSize, showRecordsOptions }: 
   <TablePagination>
     <div>
       <button className="btn btn-first" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
-        <ChevronIcon />
-        <ChevronIcon />
+        <MdChevronLeft />
+        <MdChevronLeft />
       </button>
       <button
         className="btn btn-prev"
         onClick={() => table.setPageIndex(table.getState().pagination.pageIndex - 1)}
         disabled={!table.getCanPreviousPage()}
       >
-        <ChevronIcon />
+        <MdChevronLeft />
       </button>
       <button
         className="btn btn-next"
         onClick={() => table.setPageIndex(table.getState().pagination.pageIndex + 1)}
         disabled={!table.getCanNextPage()}
       >
-        <ChevronIcon />
+        <MdChevronRight />
       </button>
       <button
         className="btn btn-last"
         onClick={() => table.setPageIndex(table.getPageCount() - 1)}
         disabled={!table.getCanNextPage()}
       >
-        <ChevronIcon />
-        <ChevronIcon />
+        <MdChevronRight />
+        <MdChevronRight />
       </button>
     </div>
     <div>

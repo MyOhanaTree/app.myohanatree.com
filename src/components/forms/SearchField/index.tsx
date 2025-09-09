@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { InputWrap, InputInner, SearchIconWrap } from "./styled";
 import { Input, useThemeUI } from "theme-ui";
-import { SearchIcon } from "@/components/svg";
+import { MdSearch } from "react-icons/md";
 
 const SearchField = ({
   name = "",
@@ -58,7 +58,7 @@ const SearchField = ({
           onBlur={(e: any) => setSelectValue(e)}
         />            
         <SearchIconWrap>
-          <SearchIcon fill={theme?.colors?.body} width={"20px"} height={"auto"} />
+          <MdSearch color={String(theme?.colors?.body)} fontSize={"20px"} />
         </SearchIconWrap>
       </InputInner>
     </InputWrap>

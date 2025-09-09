@@ -47,9 +47,4 @@ export const CloseButton = styled.div`
             align-items:center;
         }
     } 
-    svg{
-        width:24px;
-        height:24px;
-        fill:white;
-    }
 `

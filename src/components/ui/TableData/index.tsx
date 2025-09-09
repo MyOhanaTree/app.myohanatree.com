@@ -20,13 +20,14 @@ import {
   TPdiv,
 } from "./styled";
 
-import { ArrowIcon, ChevronIcon, FilterIcon } from "@/components/svg";
-
 import SearchField from "@/components/forms/SearchField";
 import SelectInput from "@/components/forms/SelectInput";
 import LoadingButton from "@/components/ui/LoadingButton";
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../Modal";
 import { findInNestedArray, getNestedValue } from "@/helpers/default";
+
+import { TiArrowSortedUp, TiArrowSortedDown, TiFilter } from "react-icons/ti";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 
 
 interface FilterProps {
@@ -318,7 +319,7 @@ const TableData = ({
                   >
                     {(filters?.length || 0) > 0 && (<>
                       <IconButton type="button" onClick={() => setShowFilters(!showFilters)}>
-                        <FilterIcon height={25} />
+                        <TiFilter fontSize={25} />
                       </IconButton>
                       <Modal isOpen={showFilters} toggle={() => setShowFilters(false)}>  
                         <ModalHeader toggle={() => setShowFilters(false)}>Filters</ModalHeader>
@@ -373,25 +374,22 @@ const TableData = ({
                           {flexRender(header.column.columnDef.header, header.getContext())}
                           {{
                             asc: (
-                              <ArrowIcon
-                                direction="up"
-                                fill={"var(--theme-ui-colors-base_500)"}
-                                width="12px"
-                                height="auto"
-                                ml="10px"
+                              <TiArrowSortedUp
+                                color={"var(--theme-ui-colors-base_500)"}
+                                fontSize="12px"                                
                               />
                             ),
                             desc: (
-                              <ArrowIcon
-                                direction="down"
-                                fill={"var(--theme-ui-colors-base_500)"}
-                                width="12px"
-                                height="auto"
-                                ml="10px"
+                              <TiArrowSortedDown
+                                color={"var(--theme-ui-colors-base_500)"}
+                                fontSize="12px"                                
                               />
                             ),
                           }[header?.column?.getIsSorted() as "asc" | "desc"] ?? (
-                            <ArrowIcon fill="white" width="12px" height="auto" ml="10px" />
+                            <TiArrowSortedUp
+                                color={"transparent"}
+                                fontSize="12px"                                
+                              />
                           )}
                         </CellInner>
                       : flexRender(header.column.columnDef.header, header.getContext())                        
@@ -435,25 +433,22 @@ const TableData = ({
                             {flexRender(header.column.columnDef.header, header.getContext())}
                             {{
                               asc: (
-                                <ArrowIcon
-                                  direction="up"
-                                  fill={"var(--theme-ui-colors-base_500)"}
-                                  width="12px"
-                                  height="auto"
-                                  ml="10px"
+                                <TiArrowSortedUp
+                                  color={"var(--theme-ui-colors-base_500)"}
+                                  fontSize="12px"                                
                                 />
                               ),
                               desc: (
-                                <ArrowIcon
-                                  direction="down"
-                                  fill={"var(--theme-ui-colors-base_500)"}
-                                  width="12px"
-                                  height="auto"
-                                  ml="10px"
+                                <TiArrowSortedDown
+                                  color={"var(--theme-ui-colors-base_500)"}
+                                  fontSize="12px"                                
                                 />
                               ),
                             }[header?.column?.getIsSorted() as "asc" | "desc"] ?? (
-                              <ArrowIcon fill="white" width="12px" height="auto" ml="10px" />
+                              <TiArrowSortedUp
+                                color={"transparent"}
+                                fontSize="12px"                                
+                              />
                             )}
                           </CellInner>
                         : flexRender(header.column.columnDef.header, header.getContext())                        
@@ -513,14 +508,14 @@ const Pagination = ({ pagination, setPagination, showRecordsOptions }: any) => {
           onClick={goPrevious}
           disabled={!(pageStack.length > 0)}
         >
-          <ChevronIcon />
+          <MdChevronLeft />
         </Button>
         <Button
           variant="white"
           onClick={goNext}
           disabled={!pagination.next}
         >
-          <ChevronIcon transform="rotate(180deg)"/>
+          <MdChevronRight />
         </Button>
       </TPdiv>    
     </TablePagination>

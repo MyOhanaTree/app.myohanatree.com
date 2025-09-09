@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Select, { components } from "react-select";
 import { InputWrap, SelectStyles, colorCodedStyles, LabelWrapper, Error } from "./styled";
 import { Label, useThemeUI } from "theme-ui";
+import { MdClose } from "react-icons/md";
 
-import { TimesIcon } from "@/components/svg";
 
 const getNestedValue = (obj: any, key: any) => {
   return key.split('.').reduce((acc: any, part: any) => acc && acc[part], obj);
@@ -242,7 +242,7 @@ const SelectSearch = ({
   const ClearIndicator = (props: any) => {
     return (      
       <components.ClearIndicator {...props}>        
-        <TimesIcon height={"12px"} width={"12px"} fill={theme?.colors?.base_500} />        
+        <MdClose fontSize={"12px"} color={String(theme?.colors?.base_500)} />        
       </components.ClearIndicator>
     );
   };

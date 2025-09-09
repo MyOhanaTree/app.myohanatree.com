@@ -7,7 +7,7 @@ import DatePicker from "react-datepicker";
 import moment from "moment";
 import "moment-timezone";
 
-import { CalendarIcon, ChevronIcon } from "@/components/svg";
+import { MdChevronRight, MdCalendarMonth } from "react-icons/md";
 //import "react-datepicker/dist/react-datepicker.css";
 
 const SelectDateRange = ({
@@ -171,9 +171,9 @@ const SelectDateRange = ({
         onClick={() => setActive(!active)}
         $active={active}
       >
-        <CalendarIcon fill={theme?.colors?.base_800} />          
+        <MdCalendarMonth color={String(theme?.colors?.base_800)} />          
         <span>{dateRangeValue}</span>          
-        <ChevronIcon fill={active ? theme?.colors?.base_800 : theme?.colors?.base_300} transform={"rotate(-90deg)"} />                 
+        <MdChevronRight color={String(active ? theme?.colors?.base_800 : theme?.colors?.base_300)} style={{ transform: active ? "rotate(90deg)" : ""}} />                 
       </InputValue>
       <div style={{display: "block", height: 0, overflow: "hidden", opacity : 0}}>
         <Input 

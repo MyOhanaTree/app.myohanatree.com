@@ -27,22 +27,7 @@ const baseButton = (color: any = "primary", outline?: boolean) => {
           color: "#ffffff",
           backgroundColor: color,
           borderColor: color,
-          svg : {
-            fill: "#ffffff",
-            stroke: "#ffffff",
-            path: { 
-              fill: "#ffffff",
-              stroke: "#ffffff",
-            },                
-          }
         },
-        svg : {
-          fill: color,
-          stroke: color,
-          path: { fill: color, stroke: color, },    
-          height: 14,
-          width: 14,
-        }
       } : {
         color: "#ffffff",
         backgroundColor: color,
@@ -53,16 +38,6 @@ const baseButton = (color: any = "primary", outline?: boolean) => {
           backgroundColor: "hover." + color,
           borderColor: "hover." + color,          
         },
-        svg : {
-          height: 14,
-          width: 14,
-          fill: "#ffffff",
-          stroke: "#ffffff",
-          path: { 
-            fill: "#ffffff",
-            stroke: "#ffffff",
-          },                          
-        }
       }
     ),    
   }
@@ -257,8 +232,6 @@ export const themevals = {
       svg: {
         height: 14,
         width: 14,
-        fill: "body",
-        path: { fill: "body" },
       },
     }, 
     icon: {
@@ -266,14 +239,6 @@ export const themevals = {
       color: "body",
       border: "none",
       padding: "0",
-      svg: {
-        fill: "body",
-        path: { fill: "body" },
-        "&:hover": {
-          fill: "base_600",
-          path: { fill: "base_600" },
-        }
-      },
     },         
   },
   badges: {
@@ -332,15 +297,9 @@ export const themevals = {
       color: "dkgrey",
       "svg" : {
         width: "20px",
-        fill: "dkgrey",
-        path : { fill: "dkgrey" }
       },
       "&:hover" : {
         color: "base_800",
-        "svg" : {
-          fill: "base_800",
-          path : { fill: "base_800" }
-        }
       }
     }
   },

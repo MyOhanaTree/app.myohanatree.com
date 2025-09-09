@@ -2,16 +2,16 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-import { Box, Divider, Flex, Heading, Text, useThemeUI } from "theme-ui";
+import { Flex, Heading, Text, useThemeUI } from "theme-ui";
 
 import { LoginFooterStyles, FooterCreds, BackButton } from "./styled";
 
 import LoginCard from "@/components/ui/LoginCard";
 import TextInput from "@/components/forms/TextInput";
 import LoadingButton from "@/components/ui/LoadingButton";
-import { BackArrowIcon } from "@/components/svg";
 import { useToast } from "@/components/toast";
 import axios from "axios";
+import { GoArrowLeft } from "react-icons/go";
 
 
 const ForgotPassword = () => {
@@ -72,7 +72,7 @@ const ForgotPassword = () => {
         </Formik>
         <BackButton>
           <Link to={"/login"}>
-            <BackArrowIcon fill={theme?.colors?.body} width={"20px"} height={"auto"} margin={"0 10px 0 0"} />
+            <GoArrowLeft />
             <span>Back to Login</span>
           </Link>
         </BackButton>      

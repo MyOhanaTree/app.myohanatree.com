@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ToastWrapper, ToastDiv, ToastText, CloseButton, CloseButtonWrap } from "./styled";
-import { CloseIcon } from "@/components/svg";
+import { MdClose } from "react-icons/md";
 
 const Toast = ({ children, remove, color }: any) =>{
 
@@ -38,7 +38,7 @@ const Toast = ({ children, remove, color }: any) =>{
         </ToastText>
         <CloseButtonWrap>
           <CloseButton onClick={remove}>
-            <CloseIcon height={16} width={16} fill={"#ffffff"}/>
+            <MdClose fontSize={16} color={"#ffffff"}/>
           </CloseButton>
         </CloseButtonWrap>
       </ToastDiv>

@@ -17,6 +17,10 @@ export const NavLinkWrapper = styled.div<CustomProps>`
     gap: 8px;
     text-decoration: none;
     background:${props => props.$active ? themevals?.colors?.base_200 : "transparent"};
+    svg{
+      height: 20px;
+      width: 20px;
+    }
     &:hover{
       background:${themevals?.colors?.base_200};
       span{

@@ -186,8 +186,7 @@ export const TablePagination = styled.div`
     border-radius: 4px;
     padding: 3px!important;
     border-color: ${theme?.colors?.base_300}!important;
-    background-color: ${theme?.colors?.white};
-    & svg {height: 10px; width: auto; fill:  ${theme?.colors?.base_500}!important;}
+    background-color: ${theme?.colors?.white};    
     &.btn-next svg ,&.btn-last svg {transform: scaleX(-1);}
   }
   & .react-select__control {
