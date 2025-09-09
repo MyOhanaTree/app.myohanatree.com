@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
@@ -14,6 +14,7 @@ import BasicCard from "@/components/ui/BasicCard";
 import SelectDate from "@/components/forms/SelectDate";
 import moment from "moment-timezone";
 import SelectSearch from "@/components/forms/SelectSearch";
+import UserContext from "@/context/User";
 
 
 export interface Person {
@@ -26,14 +27,16 @@ export interface Person {
   userId?: string
 }
 
-export default function Person() {
+export default function PersonEdit() {
   const { id } = useParams();
   const toast = useToast();  
   const navigate = useNavigate();
+  const { user } = useContext<any>(UserContext);  
 
   const [loading, setLoading] = useState<boolean>(true);  
   const [person, setPerson] = useState<Person | null>(null);
   const [confirmModal, setConfirmModal] = useState<any>(null);
+  const [showTab, setShowTab] = useState<string>("details");
 
   const getUsers = async ({ query = {}, controller = null, excludeInterceptor = false}: any) => {		
     const params: any = {params : query, excludeInterceptor}
@@ -68,15 +71,10 @@ export default function Person() {
   }); 
 
   const updateMember = async (values: { firstName?: string; lastName?: string; birthDate?: string; deathDate?: string; parents?: string[], userId?: string }) => {
-    const { data } = await axios.put(`/family/${id}`, {
-      firstName: values.firstName,
-      lastName: values.lastName,
-      birthDate: values.birthDate,
-      deathDate: values.deathDate,
-      parents: values?.parents?.map((p) => ({id: p, type: "parent"})),
-      userId: values.userId   
-    }).catch((err) => ({ data: err?.response?.data }));
-    
+    const update: any = {...values};
+    update.parents = values?.parents?.map((p) => ({id: p, type: "parent"}));
+
+    const { data } = await axios.put(`/family/${id}`, update).catch((err) => ({ data: err?.response?.data }));    
     if(data?.id){ 
       toast.add("Updated","var(--theme-ui-colors-green)");      
     }else{
@@ -114,8 +112,12 @@ export default function Person() {
   if(loading) return <Page><Spinner /></Page>
 
   return (
-    <>
-      <Page>                
+    <Page sx={{gap: "1rem"}}>   
+      <Flex sx={{gap: "1rem"}}>
+        <Button type="button" disabled={showTab === "details"} onClick={() => setShowTab("details")}>Details</Button>
+        <Button type="button" disabled={showTab === "settings"} onClick={() => setShowTab("settings")}>Settings</Button>
+      </Flex>
+      {showTab === "details" && (
         <Formik initialValues={{...person }} onSubmit={updateMember} validationSchema={ValidateSchema} >
           {({ isSubmitting, errors, values, submitCount, setFieldValue }: any) => { 
             return (                
@@ -159,6 +161,24 @@ export default function Person() {
                   labelDivider=" "                  
                   multiple
                 />
+              </BasicCard>
+              <Box sx={{display: "flex", flexWrap : "wrap-reverse", gap : "20px", justifyContent : "flex-end", width : "100%"}}>                
+                <LoadingButton
+                  type="submit" 
+                  $loading={isSubmitting}
+                >Update</LoadingButton>                
+              </Box>                
+            </Form>
+            );
+          }}
+        </Formik>
+      )}
+      {showTab === "settings" && (
+        <Formik initialValues={{...person }} onSubmit={updateMember} >
+          {({ isSubmitting, errors, values, submitCount, setFieldValue }: any) => { 
+            return (                
+            <Form noValidate autoComplete="off">
+              <BasicCard>
                 <SelectSearch
                   api={getUsers}
                   label="Connected User"
@@ -170,12 +190,14 @@ export default function Person() {
                   preload={values.userId ? true : false}
                 />
               </BasicCard>
-              <Box sx={{display: "flex", flexWrap : "wrap-reverse", gap : "20px", justifyContent : "flex-end", width : "100%"}}>
+              {user.permissions.includes("familyDelete") && (
                 <Button 
                   variant="outline.danger"
                   type="button" 
                   onClick={submitDelete} 
                 >Delete</Button>  
+              )}
+              <Box sx={{display: "flex", flexWrap : "wrap-reverse", gap : "20px", justifyContent : "flex-end", width : "100%"}}>
                 <LoadingButton
                   type="submit" 
                   $loading={isSubmitting}
@@ -185,8 +207,8 @@ export default function Person() {
             );
           }}
         </Formik>
-      </Page>  
+      )}
       {confirmModal} 
-    </>
+    </Page>      
   );
 }

@@ -1,10 +1,31 @@
 import React from "react";
-import { TreeWrapper, Card } from "./styled";
 import moment from "moment-timezone";
+import styled from "styled-components";
 import { Box, Divider, Flex, Grid, Heading, Link, Text } from "theme-ui";
+
+export const Card = styled(Box)<{ $isMain?: boolean }>`
+  user-select: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;  
+  justify-content: center;
+  padding: 1rem;
+  border: 2px solid ${({ $isMain }) => ($isMain ? "#0077ff" : "#ddd")};
+  border-radius: 10px;
+  background-color: ${({ $isMain }) => ($isMain ? "#e6f3ff" : "#fff")};
+  text-align: center;
+  scroll-snap-align: start;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  &:hover {
+    background-color: #e6f3ff;
+    border-color: #0077ff;
+  }
+`;
 
 export interface Person {
   id: string;
+  firstName: string;
+  lastName: string;
   fullName: string;
   birthDate: string;
   type?: string,
@@ -28,11 +49,16 @@ const PersonCard: React.FC<PersonCardProps> = ({ person, isMain, select }) => {
   if(!person) return <div></div>;
 
   return <Card $isMain={isMain} onClick={() => select(person.id)}>
-    <div className="inner">
+    {!isMain && (
+      <Box sx={{ display: ["flex","none"], alignItems: "center", justifyContent: "center", fontWeight: "bold", background: "secondary", color: "white", width: "50px", height:"50px", borderRadius: "50px"}}>
+        {person.firstName.slice(0, 2)}
+      </Box>
+    )}
+    <Box sx={{ display: [!isMain ? "none" : "block","block"]}}>
       <Heading as="h3">{person.fullName}</Heading>              
       <Text>{moment(person.birthDate).format('LL')}</Text>
       <Box sx={{marginTop: "auto"}}><Link href={`/family/${person.id}`}>View</Link></Box>
-    </div>
+    </Box>
   </Card>
 };
 

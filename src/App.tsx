@@ -22,7 +22,7 @@ import ResetPassword from "./containers/Auth/ResetPassword";
 import ForbiddenPage from "./containers/Errors/403";
 import NotFoundPage from "./containers/Errors/404";
 import ServerErrorPage from "./containers/Errors/500";
-import Person from "./containers/Family/member";
+import Person from "./containers/Family/person";
 
 // Layouts
 import BaseLayout from "./layouts/BaseLayout";
@@ -88,13 +88,11 @@ const App = () => {
       (response) => response,
       (err) => {
         const originalRequest = err.config;
-
         if (originalRequest.excludeInterceptor || originalRequest.method !== "get") {
           return Promise.reject(err);
         }
 
         const status = err?.response?.status;
-
         if (status === 404 && !originalRequest._retry) {
           setError("404");
         } else if (status === 403 && !originalRequest._retry) {
@@ -102,7 +100,7 @@ const App = () => {
         } else if (status === 401) {
           if (!err?.response?.request?.responseURL?.includes("/login")) {
             localStorage.removeItem("user");
-            //window.location.assign("/login");
+            window.location.assign("/login");
           }
         }
 
