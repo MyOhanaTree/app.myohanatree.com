@@ -29,9 +29,10 @@ export interface Person {
   fullName: string;
   birthDate: string;
   type?: string,
-  parents?: Record<string, Person>;
-  siblings?: Record<string, Person>;
-  children?: Record<string, Person>;
+  parents?: Person[];
+  siblings?: Person[];
+  children?: Person[];
+  relationships?: Person[];
 }
 
 interface FamilyTreeProps {
@@ -48,18 +49,36 @@ interface PersonCardProps {
 const PersonCard: React.FC<PersonCardProps> = ({ person, isMain, select }) => {
   if(!person) return <div></div>;
 
-  return <Card $isMain={isMain} onClick={() => select(person.id)}>
-    {!isMain && (
-      <Box sx={{ display: ["flex","none"], alignItems: "center", justifyContent: "center", fontWeight: "bold", background: "secondary", color: "white", width: "50px", height:"50px", borderRadius: "50px"}}>
-        {person.firstName.slice(0, 2)}
-      </Box>
-    )}
-    <Box sx={{ display: [!isMain ? "none" : "block","block"]}}>
-      <Heading as="h3">{person.fullName}</Heading>              
-      <Text>{moment(person.birthDate).format('LL')}</Text>
-      <Box sx={{marginTop: "auto"}}><Link href={`/family/${person.id}`}>View</Link></Box>
+  const relationship = person?.relationships?.[0];
+
+  return (
+    <Box sx={{ display: "flex",flexDirection: "column", alignItems: "center", gap: "5px"}}>
+      <Card $isMain={isMain} onClick={() => select(person.id)}>
+        {!isMain && (
+          <Box sx={{ display: ["flex","none"], alignItems: "center", justifyContent: "center", fontWeight: "bold", background: "secondary", color: "white", width: "50px", height:"50px", borderRadius: "50px"}}>
+            {person.firstName.slice(0, 2)}
+          </Box>
+        )}
+        <Box sx={{ display: [!isMain ? "none" : "block","block"]}}>
+          <Heading as="h3">{person.firstName} {person.lastName}</Heading>              
+          <Text>{moment(person.birthDate).format('LL')}</Text>
+          <Box sx={{marginTop: "auto"}}><Link href={`/family/${person.id}`}>View</Link></Box>
+        </Box>
+      </Card>
+      {relationship && (
+        <Card onClick={() => select(relationship.id)}>          
+          <Box sx={{ display: ["flex","none"], alignItems: "center", justifyContent: "center", fontWeight: "bold", background: "secondary", color: "white", width: "50px", height:"50px", borderRadius: "50px"}}>
+            {relationship.firstName.slice(0, 2)}
+          </Box>          
+          <Box sx={{ display: ["none","block"]}}>
+            <Heading as="h3">{relationship.firstName} {relationship.lastName}</Heading>              
+            <Text>{moment(relationship.birthDate).format('LL')}</Text>
+            <Box sx={{marginTop: "auto"}}><Link href={`/family/${relationship.id}`}>View</Link></Box>
+          </Box>
+        </Card>
+      )}
     </Box>
-  </Card>
+  );
 };
 
 const FamilyTree: React.FC<FamilyTreeProps> = ({ person, select }) => {

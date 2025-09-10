@@ -31,6 +31,7 @@ const Dashboard = () =>{
   const toggleModal = () => setShowModal(!showModal)
 
   const loadInit = async (id?: string) => {
+    setLoading(true);
     const { data } = await axios.get(`/family${id ? `?id=${id}` : ""}`).catch((err) => ({ data: err?.response?.data }));    
     if(data?.id){
       setPerson(data);

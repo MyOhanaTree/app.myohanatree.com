@@ -23,7 +23,9 @@ export interface Person {
   lastName?: string;
   fullName: string;
   birthDate: string;
+  deathDate: string;
   parents?: string[];  
+  relationship?: {[key: string]: any};
   userId?: string
 }
 
@@ -60,7 +62,11 @@ export default function PersonEdit() {
     const { data } = await axios.get(`/family/${id}`).catch((err) => ({ data: err?.response?.data }));    
 
     if(data?.id){
-      setPerson({...data, parents: (Array.isArray(data?.parents) && data?.parents?.map((p: any) => p.id)) });
+      setPerson({
+        ...data, 
+        parents: (Array.isArray(data?.parents) && data?.parents?.map((p: any) => p.id)),
+        relationship: (Array.isArray(data?.relationships) && data?.relationships[0]?.id) 
+      });
     }
     setLoading(false);
   }
@@ -68,11 +74,13 @@ export default function PersonEdit() {
   const ValidateSchema = Yup.object().shape({
     firstName: Yup.string().required("First Name is required."),
     lastName: Yup.string().required("Last Name is required."),
+    birthDate: Yup.string().required("Birth Date is required."),  
   }); 
 
-  const updateMember = async (values: { firstName?: string; lastName?: string; birthDate?: string; deathDate?: string; parents?: string[], userId?: string }) => {
+  const updateMember = async (values: { firstName?: string; lastName?: string; birthDate?: string; deathDate?: string; parents?: string[], relationship?: any, userId?: string }) => {
     const update: any = {...values};
     update.parents = values?.parents?.map((p) => ({id: p, type: "parent"}));
+    update.relationships = [update.relationship ? {id: update.relationship, type: "partner"} : null].filter(Boolean)
 
     const { data } = await axios.put(`/family/${id}`, update).catch((err) => ({ data: err?.response?.data }));    
     if(data?.id){ 
@@ -105,7 +113,7 @@ export default function PersonEdit() {
       actions={[<Button variant="secondary" onClick={() => setConfirmModal(false)}>Cancel</Button>,<Button variant="danger" onClick={confirmDelete}>Confirm</Button>]} 
       onCloseClick={() => setConfirmModal(false)}       
     >
-      <Text>Are you sure you want to delete {person?.fullName}?</Text>
+      <Text>Are you sure you want to delete {person?.firstName} {person?.lastName}?</Text>
     </BasicModal>);
   }
 
@@ -139,18 +147,18 @@ export default function PersonEdit() {
                 /> 
                 <SelectDate
                   name="birthDate"
-                  label="Birth Date"
+                  label="Date of Birth"
                   value={values.birthDate && moment(values.birthDate).unix()}
                   onChange={(val: any) => setFieldValue("birthDate",val && moment((val) * 1000).format('YYYY-MM-DD') )}
                   $errors={errors.birthDate && submitCount > 0 ? errors.birthDate : null}  
                 />   
                 <SelectDate
                   name="deathDate"
-                  label="Death Date"
+                  label="Date of Passing"
                   value={values.deathDate && moment(values.deathDate).unix()}
                   onChange={(val: any) => setFieldValue("deathDate",val && moment((val) * 1000).format('YYYY-MM-DD'))}
                   $errors={errors.deathDate && submitCount > 0 ? errors.deathDate : null}  
-                /> 
+                />                 
                 <SelectSearch
                   api={getMembers}
                   label="Parents"
@@ -160,6 +168,15 @@ export default function PersonEdit() {
                   keyLabel={["firstName","lastName"]}
                   labelDivider=" "                  
                   multiple
+                />
+                <SelectSearch
+                  api={getMembers}
+                  label="Relationship (spouce, partner, etc.)"
+                  value={values.relationship}
+                  onChange={(val: any) => setFieldValue("relationship",val.id)}
+                  $errors={errors.relationship && submitCount > 0 ? errors.relationship : null}  
+                  keyLabel={["firstName","lastName"]}
+                  labelDivider=" "                                    
                 />
               </BasicCard>
               <Box sx={{display: "flex", flexWrap : "wrap-reverse", gap : "20px", justifyContent : "flex-end", width : "100%"}}>                
@@ -181,7 +198,7 @@ export default function PersonEdit() {
               <BasicCard>
                 <SelectSearch
                   api={getUsers}
-                  label="Connected User"
+                  label="Has Login User"
                   value={values.userId}
                   onChange={(val: any) => setFieldValue("userId",val?.id)}
                   $errors={errors.userId && submitCount > 0 ? errors.userId : null}  
