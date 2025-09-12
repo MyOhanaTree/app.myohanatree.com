@@ -26,7 +26,7 @@ export const PageContent = styled.div`
 
 export const NavWrapper = styled.div`
   position: relative; 
-  z-index: 1999;  
+  z-index: 999;  
   width: 250px; 
   min-width: 250px;
   max-width: calc(100% - 25px);
