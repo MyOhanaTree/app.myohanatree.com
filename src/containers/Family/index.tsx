@@ -39,15 +39,6 @@ const Dashboard = () =>{
     setLoading(false);
   }
 
-  const getUsers = async ({ query = {}, controller = null, excludeInterceptor = false}: any) => {		
-    const params: any = {params : query, excludeInterceptor}
-    if(controller?.signal){
-      params.signal = controller.signal
-    }
-    const res = await axios.get("/users", params).catch((err) => ({ data: { items: [] } }))
-    return res?.data;
-  };
-
   const getMembers = async ({ query = {}, controller = null, excludeInterceptor = false}: any) => {		
     const params: any = {params : query, excludeInterceptor}
     if(controller?.signal){
@@ -162,15 +153,6 @@ const Dashboard = () =>{
                   keyLabel={["firstName","lastName"]}
                   labelDivider=" "                  
                   multiple
-                />
-                <SelectSearch
-                  api={getUsers}
-                  label="Connect User"
-                  value={values.userId}
-                  onChange={(val: any) => setFieldValue("userId",val?.id)}
-                  $errors={errors.userId && submitCount > 0 ? errors.userId : null}  
-                  keyLabel={["firstName","lastName"]}
-                  labelDivider=" "
                 />
               </ModalBody>
               <ModalFooter>                
