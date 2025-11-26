@@ -1,25 +1,30 @@
 {
   "compilerOptions": {
-    "types": ["vite/client"],
-    "module": "esnext",
-    "target": "esnext",
-    "moduleResolution": "node",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "jsx": "react-jsx",
-    "strict": true,
-    "outDir": "dist",    
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,    
-    "lib": ["dom", "esnext"],
-    "noImplicitAny": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "strictNullChecks": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": ["vite/client"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "types.d.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src",
+    "src/env.d.ts"
+  ]
 }
