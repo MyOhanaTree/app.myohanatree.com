@@ -4,6 +4,7 @@ export interface BasicPerson {
   lastName: string;
   fullName?: string;
   birthDate?: string;
+  deathDate?: string;
   accountId?: string;
 }
 

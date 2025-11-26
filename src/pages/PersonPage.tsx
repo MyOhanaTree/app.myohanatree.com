@@ -3,10 +3,12 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchFamilyPerson, updateFamilyPerson } from "../api/family";
 import type { FamilyPerson } from "../types/family";
 import logo from "/myohanatree-logo.png";
+import SelectDate from "@/components/forms/SelectDate";
+import SelectSearch from "@/components/forms/SelectSearch";
+import TextInput from "@/components/forms/TextInput";
 
 export const PersonPage: React.FC = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [person, setPerson] = useState<FamilyPerson | null>(null);
   const [form, setForm] = useState<Partial<FamilyPerson>>({});
@@ -27,21 +29,12 @@ export const PersonPage: React.FC = () => {
     try {
       const data = await fetchFamilyPerson(id);
       setPerson(data);
-      setForm({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        birthDate: data.birthDate,
-      });
+      setForm(data);
     } catch {
       setError("Failed to load person.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
@@ -91,35 +84,51 @@ export const PersonPage: React.FC = () => {
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
             <div className="grid gap-4">
-              <div>
-                <label className="block text-sm font-semibold">First Name</label>
-                <input
-                  name="firstName"
-                  value={form.firstName || ""}
-                  onChange={handleChange}
-                  className="mt-1 w-full border rounded px-3 py-2"
-                />
-              </div>
+              <TextInput
+                name="firstName"
+                label="First Name"
+                value={form.firstName}
+                onChange={(val: any) => setForm(prev => ({ ...prev, firstName: val }))}
+              />
+              <TextInput
+                name="lastName"
+                label="Last Name"
+                value={form.lastName}
+                onChange={(val: any) => setForm(prev => ({ ...prev, lastName: val }))}
+              /> 
 
-              <div>
-                <label className="block text-sm font-semibold">Last Name</label>
-                <input
-                  name="lastName"
-                  value={form.lastName || ""}
-                  onChange={handleChange}
-                  className="mt-1 w-full border rounded px-3 py-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold">Birth Date</label>
-                <input
-                  name="birthDate"
-                  value={form.birthDate || ""}
-                  onChange={handleChange}
-                  className="mt-1 w-full border rounded px-3 py-2"
-                />
-              </div>
+              <SelectDate
+                name="birthDate"
+                label="Date of Birth"
+                value={form.birthDate && (new Date(form.birthDate + " 00:00:00").valueOf() / 1000)}
+                onChange={(val: any) => setForm(prev => ({ ...prev, birthDate: new Date(val * 1000).toLocaleDateString('en-CA') }))}
+              />   
+              <SelectDate
+                name="deathDate"
+                label="Date of Passing"
+                value={form.deathDate && (new Date(form.deathDate + " 00:00:00").valueOf() / 1000)}
+                onChange={(val: any) => setForm(prev => ({ ...prev, deathDate: new Date(val * 1000).toLocaleDateString('en-CA') }))}
+              />                              
+              <SelectSearch
+                api={() => Promise.resolve([])} // Replace with actual API to fetch members
+                label="Parents"
+                value={form.parents?.map(p => p.id) || []}
+                onChange={(val: any) => setForm(prev => ({ ...prev, parents: val }))}
+                keyLabel={["firstName","lastName"]}
+                labelDivider=" "                  
+                multiple
+              />
+              {/* 
+              <SelectSearch
+                api={getMembers}
+                label="Relationship (spouce, partner, etc.)"
+                value={values.relationship}
+                onChange={(val: any) => setFieldValue("relationship",val.id)}
+                $errors={errors.relationship && submitCount > 0 ? errors.relationship : null}  
+                keyLabel={["firstName","lastName"]}
+                labelDivider=" "                                    
+              />
+              */}
             </div>
 
             <div className="mt-6 flex justify-end space-x-3">
