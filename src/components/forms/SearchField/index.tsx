@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { InputWrap, InputInner, SearchIconWrap } from "./styled";
-import { Input, useThemeUI } from "theme-ui";
 import { MdSearch } from "react-icons/md";
+import { fieldWrapper, inputBase } from "../shared";
+
+type SearchFieldProps = {
+  name?: string;
+  value?: string | number;
+  width?: string;
+  className?: string;
+  sx?: React.CSSProperties;
+  onChange?: (e?: any) => void;
+  onKeyUp?: (e?: any) => void;
+  onBlur?: (e?: any) => void;
+};
 
 const SearchField = ({
   name = "",
@@ -12,56 +22,36 @@ const SearchField = ({
   onChange,
   onKeyUp,
   onBlur,
-}: {
-  name?: string;
-  value?: string | number;
-  width?: string;
-  className?: string;
-  sx?: any;
-  onChange?: (e?: any) => void;
-  onKeyUp?: (e?: any) => void;
-  onBlur?: (e?: any) => void;
-}) => {
-
-  const themeContext = useThemeUI();
-  const { theme } = themeContext;    
+}: SearchFieldProps) => {
   const [newValue, setNewValue] = useState<string | number | undefined>(value);
-  
-  const setKeyUp = function(e: any){
-    if(typeof onKeyUp === "function"){
-      onKeyUp(e);
-    }
-  }
 
-  const setSelectValue = function (e: any){  
-    if(typeof onChange === "function"){
-      onChange(e);   
-    }    
-    
-    setNewValue(e.target.value ?? undefined)    
-  }
+  const setSelectValue = function (e: any) {
+    onChange?.(e);
+    setNewValue(e.target.value ?? undefined);
+  };
 
   useEffect(() => {
     setNewValue(value);
-  },[value]);
+  }, [value]);
 
   return (
-    <InputWrap className={className} sx={{...sx, width: width}}>
-      <InputInner>
-        <Input
-          type="text"  
-          name={name} 
-          placeholder={"Search"} 
+    <div className={`${fieldWrapper} ${className || ""}`} style={{ ...sx, width }}>
+      <div className="relative">
+        <input
+          type="text"
+          name={name}
+          placeholder="Search"
           value={newValue ?? ""}
-          onChange={(e: any) => setSelectValue(e)} 
-          onKeyUp={(e: any) => setKeyUp(e)} 
+          onChange={(e: any) => setSelectValue(e)}
+          onKeyUp={(e: any) => onKeyUp?.(e)}
           onBlur={(e: any) => setSelectValue(e)}
-        />            
-        <SearchIconWrap>
-          <MdSearch color={String(theme?.colors?.body)} fontSize={"20px"} />
-        </SearchIconWrap>
-      </InputInner>
-    </InputWrap>
+          className={`${inputBase} h-11 pr-10`}
+        />
+        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
+          <MdSearch size={18} />
+        </span>
+      </div>
+    </div>
   );
 };
 

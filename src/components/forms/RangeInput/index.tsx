@@ -1,117 +1,114 @@
 import React, { useState, useEffect } from "react";
-import { InputWrap, LabelWrapper, Error } from "./styled";
-import { Box, Flex, Input, Label, useThemeUI } from "theme-ui";
+import { fieldWrapper, inputBase, labelWrapper, errorText, helperText } from "../shared";
 
-const RangeInput = ({ 
-  name, 
-  label,
-  labelFrom, 
-  labelTo, 
-  value, 
-  description, 
-  required,
-  disabled, 
-  readonly, 
-  min, 
-  max, 
-  step, 
-  sx, 
-  $errors, 
-  $responseErrors, 
-  onChange 
-}:{
+type RangeInputProps = {
   name?: string;
   label?: string | React.ReactNode;
-  labelFrom?: string | React.ReactNode;  
-  labelTo?: string | React.ReactNode;  
+  labelFrom?: string | React.ReactNode;
+  labelTo?: string | React.ReactNode;
   value?: number[];
-  description?: string; 
+  description?: string;
   required?: boolean;
   readonly?: boolean;
   disabled?: boolean;
   min?: string | number;
   max?: string | number;
   step?: string | number;
-  sx?: any;
+  sx?: React.CSSProperties;
   $responseErrors?: any;
   $errors?: any;
   onChange?: (e?: any) => void;
-}) => {
+};
 
-  const themeContext = useThemeUI();
-  const { theme } = themeContext;
+const RangeInput = ({
+  name,
+  label,
+  labelFrom,
+  labelTo,
+  value,
+  description,
+  required,
+  disabled,
+  readonly,
+  min,
+  max,
+  step,
+  sx,
+  $errors,
+  $responseErrors,
+  onChange,
+}: RangeInputProps) => {
   const [borderError, setBorderError] = useState(false);
 
-  const setSelectValue = function (e: any, type = "from"){    
-    if(disabled) return true;
-      
-    let tempVal = e.target.value;
-    let curVal: number[] = value || [];
+  const handleChange = (e: any, type: "from" | "to") => {
+    if (disabled) return;
 
-    if(type === "from"){
-      if(min && tempVal < min){ tempVal = min }
-      if(max && tempVal > max){ tempVal = max }   
-      curVal = [parseFloat(tempVal), curVal[1]]
+    let val = parseFloat(e.target.value);
+    if (min !== undefined && val < (min as number)) val = min as number;
+    if (max !== undefined && val > (max as number)) val = max as number;
+
+    const current: number[] = value ? [...value] : [];
+    if (type === "from") {
+      current[0] = val;
     } else {
-      if(min && tempVal < min){ tempVal = min }
-      if(max && tempVal > max){ tempVal = max }   
-      curVal = [curVal[0], parseFloat(tempVal)]
+      current[1] = val;
     }
-
-    if(typeof onChange === "function"){
-      onChange(curVal[0] || curVal[1] ? curVal : null);
-    }
-  }
+    onChange?.(current[0] || current[1] ? current : null);
+  };
 
   useEffect(() => {
-    if($responseErrors || $errors){
-      setBorderError(true);
-    }else{
-      setBorderError(false);
-    }
-  },[$responseErrors, $errors]);
+    setBorderError(!!($responseErrors || $errors));
+  }, [$responseErrors, $errors]);
+
+  const inputClass = `${inputBase} h-11 ${borderError ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200" : ""}`;
 
   return (
-    <InputWrap sx={sx} $errors={borderError}> 
-      {label && 
-        <LabelWrapper>
-          <Label>{label}</Label>
-          {required ? <span>*</span>  : ''}         
-        </LabelWrapper>
-      }     
-      <Flex sx={{gap: "1rem"}}>
-        <Box sx={{flexGrow: 1}}>          
-          <Label sx={{fontSize: ".75rem"}}>{labelFrom || "From"}</Label>                     
-          <Input 
-            type="number" 
-            name={`${name}[from]`} 
-            disabled={disabled} 
-            readOnly={readonly}                     
-            min={min}
-            max={max}
-            step={step}
-            value={value?.[0] ?? ""} 
-            onChange={(e: any) => setSelectValue(e, "from")}  
+    <div className={fieldWrapper} style={sx}>
+      {label && (
+        <div className={labelWrapper}>
+          <span>{label}</span>
+          {required ? <span className="text-rose-600">*</span> : ""}
+        </div>
+      )}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="flex flex-col gap-1 text-xs font-semibold text-slate-700">
+          <span>{labelFrom || "From"}</span>
+          <input
+            type="number"
+            name={`${name}[from]`}
+            disabled={disabled}
+            readOnly={readonly}
+            min={min as any}
+            max={max as any}
+            step={step as any}
+            value={value?.[0] ?? ""}
+            onChange={(e) => handleChange(e, "from")}
+            className={inputClass}
           />
-        </Box>
-        <Box sx={{flexGrow: 1}}>        
-          <Label sx={{fontSize: ".75rem"}}>{labelTo || "To"}</Label>                            
-          <Input 
-            type="number" 
-            name={`${name}[to]`} 
-            disabled={disabled} 
-            readOnly={readonly}                     
-            min={min}
-            max={max}
-            step={step}
-            value={value?.[1] ?? ""} 
-            onChange={(e: any) => setSelectValue(e, "to")}  
+        </label>
+        <label className="flex flex-col gap-1 text-xs font-semibold text-slate-700">
+          <span>{labelTo || "To"}</span>
+          <input
+            type="number"
+            name={`${name}[to]`}
+            disabled={disabled}
+            readOnly={readonly}
+            min={min as any}
+            max={max as any}
+            step={step as any}
+            value={value?.[1] ?? ""}
+            onChange={(e) => handleChange(e, "to")}
+            className={inputClass}
           />
-        </Box>
-      </Flex>
-      {description && <p><small>{description}</small></p>}       
-      {$errors && <Error>{$errors}</Error>}
-    </InputWrap>    
+        </label>
+      </div>
+      {description && (
+        <p className={helperText}>
+          <small>{description}</small>
+        </p>
+      )}
+      {$errors && <div className={errorText}>{$errors}</div>}
+    </div>
   );
 };
 

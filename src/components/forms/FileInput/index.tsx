@@ -1,43 +1,39 @@
 import React, { useState, useEffect, useRef } from "react";
-import { InputWrap, LabelWrapper, DropArea, DropAreaLabel, Error } from "./styled";
-import { Label, useThemeUI } from "theme-ui";
-import { useToast } from "@/components/toast";
+import { fieldWrapper, labelWrapper, errorText, helperText } from "../shared";
 
-const FileInput = ({ 
-  api,
-  apiVariables,
-  label, 
-  value,
-  directory,
-  description, 
-  required,
-  disabled, 
-  placeholder,  
-  refreshValue,
-  showTitles = true,
-  sx, 
-  $errors, 
-  $responseErrors, 
-  onChange 
-}:{
-  api: (props?: any) => Promise<void>;
-  apiVariables?: {[key: string]: any},
-  label?: string | React.ReactNode;  
+type FileInputProps = {
+  api: (props?: any) => Promise<any>;
+  apiVariables?: { [key: string]: any };
+  label?: string | React.ReactNode;
   value?: string;
   directory?: string;
-  description?: string; 
+  description?: string;
   required?: boolean;
   disabled?: boolean;
-  placeholder?: string; 
+  placeholder?: string;
   refreshValue?: boolean;
   showTitles?: boolean;
-  sx?: any;
+  sx?: React.CSSProperties;
   $responseErrors?: any;
   $errors?: any;
   onChange?: (a?: any) => void;
-}) => {
+};
 
-  const toast = useToast();  
+const FileInput = ({
+  api,
+  apiVariables,
+  label,
+  directory,
+  description,
+  required,
+  disabled,
+  refreshValue,
+  showTitles = true,
+  sx,
+  $errors,
+  $responseErrors,
+  onChange,
+}: FileInputProps) => {
   const fileInputRef = useRef<any>(null);
 
   const [files, setFiles] = useState<any[]>([]);
@@ -59,76 +55,90 @@ const FileInput = ({
     setFiles(e.target.files);
   };
 
-  const handleUpload = async () => {    
-    if(disabled || files.length === 0) return true;         
+  const handleUpload = async () => {
+    if (disabled || files.length === 0) return true;
 
     const tempFiles: any[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const res: any = await api({ ...apiVariables, data : { ...apiVariables?.data, directory : directory || "", name : file.name, type : file.type, size : file.size }});    
-      if(res.success){      
+      const res: any = await api({
+        ...apiVariables,
+        data: { ...apiVariables?.data, directory: directory || "", name: file.name, type: file.type, size: file.size },
+      });
+      if (res?.success) {
         tempFiles.push({
-          file : file,
-          url : res.url, 
-          title: res.name, 
-          location : res.location
-        })
-      } else {
-        toast.add(res?.message ? res.message : `Error grabbing file ${file.name}`,"var(--theme-ui-colors-red)");
+          file: file,
+          url: res.url,
+          title: res.name,
+          location: res.location,
+        });
       }
-    } 
-    setValues(tempFiles); 
+    }
+    setValues(tempFiles);
 
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  }
+  };
 
   useEffect(() => {
-    if(typeof onChange === "function"){
+    if (typeof onChange === "function") {
       onChange(values);
     }
-  },[values]);
+  }, [values, onChange]);
 
   useEffect(() => {
     handleUpload();
-  },[files]);
+  }, [files]);
 
   useEffect(() => {
-    if(refreshValue){
+    if (refreshValue) {
       setFiles([]);
+      setValues([]);
     }
-  },[refreshValue])
+  }, [refreshValue]);
 
   useEffect(() => {
-    if($responseErrors || $errors){
+    if ($responseErrors || $errors) {
       setBorderError(true);
-    }else{
+    } else {
       setBorderError(false);
     }
-  },[$responseErrors, $errors]);
+  }, [$responseErrors, $errors]);
 
   return (
-    <InputWrap sx={sx} $errors={borderError}>
-      {label && 
-        <LabelWrapper>
-          <Label>{label}</Label>
-          {required ? <span>*</span>  : ''}         
-        </LabelWrapper>
-      }
-      <DropArea
+    <div className={fieldWrapper} style={sx}>
+      {label && (
+        <div className={labelWrapper}>
+          <span>{label}</span>
+          {required ? <span className="text-rose-600">*</span> : ""}
+        </div>
+      )}
+      <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current.click()}
+        onClick={() => fileInputRef.current?.click()}
+        className={`flex min-h-[140px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed bg-white text-center text-sm font-semibold shadow-sm transition ${
+          borderError ? "border-rose-400" : "border-slate-300 hover:border-emerald-400"
+        }`}
       >
-        <DropAreaLabel>Drag and drop / or select files here</DropAreaLabel>
-        {(showTitles && values.length > 0) && values.map((file: any, index: number) => <div key={index}>{file.title}</div>)}
-      </DropArea>
+        <p className="text-slate-600">Drag and drop / or select files here</p>
+        {showTitles && values.length > 0 && (
+          <div className="mt-2 space-y-1 text-xs text-slate-500">
+            {values.map((file: any, index: number) => (
+              <div key={index}>{file.title}</div>
+            ))}
+          </div>
+        )}
+      </div>
       <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple hidden />
-      {description && <p><small>{description}</small></p>}       
-      {$errors && <Error>{$errors}</Error>}
-    </InputWrap>    
+      {description && (
+        <p className={helperText}>
+          <small>{description}</small>
+        </p>
+      )}
+      {$errors && <div className={errorText}>{$errors}</div>}
+    </div>
   );
 };
 

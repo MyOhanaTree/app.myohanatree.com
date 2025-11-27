@@ -1,10 +1,28 @@
-import React, { useState, useEffect, useRef } from "react";
-import { InputWrap, InputDate, InputValue, LabelWrapper, Error } from "./styled";
-import { Label, useThemeUI } from "theme-ui";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
-import moment from "moment";
-import ReactDOM from "react-dom";
-import { MdChevronRight, MdCalendarMonth } from "react-icons/md";
+import { MdCalendarMonth } from "react-icons/md";
+import { fieldWrapper, inputBase, labelWrapper, errorText, helperText } from "../shared";
+import "./datepicker.css"
+
+type SelectDateProps = {
+  label?: string | React.ReactNode;
+  name?: string;
+  value?: string | number;
+  description?: string;
+  autoComplete?: string;
+  minDate?: number;
+  maxDate?: number;
+  specialDates?: number[];
+  required?: boolean;
+  disabled?: boolean;
+  startOfDay?: boolean;
+  showTime?: boolean;
+  sx?: React.CSSProperties;
+  $errors?: any;
+  $responseErrors?: any;
+  closeOnSelect?: boolean;
+  onChange?: (e?: any) => void;
+};
 
 const SelectDate = ({
   label,
@@ -24,203 +42,84 @@ const SelectDate = ({
   $responseErrors,
   closeOnSelect = false,
   onChange,
-}: {
-  label?: string | React.ReactNode;
-  name?: string;
-  value?: string | number;
-  description?: string;
-  autoComplete?: string;
-  minDate?: number;
-  maxDate?: number;
-  specialDates?: number[]
-  required?: boolean;
-  disabled?: boolean;
-  startOfDay?: boolean;
-  showTime?: boolean;
-  sx?: any;
-  $errors?: any;
-  $responseErrors?: any;
-  closeOnSelect?: boolean;
-  onChange?: (e?: any) => void;
-}) => {
-  const themeContext = useThemeUI();
-  const { theme } = themeContext;
+}: SelectDateProps) => {
   const [borderError, setBorderError] = useState(false);
-  const [active, setActive] = useState(false);
-
-  const datePickerRef = useRef<any>(null);
-  const wrapperRef = useRef<any>(null);
-  const typingTimeoutRef = useRef<any>(null);
-
-  const [inputLabel, setInputLabel] = useState("");
   const [dateValue, setDateValue] = useState<any>(value ?? null);
 
-  const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
-  const inputDateRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLDivElement>(null);
-
+  const toUnix = (date: Date, endOfDay?: boolean) => {
+    const copy = new Date(date);
+    if (endOfDay) {
+      copy.setHours(23, 59, 59, 999);
+    } else {
+      copy.setHours(0, 0, 0, 0);
+    }
+    return Math.floor(copy.getTime() / 1000);
+  };
 
   const highlightSpecialDates = (date: Date) => {
-    return specialDates?.some((d) => d === moment(date.getTime()).startOf('day').unix()) ? "special-date" : "";
-  };
-  
-
-  const calculatePosition = () => {
-    if (!triggerRef.current || !inputDateRef.current) return;
-
-    const triggerRect = triggerRef.current.getBoundingClientRect();
-    const tooltipRect = inputDateRef.current.getBoundingClientRect();
-    const scrollY = window.scrollY || document.documentElement.scrollTop;
-    const spaceBelow = window.innerHeight - triggerRect.bottom;
-    const spaceAbove = triggerRect.top;
-
-    let top = triggerRect.bottom + scrollY - 8;
-    if (spaceBelow < tooltipRect.height && spaceAbove >= tooltipRect.height) {
-      top = triggerRect.top + scrollY - (tooltipRect.height + 12);
-    }
-    const style: React.CSSProperties = { top, left: triggerRect.right - tooltipRect.width };
-
-    setTooltipStyle(style);
+    return specialDates?.some((d) => d === toUnix(date, false)) ? "special-date" : "";
   };
 
-  useEffect(() => {
-    if (active) {
-      calculatePosition();
+  const handleChange = (date: Date | null) => {
+    if (disabled) return;
+    if (!date) {
+      setDateValue(null);
+      onChange?.(null);
+      return;
     }
-  }, [active]);
-
-  const setSelectValue = async function (date: any) {
-    if (disabled) return true;
-
-    const momentDate = startOfDay ? moment(date).startOf("day").unix() : moment(date).endOf("day").unix();
+    const momentDate = startOfDay ? toUnix(date, false) : toUnix(date, true);
     if ((!minDate || minDate <= momentDate) && (!maxDate || maxDate >= momentDate)) {
       setDateValue(momentDate);
-      if (typeof onChange === "function") {
-        onChange(momentDate);
-        if (closeOnSelect) setActive(false);
+      onChange?.(momentDate);
+      if (closeOnSelect) {
+        // noop; DatePicker closes automatically
       }
     }
   };
 
-  const inputChange = (e?: any) => {
-    setInputLabel(e.target.value);
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-
-    typingTimeoutRef.current = setTimeout(() => {
-      try {
-        const newDate = moment(e.target.value).toDate();
-        if (newDate) {
-          setSelectValue(newDate);
-          datePickerRef?.current?.setOpen(false);
-          setTimeout(() => datePickerRef?.current?.setOpen(true), 500);
-        }
-      } catch (e) {}
-    }, 1000);
-  };
-
   useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      if (inputDateRef.current && !inputDateRef.current.contains(event.target)) {
-        setActive(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [inputDateRef]);
-
-  useEffect(() => {
-    setDateValue(value);
+    setDateValue(value ?? null);
   }, [value]);
 
   useEffect(() => {
-    setInputLabel(dateValue ? moment.unix(dateValue).format("L") : "");
-  }, [dateValue]);
-
-  useEffect(() => {
-    if ($responseErrors || $errors) {
-      setBorderError(true);
-    } else {
-      setBorderError(false);
-    }
+    setBorderError(!!($responseErrors || $errors));
   }, [$responseErrors, $errors]);
 
+  const selectedDate = dateValue ? new Date((dateValue as number) * 1000) : null;
+
   return (
-    <InputWrap $errors={borderError} sx={sx} disabled={disabled} ref={wrapperRef}>
+    <div className={fieldWrapper} style={sx}>
       {label && (
-        <LabelWrapper>
-          <Label>{label}</Label>
-          {required ? <span>*</span> : ""}
-        </LabelWrapper>
+        <div className={labelWrapper}>
+          <span>{label}</span>
+          {required ? <span className="text-rose-600">*</span> : ""}
+        </div>
       )}
-      <InputValue ref={triggerRef} onClick={() => setActive(!active)} $active={active}>
-        <MdCalendarMonth color={String(theme?.colors?.base_800)} />
-        <input onChange={(e) => inputChange(e)} value={inputLabel} />
-        <MdChevronRight color={String(active ? theme?.colors?.base_800 : theme?.colors?.base_300)} style={{ transform: active ? "rotate(90deg)" : ""}} />
-      </InputValue>
-      {active &&
-        ReactDOM.createPortal(
-          <InputDate ref={inputDateRef} style={tooltipStyle}>
-            <DatePicker
-              ref={datePickerRef}
-              selected={dateValue ? moment.unix(dateValue).toDate() : undefined}
-              minDate={minDate ? moment.unix(minDate).toDate() : undefined}
-              maxDate={maxDate ? moment.unix(maxDate).toDate() : undefined}
-              openToDate={dateValue ? moment.unix(dateValue).toDate() : moment().toDate()}
-              onChange={setSelectValue}
-              customInput={<></>}
-              disabled={disabled}
-              showTimeSelect={showTime}
-              inline
-              dayClassName={highlightSpecialDates}
-              renderCustomHeader={({ date, decreaseYear, increaseYear, decreaseMonth, increaseMonth }) => (
-                <div className="react-datepicker__custom-year-selector">
-                  <span className="react-datepicker__current-month">
-                    {date.toLocaleDateString("en-US", { year: "numeric", month: "long" })}
-                  </span>
-                  <div className="react-datepicker__navigation">
-                    <span
-                      className="react-datepicker__navigation-icon react-datepicker__navigation-icon-double react-datepicker__navigation-icon--previous"
-                      onClick={decreaseYear}
-                    >
-                      {"<<"}
-                    </span>
-                    <span
-                      className="react-datepicker__navigation-icon react-datepicker__navigation-icon--previous"
-                      onClick={decreaseMonth}
-                    >
-                      {"<"}
-                    </span>
-                    <span
-                      className="react-datepicker__navigation-icon react-datepicker__navigation-icon--next"
-                      onClick={increaseMonth}
-                    >
-                      {">"}
-                    </span>
-                    <span
-                      className="react-datepicker__navigation-icon react-datepicker__navigation-icon-double react-datepicker__navigation-icon--next"
-                      onClick={increaseYear}
-                    >
-                      {">>"}
-                    </span>
-                  </div>
-                </div>
-              )}
-            />
-          </InputDate>,
-          document.body
-        )}
+      <div className="relative">
+        <DatePicker
+          selected={selectedDate || undefined}
+          onChange={handleChange}
+          minDate={minDate ? new Date((minDate as number) * 1000) : undefined}
+          maxDate={maxDate ? new Date((maxDate as number) * 1000) : undefined}
+          placeholderText="Select date"
+          className={`${inputBase} h-11 pr-10 ${borderError ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200" : ""}`}
+          name={name}
+          autoComplete={autoComplete}
+          showTimeSelect={showTime}
+          dateFormat={showTime ? "Pp" : "P"}
+          dayClassName={highlightSpecialDates}
+        />
+        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
+          <MdCalendarMonth />
+        </span>
+      </div>
       {description && (
-        <p>
+        <p className={helperText}>
           <small>{description}</small>
         </p>
       )}
-      {$errors && <Error>{$errors}</Error>}
-    </InputWrap>
+      {$errors && <div className={errorText}>{$errors}</div>}
+    </div>
   );
 };
 
