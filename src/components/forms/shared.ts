@@ -13,7 +13,7 @@ export const buildSelectStyles = (hasError?: boolean) => ({
     paddingRight: 4,
     borderRadius: 12,
     backgroundColor: "#fff",
-    borderColor: hasError ? "#f87171" : state.isFocused ? "#0ea5e9" : "#e2e8f0",
+    borderColor: hasError ? "#f87171" : state.isFocused ? "#0ea5e9" : "#e2e8f0",   
     boxShadow: state.isFocused ? "0 0 0 2px rgba(16,185,129,0.25)" : "none",
     "&:hover": { borderColor: "#0ea5e9" },
   }),
@@ -29,6 +29,10 @@ export const buildSelectStyles = (hasError?: boolean) => ({
     padding: "8px 12px",
     backgroundColor: state.isSelected ? "#e0f2fe" : state.isFocused ? "#f8fafc" : "#fff",
     color: "#0f172a",
+  }),
+  singleValue: (base: any, state: any) => ({
+    ...base,
+    color: state.selectProps.menuIsOpen ? "#80879b" : "#0f172a",
   }),
   multiValue: (base: any) => ({
     ...base,

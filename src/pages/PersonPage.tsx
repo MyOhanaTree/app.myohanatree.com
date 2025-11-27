@@ -6,6 +6,7 @@ import logo from "/myohanatree-logo.png";
 import SelectDate from "@/components/forms/SelectDate";
 import SelectSearch from "@/components/forms/SelectSearch";
 import TextInput from "@/components/forms/TextInput";
+import { api } from "@/api/axiosClient";
 
 export const PersonPage: React.FC = () => {
   const { id } = useParams();
@@ -15,6 +16,7 @@ export const PersonPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
 
   useEffect(() => {
     loadPerson();
@@ -49,6 +51,15 @@ export const PersonPage: React.FC = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const getMembers = async ({ query = {}, controller = null, excludeInterceptor = false}: any) => {		
+    const params: any = {params : query, excludeInterceptor}
+    if(controller?.signal){
+      params.signal = controller.signal
+    }
+    const res = await api.get("/family/all", params).catch((err) => ({ data: { items: [] } }))
+    return res?.data;
   };
 
   if (loading) return <div className="p-6">Loading…</div>;
@@ -110,25 +121,24 @@ export const PersonPage: React.FC = () => {
                 onChange={(val: any) => setForm(prev => ({ ...prev, deathDate: new Date(val * 1000).toLocaleDateString('en-CA') }))}
               />                              
               <SelectSearch
-                api={() => Promise.resolve([])} // Replace with actual API to fetch members
+                api={getMembers} // Replace with actual API to fetch members
                 label="Parents"
                 value={form.parents?.map(p => p.id) || []}
                 onChange={(val: any) => setForm(prev => ({ ...prev, parents: val }))}
                 keyLabel={["firstName","lastName"]}
                 labelDivider=" "                  
                 multiple
+                preload
               />
-              {/* 
               <SelectSearch
                 api={getMembers}
                 label="Relationship (spouce, partner, etc.)"
-                value={values.relationship}
-                onChange={(val: any) => setFieldValue("relationship",val.id)}
-                $errors={errors.relationship && submitCount > 0 ? errors.relationship : null}  
+                value={form.relationships?.map(p => p.id) || []}
+                onChange={(val: any) => setForm(prev => ({ ...prev, relationships: val }))}
                 keyLabel={["firstName","lastName"]}
-                labelDivider=" "                                    
+                labelDivider=" " 
+                preload                                   
               />
-              */}
             </div>
 
             <div className="mt-6 flex justify-end space-x-3">
