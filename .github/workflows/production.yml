@@ -20,10 +20,8 @@ jobs:
     - name: Build App
       run: |
         echo "Creating .env file"
-        echo "VITE_REACT_APP_NAME=MyOhanaTree" > .env
-        echo "VITE_REACT_APP_BACKEND=https://api.myohanatree.com" >> .env
-        echo "VITE_REACT_APP_LOGO=" >> .env
-        echo "VITE_REACT_APP_CDN=https://assets.myohanatree.com" >> .env
+        echo "VITE_SITE_NAME=MyOhanaTree" > .env
+        echo "VITE_API_URL=https://api.myohanatree.com" >> .env
 
         npm ci
         npm run build
