@@ -19,7 +19,7 @@ export default function Login() {
       await login(email, password);
       navigate("/");
     } catch (err: any) {
-      const message = err?.response?.data?.message || "Unable to log you in right now.";
+      const message = JSON.stringify(err) || "Unable to log you in right now.";
       setError(message);
     } finally {
       setSubmitting(false);
