@@ -7,9 +7,11 @@ import SelectDate from "@/components/forms/SelectDate";
 import SelectSearch from "@/components/forms/SelectSearch";
 import TextInput from "@/components/forms/TextInput";
 import { api } from "@/api/axiosClient";
+import { useAuth } from "../context/AuthContext";
 
 export const PersonPage: React.FC = () => {
   const { id } = useParams();
+  const { user } = useAuth();
 
   const [person, setPerson] = useState<FamilyPerson | null>(null);
   const [form, setForm] = useState<Partial<FamilyPerson>>({});
@@ -62,6 +64,7 @@ export const PersonPage: React.FC = () => {
     return res?.data;
   };
 
+  if(user && !user.permissions.includes("familyEdit")) return <div className="p-6">Unauthorized</div>;
   if (loading) return <div className="p-6">Loading…</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
   if (!person) return null;
