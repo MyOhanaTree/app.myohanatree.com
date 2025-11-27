@@ -33,7 +33,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.BUCKET_DEPLOY_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.BUCKET_DEPLOY_SECRET_ACCESS_KEY }}
       run: |
-        aws --region=us-east-1 s3 sync --delete build s3://${{ secrets.BUCKET_DEPLOY_NAME }} --exclude "uploads/*"
+        aws --region=us-east-1 s3 sync --delete dist s3://${{ secrets.BUCKET_DEPLOY_NAME }} --exclude "uploads/*"
 
     - name: Purge Cloudfront Cache
       uses: awact/cloudfront-action@master
