@@ -20,7 +20,7 @@ jobs:
     - name: Build App
       run: |
         echo "Creating .env file"
-        echo "VITE_SITE_NAME=MyOhanaTree" > .env
+        echo "VITE_SITE_NAME=My Ohana Tree" > .env
         echo "VITE_API_URL=https://api.myohanatree.com" >> .env
 
         npm ci

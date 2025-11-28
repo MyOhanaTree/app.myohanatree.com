@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "/myohanatree-logo.png";
 import TextInput from "@/components/forms/TextInput";
 import PasswordInput from "@/components/forms/PasswordInput";
@@ -29,14 +29,14 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary-800 via-secondary-700 to-secondary-900 text-slate-50">
-      <div className="pointer-events-none absolute inset-0" />
-
-      <div className="relative mx-auto flex min-h-screen max-w-6xl items-center px-6 py-12 lg:px-12">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary-900 via-secondary-700 to-secondary-900 text-slate-50">
+      <div className="pointer-events-none absolute inset-0" />      
+      <div className="relative mx-auto flex flex-col justify-center min-h-screen max-w-6xl items-center px-6 py-12 lg:px-12">
+        <div className="w-full flex items-center justify-center mb-12">
+          <img src={logo} alt="My Ohana Tree logo" className="h-auto max-h-[150px] w-auto" />
+        </div>
         <div className="grid w-full items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
           <div className="space-y-7">
-
-            <img src={logo} alt="My Ohana Tree logo" className="h-auto max-h-[150px] w-auto" />
             <div className="space-y-3">
               <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
                 Sign in to grow your family story
@@ -91,6 +91,12 @@ export default function Login() {
                   required
                 />
               </label>
+
+              <div className="flex justify-end text-sm">
+                <Link to="/forgot-password" className="text-emerald-100 underline decoration-white/40 underline-offset-4 hover:text-white">
+                  Forgot your password?
+                </Link>
+              </div>
 
               {error && (
                 <div className="rounded-xl border border-rose-500/50 bg-rose-500/10 px-4 py-3 text-sm text-rose-50">

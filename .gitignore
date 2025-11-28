@@ -4,6 +4,7 @@
 .pnp.js
 
 # testing
+postman_collection.json
 /coverage
 
 # production
