@@ -244,7 +244,7 @@ export default function UserManagement() {
             </div>
 
             <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
-              <div className="grid grid-cols-12 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <div className="hidden grid-cols-12 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 md:grid">
                 <div className="col-span-5">User</div>
                 <div className="col-span-4">Email</div>
                 <div className="col-span-2">Status</div>
@@ -256,17 +256,30 @@ export default function UserManagement() {
                 <div className="px-4 py-6 text-sm text-slate-600">No users found.</div>
               ) : (
                 users.map((u) => (
-                  <div key={u.id} className="grid grid-cols-12 items-center px-4 py-4 text-sm odd:bg-white even:bg-slate-50/80">
-                    <div className="col-span-5">
+                  <div
+                    key={u.id}
+                    className="flex flex-col gap-3 px-4 py-4 text-sm odd:bg-white even:bg-slate-50/80 md:grid md:grid-cols-12 md:items-center md:gap-0"
+                  >
+                    <div className="md:col-span-5">
                       <p className="font-semibold text-slate-900">{u.fullName || [u.firstName, u.lastName].filter(Boolean).join(" ") || "—"}</p>
                       <p className="text-xs text-slate-500">Joined {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}</p>
                     </div>
-                    <div className="col-span-4 text-slate-800">{u.email}</div>
-                    <div className="col-span-2">
-                      <span className="rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700">{statusLabel(u.status)}</span>
-                      {u.verifiedAt ? <p className="mt-1 text-xs text-emerald-600">Verified</p> : <p className="mt-1 text-xs text-amber-600">Pending</p>}
+                    <div className="text-slate-800 md:col-span-4">
+                      <p className="md:hidden text-[11px] uppercase tracking-[0.18em] text-slate-500">Email</p>
+                      {u.email}
                     </div>
-                    <div className="col-span-1 ml-auto flex flex-col items-end gap-2">
+                    <div className="md:col-span-2">
+                      <p className="md:hidden text-[11px] uppercase tracking-[0.18em] text-slate-500">Status</p>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700">{statusLabel(u.status)}</span>
+                        {u.verifiedAt ? (
+                          <span className="text-xs text-emerald-600">Verified</span>
+                        ) : (
+                          <span className="text-xs text-amber-600">Pending</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 md:col-span-1 md:ml-auto md:flex-col md:items-end">
                       <Link
                         to={`/users/${u.id}`}
                         className="text-xs font-semibold text-primary-700 underline decoration-primary-200 underline-offset-4 hover:text-primary-900"
