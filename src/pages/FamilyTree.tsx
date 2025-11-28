@@ -24,7 +24,7 @@ const FamilyTreePage: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary-100 bg-white/80 px-3 py-2 shadow-sm">
-              <img src={logo} alt="My Ohana Tree logo" className="h-7 w-7 bg-secondary-500 rounded-full border border-primary-100 object-contain bg-white" />
+              <img src={logo} alt="My Ohana Tree logo" className="h-7 w-7 bg-secondary-500 rounded-full border border-primary-100 object-contain" />
               <span className="text-xs font-semibold uppercase tracking-[0.28em] text-primary-500">
                 My Ohana Tree
               </span>
