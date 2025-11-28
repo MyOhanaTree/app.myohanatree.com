@@ -6,6 +6,7 @@ type PasswordInputProps = {
   name?: string;
   label?: string | React.ReactNode;
   value?: string;
+  placeholder?: string;
   required?: boolean;
   description?: string;
   autoComplete?: string;
@@ -19,6 +20,7 @@ const PasswordInput = ({
   name,
   label,
   value,
+  placeholder,
   required,
   description,
   autoComplete,
@@ -49,6 +51,8 @@ const PasswordInput = ({
           value={value ?? ""}
           autoComplete={autoComplete}
           onChange={(e) => onChange?.(e.target.value)}
+          placeholder={placeholder}
+          required={required}
           className={`${inputBase} h-11 pr-10 ${borderError ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200" : ""}`}
         />
         <button

@@ -2,6 +2,8 @@ import { FormEvent, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import logo from "/myohanatree-logo.png";
+import TextInput from "@/components/forms/TextInput";
+import PasswordInput from "@/components/forms/PasswordInput";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -31,7 +33,7 @@ export default function Login() {
       <div className="pointer-events-none absolute inset-0" />
 
       <div className="relative mx-auto flex min-h-screen max-w-6xl items-center px-6 py-12 lg:px-12">
-        <div className="grid w-full items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="grid w-full items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
           <div className="space-y-7">
 
             <img src={logo} alt="My Ohana Tree logo" className="h-auto max-h-[150px] w-auto" />
@@ -71,8 +73,7 @@ export default function Login() {
             <div className="mt-8 space-y-5">
               <label className="block space-y-2 text-sm">
                 <span className="text-slate-100/80">Email</span>
-                <input
-                  className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-base text-white outline-none transition focus:border-emerald-300 focus:bg-white/15 focus:ring-2 focus:ring-emerald-300/60"
+                <TextInput
                   type="email"
                   placeholder="you@example.com"
                   value={email}
@@ -83,9 +84,7 @@ export default function Login() {
 
               <label className="block space-y-2 text-sm">
                 <span className="text-slate-100/80">Password</span>
-                <input
-                  className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-base text-white outline-none transition focus:border-emerald-300 focus:bg-white/15 focus:ring-2 focus:ring-emerald-300/60"
-                  type="password"
+                <PasswordInput
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
