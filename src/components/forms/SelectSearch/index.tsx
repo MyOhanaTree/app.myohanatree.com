@@ -256,6 +256,7 @@ const SelectSearch = ({
           ),
           Option: ColorOption,
         }}
+        isClearable
         menuPortalTarget={document.body}
       />
       {description && (

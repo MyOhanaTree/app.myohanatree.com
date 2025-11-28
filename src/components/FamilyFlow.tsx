@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ReactFlow, {
   Background,
   Controls,
@@ -23,6 +23,7 @@ type FamilyRole = "you" | "parent" | "sibling" | "partner" | "child";
 type FamilyNodeData = {
   label: string;
   subLabel?: string;
+  link?: string;
   role: FamilyRole;
 };
 
@@ -55,7 +56,8 @@ function createNode(
     position: { x, y },
     data: {
       label: getDisplayName(person),
-      subLabel: person.birthDate ? `b. ${person.birthDate}` : undefined,
+      subLabel: person.birthDate ? `b. ${new Date(person.birthDate + " 00:00:00").toLocaleDateString()}` : undefined,
+      link: "/person/" + id,
       role,
     },
   };
@@ -139,27 +141,38 @@ const roleToColor: Record<FamilyRole, string> = {
 };
 
 function FamilyNodeRenderer({ data }: { data: FamilyNodeData }) {
-  const { label, subLabel, role } = data;
+  const { label, subLabel, link, role } = data;
 
   return (
-    <div className="rounded-full bg-white px-3 py-2 shadow-md border border-slate-200 w-[175px]">
-      <div className="flex items-center gap-2">
-        <span
-          className="h-2 w-2 rounded-full"
-          style={{ backgroundColor: roleToColor[role] }}
-        />
+    <div className="rounded-lg bg-white px-3 py-2 shadow-md border border-slate-200 w-auto min-w-[170px] max-w-[170px] overflow-hidden">
+      <div className="flex items-start gap-2 overflow-hidden">
+        <div className="w-2">
+          <span
+            className="flex h-2 w-2 rounded-full"
+            style={{ backgroundColor: roleToColor[role] }}
+          />
+        </div>
 
-        <div className="text-xs font-semibold text-slate-800 truncate">
+        <div className="text-xs font-semibold text-slate-800 leading-tight truncate flex-grow">
           {label}
         </div>
       </div>
 
       {subLabel && (
-        <div className="text-[10px] text-slate-500 mt-0.5 truncate">
+        <div className="text-[10px] text-slate-500 mt-0.5 leading-tight break-words">
           {subLabel}
         </div>
       )}
+
+      {link && (
+        <div className="text-[10px] text-slate-500 mt-1.5 leading-tight break-words">
+          <Link to={link} className="underline">
+            View Profile
+          </Link>
+        </div>
+      )}
     </div>
+
   );
 }
 
@@ -169,7 +182,9 @@ const nodeTypes = {
 
 // ------------------ Main Component ------------------
 
-const FamilyFlowInner: React.FC = () => {
+type FamilyFlowProps = { focusId?: string | null };
+
+const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
   const navigate = useNavigate();
 
   const [nodes, setNodes] = useState<FamilyNode[]>([]);
@@ -177,6 +192,7 @@ const FamilyFlowInner: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rfKey, setRfKey] = useState(0);
+  const [currentCenterId, setCurrentCenterId] = useState<string | null>(null);
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -198,6 +214,7 @@ const FamilyFlowInner: React.FC = () => {
 
       setNodes(nodes);
       setEdges(edges);
+      setCurrentCenterId(person.id || null);
 
       setRfKey((k) => k + 1);
     } catch (err: any) {
@@ -210,6 +227,12 @@ const FamilyFlowInner: React.FC = () => {
   useEffect(() => {
     loadPerson();
   }, []);
+
+  useEffect(() => {
+    if (!focusId) return;
+    if (focusId === currentCenterId) return;
+    loadPerson(focusId);
+  }, [focusId, currentCenterId]);
 
   const onNodeClick = useCallback(
     (_: unknown, node: Node<FamilyNodeData>) => {
@@ -282,8 +305,8 @@ const FamilyFlowInner: React.FC = () => {
   );
 };
 
-export const FamilyFlow: React.FC = () => (
+export const FamilyFlow: React.FC<FamilyFlowProps> = ({ focusId }) => (
   <ReactFlowProvider>
-    <FamilyFlowInner />
+    <FamilyFlowInner focusId={focusId} />
   </ReactFlowProvider>
 );

@@ -71,11 +71,11 @@ export const PersonPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-primary-100">
-      <div className="mx-auto w-[1200px] max-w-full px-6 py-12">
+      <div className="mx-auto w-[1200px] max-w-full px-6 py-10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary-100 bg-white/80 px-3 py-2 shadow-sm">
-              <img src={logo} alt="My Ohana Tree logo" className="h-7 w-7 rounded-full border border-primary-100 object-contain bg-white" />
+              <img src={logo} alt="My Ohana Tree logo" className="h-7 w-7 bg-secondary-500 rounded-full border border-primary-100 object-contain bg-white" />
               <span className="text-xs font-semibold uppercase tracking-[0.28em] text-primary-500">
                 Person Details
               </span>
@@ -93,66 +93,66 @@ export const PersonPage: React.FC = () => {
             </Link>
           </div>
         </div>
+      </div>
 
-        <div className="mt-10">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mx-auto w-[1200px] max-w-full px-4 pb-12 sm:px-6 grow">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
-            <div className="grid gap-4">
-              <TextInput
-                name="firstName"
-                label="First Name"
-                value={form.firstName}
-                onChange={(val: any) => setForm(prev => ({ ...prev, firstName: val }))}
-              />
-              <TextInput
-                name="lastName"
-                label="Last Name"
-                value={form.lastName}
-                onChange={(val: any) => setForm(prev => ({ ...prev, lastName: val }))}
-              /> 
+          <div className="grid gap-4">
+            <TextInput
+              name="firstName"
+              label="First Name"
+              value={form.firstName}
+              onChange={(val: any) => setForm(prev => ({ ...prev, firstName: val }))}
+            />
+            <TextInput
+              name="lastName"
+              label="Last Name"
+              value={form.lastName}
+              onChange={(val: any) => setForm(prev => ({ ...prev, lastName: val }))}
+            /> 
 
-              <SelectDate
-                name="birthDate"
-                label="Date of Birth"
-                value={form.birthDate && (new Date(form.birthDate + " 00:00:00").valueOf() / 1000)}
-                onChange={(val: any) => setForm(prev => ({ ...prev, birthDate: new Date(val * 1000).toLocaleDateString('en-CA') }))}
-              />   
-              <SelectDate
-                name="deathDate"
-                label="Date of Passing"
-                value={form.deathDate && (new Date(form.deathDate + " 00:00:00").valueOf() / 1000)}
-                onChange={(val: any) => setForm(prev => ({ ...prev, deathDate: new Date(val * 1000).toLocaleDateString('en-CA') }))}
-              />                              
-              <SelectSearch
-                api={getMembers} // Replace with actual API to fetch members
-                label="Parents"
-                value={form.parents?.map(p => p.id) || []}
-                onChange={(val: any) => setForm(prev => ({ ...prev, parents: val }))}
-                keyLabel={["firstName","lastName"]}
-                labelDivider=" "                  
-                multiple
-                preload
-              />
-              <SelectSearch
-                api={getMembers}
-                label="Relationship (spouce, partner, etc.)"
-                value={form.relationships?.map(p => p.id) || []}
-                onChange={(val: any) => setForm(prev => ({ ...prev, relationships: val }))}
-                keyLabel={["firstName","lastName"]}
-                labelDivider=" " 
-                preload                                   
-              />
-            </div>
+            <SelectDate
+              name="birthDate"
+              label="Date of Birth"
+              value={form.birthDate && (new Date(form.birthDate + " 00:00:00").valueOf() / 1000)}
+              onChange={(val: any) => setForm(prev => ({ ...prev, birthDate: new Date(val * 1000).toLocaleDateString('en-CA') }))}
+            />   
+            <SelectDate
+              name="deathDate"
+              label="Date of Passing"
+              value={form.deathDate && (new Date(form.deathDate + " 00:00:00").valueOf() / 1000)}
+              onChange={(val: any) => setForm(prev => ({ ...prev, deathDate: new Date(val * 1000).toLocaleDateString('en-CA') }))}
+            />                              
+            <SelectSearch
+              api={getMembers} // Replace with actual API to fetch members
+              label="Parents"
+              value={form.parents?.map(p => p.id) || []}
+              onChange={(val: any) => setForm(prev => ({ ...prev, parents: val }))}
+              keyLabel={["firstName","lastName"]}
+              labelDivider=" "                  
+              multiple
+              preload
+            />
+            <SelectSearch
+              api={getMembers}
+              label="Relationship (spouce, partner, etc.)"
+              value={form.relationships?.map(p => p.id) || []}
+              onChange={(val: any) => setForm(prev => ({ ...prev, relationships: val }))}
+              keyLabel={["firstName","lastName"]}
+              labelDivider=" " 
+              preload                                   
+            />
+          </div>
 
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="rounded-xl bg-primary-500 px-4 py-2 text-sm font-semibold text-secondary-100 shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 focus-visible:ring-offset-2"
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
+          <div className="mt-6 flex justify-end space-x-3">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="rounded-xl bg-primary-500 px-4 py-2 text-sm font-semibold text-secondary-100 shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 focus-visible:ring-offset-2"
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
           </div>
         </div>
       </div>
