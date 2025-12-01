@@ -8,16 +8,20 @@ import SelectSearch from "@/components/forms/SelectSearch";
 import TextInput from "@/components/forms/TextInput";
 import { api } from "@/api/axiosClient";
 import { useAuth } from "../context/AuthContext";
+import SelectInput from "@/components/forms/SelectInput";
 
 export const PersonPage: React.FC = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [person, setPerson] = useState<FamilyPerson | null>(null);
   const [form, setForm] = useState<Partial<FamilyPerson>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
 
   useEffect(() => {
@@ -62,6 +66,20 @@ export const PersonPage: React.FC = () => {
     }
     const res = await api.get("/family/all", params).catch((err) => ({ data: { items: [] } }))
     return res?.data;
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/family/${id}`);
+      navigate("/");
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Failed to delete person.");
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
   if(user && !user.permissions.includes("familyEdit")) return <div className="p-6">Unauthorized</div>;
@@ -123,7 +141,20 @@ export const PersonPage: React.FC = () => {
               label="Date of Passing"
               value={form.deathDate && (new Date(form.deathDate + " 00:00:00").valueOf() / 1000)}
               onChange={(val: any) => setForm(prev => ({ ...prev, deathDate: new Date(val * 1000).toLocaleDateString('en-CA') }))}
-            />                              
+            />    
+            <SelectInput
+              label="Gender"
+              options={[
+                { label: "Male", value: "male" },
+                { label: "Female", value: "female" },
+                { label: "Non Binary", value: "non-binary" },
+                { label: "Other", value: "other" },
+              ]}
+              value={form.gender}
+              onChange={(val: any) => setForm((prev) => ({ ...prev, gender: val }))}
+              placeholder="Select gender"
+            />
+
             <SelectSearch
               api={getMembers} // Replace with actual API to fetch members
               label="Parents"
@@ -147,6 +178,12 @@ export const PersonPage: React.FC = () => {
 
           <div className="mt-6 flex justify-end space-x-3">
             <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-200 focus-visible:ring-offset-2"
+            >
+              Delete
+            </button>
+            <button
               onClick={handleSave}
               disabled={saving}
               className="rounded-xl bg-primary-500 px-4 py-2 text-sm font-semibold text-secondary-100 shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-900 focus-visible:ring-offset-2"
@@ -156,6 +193,33 @@ export const PersonPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-rose-500">Confirm delete</p>
+            <p className="mt-2 text-xl font-semibold text-slate-900">Remove this person?</p>
+            <p className="mt-1 text-sm text-slate-600">
+              This will delete the person record from your family tree. This action cannot be undone.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-rose-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-200 focus-visible:ring-offset-2 disabled:opacity-60"
+              >
+                {deleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
