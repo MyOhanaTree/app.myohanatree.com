@@ -250,7 +250,7 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
   );
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-b from-white via-slate-50 to-slate-100 shadow-xl">
+    <div className="grow relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-b from-white via-slate-50 to-slate-100 shadow-xl">
       {(loading || error) && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur">
           <div className="rounded-full bg-white px-5 py-2 text-sm font-semibold shadow-lg text-slate-700">
