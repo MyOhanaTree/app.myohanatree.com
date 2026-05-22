@@ -15,7 +15,6 @@ type RangeInputProps = {
   max?: string | number;
   step?: string | number;
   sx?: React.CSSProperties;
-  $responseErrors?: any;
   $errors?: any;
   onChange?: (e?: any) => void;
 };
@@ -35,7 +34,6 @@ const RangeInput = ({
   step,
   sx,
   $errors,
-  $responseErrors,
   onChange,
 }: RangeInputProps) => {
   const [borderError, setBorderError] = useState(false);
@@ -57,8 +55,8 @@ const RangeInput = ({
   };
 
   useEffect(() => {
-    setBorderError(!!($responseErrors || $errors));
-  }, [$responseErrors, $errors]);
+    setBorderError(!!$errors);
+  }, [$errors]);
 
   const inputClass = `${inputBase} h-11 ${borderError ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200" : ""}`;
 
@@ -71,7 +69,7 @@ const RangeInput = ({
         </div>
       )}
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-xs font-semibold text-slate-700">
+        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-[0.08em] text-slate-500">
           <span>{labelFrom || "From"}</span>
           <input
             type="number"
@@ -86,7 +84,7 @@ const RangeInput = ({
             className={inputClass}
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs font-semibold text-slate-700">
+        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-[0.08em] text-slate-500">
           <span>{labelTo || "To"}</span>
           <input
             type="number"

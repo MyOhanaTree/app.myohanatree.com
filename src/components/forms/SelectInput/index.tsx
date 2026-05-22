@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import Select, { components } from "react-select";
-import { MdClose, MdChevronRight } from "react-icons/md";
+import Select, { components, type InputActionMeta } from "react-select";
 import { fieldWrapper, labelWrapper, errorText, helperText, buildSelectStyles } from "../shared";
+import CloseIcon from "@/components/icons/Close";
+import ChevronRightIcon from "@/components/icons/ChevronRight";
 
 type OptionType = { value: string | number; label?: string };
 
@@ -17,8 +18,12 @@ type SelectInputProps = {
   readonly?: boolean;
   disabled?: boolean;
   clearable?: boolean;
+  loading?: boolean;
+  filterOption?: ((option: any, inputValue: string) => boolean) | null;
+  noOptionsMessage?: (obj: { inputValue: string }) => React.ReactNode;
+  onInputChange?: (inputValue: string, actionMeta: InputActionMeta) => void;
   sx?: React.CSSProperties;
-  $responseErrors?: any;
+  wrapperClassName?: string;
   $errors?: any;
   onChange?: (e?: any) => void;
 };
@@ -35,8 +40,12 @@ const SelectInput = ({
   readonly,
   disabled,
   clearable,
+  loading,
+  filterOption,
+  noOptionsMessage,
+  onInputChange,
   sx,
-  $responseErrors,
+  wrapperClassName,
   $errors,
   onChange,
 }: SelectInputProps) => {
@@ -48,7 +57,7 @@ const SelectInput = ({
 
     let changedValue = e?.value ?? "";
     if (multiple) {
-      const values = e.map((el: any) => el.value).filter((v: any) => v !== "");
+      const values = (Array.isArray(e) ? e : []).map((el: any) => el.value).filter((v: any) => v !== "");
       changedValue = values;
     }
 
@@ -61,24 +70,24 @@ const SelectInput = ({
   };
 
   useEffect(() => {
-    setBorderError(!!($responseErrors || $errors));
-  }, [$responseErrors, $errors]);
+    setBorderError(!!$errors);
+  }, [$errors]);
 
   const MultiValueRemove = (props: any) => (
     <components.MultiValueRemove {...props}>
-      <MdClose fontSize={"12px"} className="text-slate-500" />
+      <CloseIcon className="h-3 w-3 text-slate-500" />
     </components.MultiValueRemove>
   );
 
   const ClearIndicator = (props: any) => (
     <components.ClearIndicator {...props}>
-      <MdClose fontSize={"12px"} className="text-slate-500" />
+      <CloseIcon className="h-3 w-3 text-slate-500" />
     </components.ClearIndicator>
   );
 
   const DropdownIndicator = (props: any) => (
     <components.DropdownIndicator {...props}>
-      <MdChevronRight fontSize={"12px"} className="text-slate-500" />
+      <ChevronRightIcon className="h-3 w-3 text-slate-500" />
     </components.DropdownIndicator>
   );
 
@@ -87,7 +96,7 @@ const SelectInput = ({
   );
 
   return (
-    <div className={fieldWrapper} style={sx}>
+    <div className={`${fieldWrapper} ${wrapperClassName ?? ""}`.trim()} style={sx}>
       {label && (
         <div className={labelWrapper}>
           <span>{label}</span>
@@ -108,6 +117,10 @@ const SelectInput = ({
         components={{ MultiValueRemove, ClearIndicator, DropdownIndicator }}
         isClearable={multiple || clearable}
         isDisabled={readonly || disabled}
+        isLoading={loading}
+        filterOption={filterOption}
+        noOptionsMessage={noOptionsMessage}
+        onInputChange={onInputChange}
         menuPortalTarget={document.body}
       />
       {description && (

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FormEvent, useState } from "react";
 import { FamilyFlow } from "../components/FamilyFlow";
 import logo from "/myohanatree-logo.png";
@@ -10,6 +10,7 @@ import SelectDate from "@/components/forms/SelectDate";
 import SelectInput from "@/components/forms/SelectInput";
 
 const FamilyTreePage: React.FC = () => {
+  const navigate = useNavigate();
   const [focusId, setFocusId] = useState<string | null>(null);
 
   const getMembers = async ({ query = {}, controller = null, excludeInterceptor = false }: any) => {		
@@ -43,11 +44,13 @@ const FamilyTreePage: React.FC = () => {
         gender: createForm.gender,
       };
       const res = await api.post("/family", body);
-      const newId = res?.data?.id;
-      setCreateOpen(false);
-      setCreateForm({ firstName: "", lastName: "", birthDate: undefined, gender: undefined });
+      const newId = res?.data?.id;      
       if (newId) {
-        setFocusId(newId);
+        setCreateOpen(false);
+        setCreateForm({ firstName: "", lastName: "", birthDate: undefined, gender: undefined });
+        navigate(`/person/${newId}`);
+      } else {
+        setCreateError("Unable to create person.");  
       }
     } catch (err: any) {
       const message = err?.response?.data?.message || "Unable to create person.";

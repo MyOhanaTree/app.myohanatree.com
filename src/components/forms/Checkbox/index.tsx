@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { fieldWrapper } from "../shared";
 
 type CheckboxProps = {
   name?: string;
@@ -36,28 +35,24 @@ const Checkbox = ({
 
   return (
     <div
-      className={`${fieldWrapper} flex items-start gap-3 ${className || ""}`}
+      className="flex items-start gap-3"
       style={sx}
       onClick={(e) => e.stopPropagation()}
     >
-      <input
-        disabled={$disabled}
-        type="checkbox"
-        name={name}
-        value={value ?? 1}
-        checked={newChecked}
-        onChange={setSelectValue}
-        className="mt-1 h-5 w-5 rounded border-slate-300 text-emerald-600 shadow-sm transition focus:ring-2 focus:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
-      />
-      {label && (
-        <button
-          type="button"
-          onClick={() => typeof onChange === "function" && onChange(!newChecked)}
-          className="text-sm font-semibold text-slate-800 hover:text-slate-900 focus:outline-none"
-        >
-          {label}
-        </button>
-      )}
+      <label
+        className={`flex cursor-pointer items-center gap-2.5 text-sm font-medium text-slate-700 transition ${className || ""}`}
+      >
+        <input
+          disabled={$disabled}
+          type="checkbox"
+          name={name}
+          value={value ?? 1}
+          checked={newChecked}
+          onChange={setSelectValue}
+          className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-2 focus:ring-primary-200 disabled:cursor-not-allowed"
+        />
+        {label}
+      </label>
     </div>
   );
 };
