@@ -15,8 +15,10 @@ type TextInputProps = {
   min?: string | number;
   max?: string | number;
   step?: string | number;
+  rows?: number;
+  className?: string;
+  wrapperClassName?: string;
   sx?: React.CSSProperties;
-  $responseErrors?: any;
   $errors?: any;
   onChange?: (e?: any) => void;
 };
@@ -35,9 +37,11 @@ const TextInput = ({
   min,
   max,
   step,
+  rows,
+  className,
+  wrapperClassName,
   sx,
   $errors,
-  $responseErrors,
   onChange,
 }: TextInputProps) => {
   const [borderError, setBorderError] = useState(false);
@@ -63,13 +67,13 @@ const TextInput = ({
   };
 
   useEffect(() => {
-    setBorderError(!!($responseErrors || $errors));
-  }, [$responseErrors, $errors]);
+    setBorderError(!!$errors);
+  }, [$errors]);
 
-  const baseClasses = `${inputBase} ${borderError ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200" : ""}`;
+  const baseClasses = `${inputBase} ${className} ${borderError ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200" : ""}`;
 
   return (
-    <div className={fieldWrapper} style={sx}>
+    <div className={`${fieldWrapper} ${wrapperClassName ?? ""}`.trim()} style={sx}>
       {label && (
         <div className={labelWrapper}>
           <span>{label}</span>
@@ -86,6 +90,7 @@ const TextInput = ({
           minLength={min as number | undefined}
           maxLength={max as number | undefined}
           value={value ?? ""}
+          rows={rows ?? 4}
           onChange={(e: any) => setSelectValue(e)}
           className={`${baseClasses} min-h-[120px]`}
         />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
-import { MdCalendarMonth } from "react-icons/md";
 import { fieldWrapper, inputBase, labelWrapper, errorText, helperText } from "../shared";
+import CalendarIcon from "@/components/icons/Calendar";
 import "../SelectDate/datepicker.css"
 
 type SelectDateRangeProps = {
@@ -14,8 +14,7 @@ type SelectDateRangeProps = {
   description?: string;
   required?: boolean;
   sx?: React.CSSProperties;
-  errors?: any;
-  responseErrors?: any;
+  $errors?: any;
   onChange?: (e?: any) => void;
 };
 
@@ -29,8 +28,7 @@ const SelectDateRange = ({
   description,
   required,
   sx,
-  errors,
-  responseErrors,
+  $errors,
   onChange,
 }: SelectDateRangeProps) => {
   const [borderError, setBorderError] = useState<boolean>(false);
@@ -60,8 +58,8 @@ const SelectDateRange = ({
   };
 
   useEffect(() => {
-    setBorderError(!!(responseErrors || errors));
-  }, [responseErrors, errors]);
+    setBorderError(!!$errors);
+  }, [$errors]);
 
   useEffect(() => {
     setRange([
@@ -91,7 +89,7 @@ const SelectDateRange = ({
           name={`${nameStartDate}-${nameEndDate}`}
         />
         <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
-          <MdCalendarMonth />
+          <CalendarIcon />
         </span>
       </div>
       {description && (
@@ -99,7 +97,7 @@ const SelectDateRange = ({
           <small>{description}</small>
         </p>
       )}
-      {errors && <div className={errorText}>{errors}</div>}
+      {$errors && <div className={errorText}>{$errors}</div>}
     </div>
   );
 };

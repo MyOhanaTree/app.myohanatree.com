@@ -170,7 +170,11 @@ const SelectSearch = ({
     if (e !== null) {
       if (multiple) {
         const selectedValues = await Promise.all(e.map((el: any) => el.value).filter((v: any) => v !== ""));
-        changedValue = [...new Set([...selectedValues])];
+        const newSet = new Set([...selectedValues]);
+        changedValue = Array.from(newSet).map((val: any) => {
+          const existing = findNestedValue(items, keyValue, val);
+          return existing ? existing : val;
+        });
       } else {
         changedValue = findNestedValue(items, keyValue, e?.value);
       }

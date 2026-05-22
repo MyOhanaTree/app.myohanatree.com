@@ -5,8 +5,6 @@ import { ReactNode } from "react";
 export default function PrivateRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
 
-  console.log("PrivateRoute - user:", user, "loading:", loading);
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600">

@@ -9,7 +9,6 @@ type ToggleInputProps = {
   required?: boolean;
   checked?: boolean;
   sx?: React.CSSProperties;
-  $responseErrors?: any;
   $errors?: any;
   onChange?: (e?: any) => void;
 };
@@ -22,7 +21,6 @@ export default function ToggleInput({
   required,
   checked,
   sx,
-  $responseErrors,
   $errors,
   onChange,
 }: ToggleInputProps) {
@@ -40,8 +38,8 @@ export default function ToggleInput({
   }, [checked]);
 
   useEffect(() => {
-    setBorderError(!!($responseErrors || $errors));
-  }, [$responseErrors, $errors]);
+    setBorderError(!!($errors));
+  }, [$errors]);
 
   return (
     <div className={fieldWrapper} style={sx}>
@@ -52,20 +50,35 @@ export default function ToggleInput({
         </div>
       )}
       <div
+        role="switch"
+        aria-checked={newChecked}
+        tabIndex={0}
         onClick={setSelectValue}
-        className={`inline-flex overflow-hidden rounded-lg border text-sm font-semibold shadow-sm transition ${
-          borderError ? "border-rose-400" : "border-slate-200"
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setSelectValue();
+          }
+        }}
+        className={`inline-flex items-center gap-2 rounded-md border px-2.5 py-2 text-sm font-medium transition ${
+          borderError ? "border-rose-400" : "border-slate-300 bg-white"
         }`}
       >
         <span
-          className={`px-4 py-2 ${newChecked ? "bg-emerald-500 text-white" : "bg-white text-slate-700"}`}
+          className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${
+            newChecked ? "bg-primary-600" : "bg-slate-300"
+          }`}
         >
-          {labelTrue || "On"}
+          <span
+            className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
+              newChecked ? "translate-x-4" : "translate-x-0.5"
+            }`}
+          />
         </span>
         <span
-          className={`px-4 py-2 ${!newChecked ? "bg-slate-900 text-emerald-100" : "bg-white text-slate-700"}`}
+          className="select-none text-slate-700"
         >
-          {labelFalse || "Off"}
+          {newChecked ? labelTrue || "On" : labelFalse || "Off"}
         </span>
       </div>
       {description && (

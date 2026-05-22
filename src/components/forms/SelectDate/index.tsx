@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
-import { MdCalendarMonth } from "react-icons/md";
 import { fieldWrapper, inputBase, labelWrapper, errorText, helperText } from "../shared";
+import CalendarIcon from "@/components/icons/Calendar";
 import "./datepicker.css"
 
 type SelectDateProps = {
@@ -19,7 +19,6 @@ type SelectDateProps = {
   showTime?: boolean;
   sx?: React.CSSProperties;
   $errors?: any;
-  $responseErrors?: any;
   closeOnSelect?: boolean;
   onChange?: (e?: any) => void;
 };
@@ -39,7 +38,6 @@ const SelectDate = ({
   showTime = false,
   sx,
   $errors,
-  $responseErrors,
   closeOnSelect = false,
   onChange,
 }: SelectDateProps) => {
@@ -67,7 +65,11 @@ const SelectDate = ({
       onChange?.(null);
       return;
     }
-    const momentDate = startOfDay ? toUnix(date, false) : toUnix(date, true);
+    const momentDate = showTime
+      ? Math.floor(date.getTime() / 1000)
+      : startOfDay
+        ? toUnix(date, false)
+        : toUnix(date, true);
     if ((!minDate || minDate <= momentDate) && (!maxDate || maxDate >= momentDate)) {
       setDateValue(momentDate);
       onChange?.(momentDate);
@@ -82,8 +84,8 @@ const SelectDate = ({
   }, [value]);
 
   useEffect(() => {
-    setBorderError(!!($responseErrors || $errors));
-  }, [$responseErrors, $errors]);
+    setBorderError(!!$errors);
+  }, [$errors]);
 
   const selectedDate = dateValue ? new Date((dateValue as number) * 1000) : null;
 
@@ -104,13 +106,14 @@ const SelectDate = ({
           placeholderText="Select date"
           className={`${inputBase} h-11 pr-10 ${borderError ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200" : ""}`}
           name={name}
-          autoComplete={autoComplete}
-          showTimeSelect={showTime}
+          autoComplete={autoComplete ?? "off"}
+          showTimeSelect={false}
+          showTimeInput={showTime}
           dateFormat={showTime ? "Pp" : "P"}
           dayClassName={highlightSpecialDates}
         />
         <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
-          <MdCalendarMonth />
+          <CalendarIcon />
         </span>
       </div>
       {description && (

@@ -1,43 +1,38 @@
 import React, { useState, useEffect, useRef } from "react";
 import { fieldWrapper, labelWrapper, errorText, helperText } from "../shared";
+import TrashIcon from "@/components/icons/Trash";
+import Button from "../Button";
 
 type FileInputProps = {
-  api: (props?: any) => Promise<any>;
-  apiVariables?: { [key: string]: any };
   label?: string | React.ReactNode;
   value?: string;
-  directory?: string;
   description?: string;
   required?: boolean;
   disabled?: boolean;
+  multiple?: boolean;  
   placeholder?: string;
-  refreshValue?: boolean;
-  showTitles?: boolean;
   sx?: React.CSSProperties;
-  $responseErrors?: any;
+  accept?: string;
+  types?: string[];
   $errors?: any;
   onChange?: (a?: any) => void;
 };
 
 const FileInput = ({
-  api,
-  apiVariables,
   label,
-  directory,
   description,
   required,
   disabled,
-  refreshValue,
-  showTitles = true,
+  multiple,
   sx,
+  types,
+  accept,
   $errors,
-  $responseErrors,
   onChange,
 }: FileInputProps) => {
   const fileInputRef = useRef<any>(null);
 
-  const [files, setFiles] = useState<any[]>([]);
-  const [values, setValues] = useState<any[]>([]);
+  const [files, setFiles] = useState<any>([]);
   const [borderError, setBorderError] = useState<any>(false);
 
   const handleDragOver = (e: any) => {
@@ -48,63 +43,49 @@ const FileInput = ({
   const handleDrop = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    setFiles(e.dataTransfer.files);
+    
+    if(disabled) return;
+
+    const droppedFiles = Array.from(e.dataTransfer.files || []);
+    const validFiles = (types?.length || 0) > 0 ? droppedFiles.filter((file: any) => types?.includes(file.type)) : droppedFiles;
+    setFiles(validFiles);
   };
 
   const handleFileChange = (e: any) => {
-    setFiles(e.target.files);
+    if(disabled) return;
+
+    const changedFiles = Array.from(e.target.files || []);
+    const validFiles = (types?.length || 0) > 0 ? changedFiles.filter((file: any) => types?.includes(file.type)) : changedFiles;
+    if(!multiple) {
+      setFiles([validFiles[0]]);
+    } else {
+      setFiles(validFiles);
+    }
   };
 
-  const handleUpload = async () => {
-    if (disabled || files.length === 0) return true;
-
-    const tempFiles: any[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const res: any = await api({
-        ...apiVariables,
-        data: { ...apiVariables?.data, directory: directory || "", name: file.name, type: file.type, size: file.size },
-      });
-      if (res?.success) {
-        tempFiles.push({
-          file: file,
-          url: res.url,
-          title: res.name,
-          location: res.location,
-        });
-      }
-    }
-    setValues(tempFiles);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const removeFile = (indexToRemove: number) => {
+    setFiles((prevFiles: any) => {
+      const prevArray = Array.isArray(prevFiles) ? prevFiles : Array.from(prevFiles || []);
+      return prevArray.filter((_: any, index: number) => index !== indexToRemove);
+    });
   };
 
   useEffect(() => {
+    if(disabled) return;
     if (typeof onChange === "function") {
-      onChange(values);
+      onChange(files);
     }
-  }, [values, onChange]);
+  }, [files, onChange]);
 
   useEffect(() => {
-    handleUpload();
-  }, [files]);
-
-  useEffect(() => {
-    if (refreshValue) {
-      setFiles([]);
-      setValues([]);
-    }
-  }, [refreshValue]);
-
-  useEffect(() => {
-    if ($responseErrors || $errors) {
+    if ($errors) {
       setBorderError(true);
     } else {
       setBorderError(false);
     }
-  }, [$responseErrors, $errors]);
+  }, [$errors]);
+
+  const filesArray = Array.isArray(files) ? files : Array.from(files || []);
 
   return (
     <div className={fieldWrapper} style={sx}>
@@ -118,26 +99,61 @@ const FileInput = ({
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`flex min-h-[140px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed bg-white text-center text-sm font-semibold shadow-sm transition ${
-          borderError ? "border-rose-400" : "border-slate-300 hover:border-emerald-400"
+        className={`flex min-h-[132px] cursor-pointer select-none flex-col items-center justify-center rounded-md border-2 border-dashed bg-white text-center text-sm font-medium transition ${
+          borderError ? "border-rose-400" : "border-slate-300 hover:border-primary-300"
         }`}
       >
-        <p className="text-slate-600">Drag and drop / or select files here</p>
-        {showTitles && values.length > 0 && (
-          <div className="mt-2 space-y-1 text-xs text-slate-500">
-            {values.map((file: any, index: number) => (
-              <div key={index}>{file.title}</div>
-            ))}
-          </div>
-        )}
+        <p className="text-slate-700">Drag and drop files here, or click to browse</p>
+        <p className="mt-1 text-xs text-slate-500">Accepted: {types?.length ? "selected file types only" : "all file types"}</p>
       </div>
-      <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple hidden />
+      <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple hidden accept={accept} />
       {description && (
         <p className={helperText}>
           <small>{description}</small>
         </p>
       )}
       {$errors && <div className={errorText}>{$errors}</div>}
+      {filesArray.length > 0 && (
+        <div className="overflow-x-scroll rounded-md border border-slate-200 mt-3">
+          <table className="min-w-full max-w-full table-auto overflow-hidden rounded-md border border-slate-200 text-left text-sm">
+            <thead className="bg-slate-50">
+              <tr className="text-slate-600">
+                <th className="px-3 py-2 text-right"></th>
+                <th className="px-3 py-2">Name</th>
+                <th className="px-3 py-2">Type</th>
+                <th className="px-3 py-2 text-right">Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filesArray.map((file: any, index: number) => (
+                <tr key={`${file.name}-${index}`} className="border-t border-slate-200">                  
+                  <td className="px-3 py-2 text-right">
+                    <Button
+                      type="button"
+                      disabled={disabled}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        removeFile(index);
+                      }}
+                      aria-label={`Remove ${file.name}`}
+                      title="Remove file"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-md text-rose-600 shadow-none hover:bg-rose-50 hover:text-rose-700 disabled:text-slate-400"
+                    >
+                      <TrashIcon />
+                    </Button>
+                  </td>
+                  <td className="max-w-[220px] truncate px-3 py-2">{file.name}</td>
+                  <td className="px-3 py-2">{file.type || "-"}</td>
+                  <td className="px-3 py-2 text-right">{Math.ceil(file.size / 1024)} KB</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
