@@ -26,6 +26,7 @@ type FamilyRole = "you" | "parent" | "sibling" | "partner" | "child" | "group";
 type FamilyNodeData = {
   label: string;
   subLabel?: string;
+  birthTime?: number;
   link?: string;
   role: FamilyRole;
   isCurrent?: boolean;
@@ -66,6 +67,7 @@ function createNode(
     data: {
       label: getDisplayName(person),
       subLabel: person.birthDate ? `b. ${new Date(person.birthDate + " 00:00:00").toLocaleDateString()}` : undefined,
+      birthTime: person.birthDate ? new Date(person.birthDate + " 00:00:00").getTime() : undefined,
       link: "/person/" + id,
       role,
       isCurrent,
@@ -106,6 +108,10 @@ function mergeRole(existingRole: FamilyRole, incomingRole: FamilyRole): FamilyRo
   if ((existingRole === "child" || existingRole === "partner") && incomingRole === "sibling") {
     return existingRole;
   }
+  // Preserve established relationship lane when the same person is discovered
+  // later from another branch as child vs partner.
+  if (existingRole === "child" && incomingRole === "partner") return "child";
+  if (existingRole === "partner" && incomingRole === "child") return "partner";
 
   const fixedRoles: FamilyRole[] = ["you", "parent", "sibling"];
   if (fixedRoles.includes(existingRole)) return existingRole;
@@ -155,7 +161,10 @@ function reflowRightColumn(nodes: FamilyNode[], anchorNodeId?: string): FamilyNo
     orderedGroups.forEach((group) => {
       const sorted = [...group].sort((a, b) => {
         if (a.data.role !== b.data.role) return a.data.role === "partner" ? -1 : 1;
-        if (a.position.y !== b.position.y) return a.position.y - b.position.y;
+
+        const aBirth = Number.isFinite(a.data.birthTime) ? (a.data.birthTime as number) : Number.POSITIVE_INFINITY;
+        const bBirth = Number.isFinite(b.data.birthTime) ? (b.data.birthTime as number) : Number.POSITIVE_INFINITY;
+        if (aBirth !== bBirth) return aBirth - bBirth;
 
         const byLabel = (a.data.label || "").localeCompare(b.data.label || "");
         if (byLabel !== 0) return byLabel;
@@ -226,6 +235,7 @@ function buildLayout(
   const siblingsCenterY =
     centerY +
     (((siblingGroup.length - 1) / 2) - resolvedCenterIndex) * V_SPACING;
+  const branchAnchorY = centerRole === "parent" ? centerY : siblingsCenterY;
   nodes.push(createNode(centerId, centerX, centerY, centerRole, center, markCurrent));
 
   // --- Parents (LEFT) ---
@@ -234,7 +244,7 @@ function buildLayout(
     if (!parentId) return;
 
     const y =
-      siblingsCenterY +
+      branchAnchorY +
       (index - (parents.length - 1) / 2) * V_SPACING;
 
     nodes.push(createNode(parentId, centerX - H_SPACING, y, "parent", parent));
@@ -289,7 +299,7 @@ function buildLayout(
   const rightColumnCenterOffset = (rightColumnItems.length - 1) / 2;
 
   rightColumnItems.forEach((item, index) => {
-    const y = siblingsCenterY + (index - rightColumnCenterOffset) * V_SPACING;
+    const y = branchAnchorY + (index - rightColumnCenterOffset) * V_SPACING;
     nodes.push(
       createNode(item.id, familyRightX, y, item.role, item.person, false, {
         ownerId: centerId,

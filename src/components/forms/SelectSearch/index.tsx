@@ -4,6 +4,20 @@ import { MdClose } from "react-icons/md";
 import { fieldWrapper, labelWrapper, errorText, helperText, buildSelectStyles } from "../shared";
 
 const getNestedValue = (obj: any, key: any) => key.split(".").reduce((acc: any, part: any) => acc && acc[part], obj);
+const dateLabelKeys = new Set(["birthDate", "deathDate", "createdAt", "updatedAt", "deletedAt"]);
+
+const formatLabelValue = (key: string, value: any) => {
+  if (!dateLabelKeys.has(key) || value === null || value === undefined || value === "") {
+    return value ?? "";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleDateString();
+};
 
 function findNestedValue(arr: any[], key: string, value: string) {
   return arr.find((obj) => getNestedValue(obj, key) === value);
@@ -135,7 +149,7 @@ const SelectSearch = ({
             setItems(resultItems);
             const newOptions = resultItems.map((item: any) => {
               const labelVal = Array.isArray(keyLabel)
-                ? keyLabel.map((key) => getNestedValue(item, key) ?? "").join(labelDivider)
+                ? keyLabel.map((key) => formatLabelValue(key, getNestedValue(item, key))).join(labelDivider)
                 : getNestedValue(item, keyLabel);
               return {
                 value: getNestedValue(item, keyValue),
