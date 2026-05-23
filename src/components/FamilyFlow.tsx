@@ -9,6 +9,7 @@ import ReactFlow, {
   Edge,
   Position,
   ReactFlowProvider,
+  ReactFlowInstance,
   OnNodesChange,
   OnEdgesChange,
   applyNodeChanges,
@@ -99,6 +100,13 @@ function getPersonId(person: Partial<BasicPerson>) {
 }
 
 function mergeRole(existingRole: FamilyRole, incomingRole: FamilyRole): FamilyRole {
+  // Keep right-column relationship roles stable during branch expansion.
+  // When opening a child node, shared relatives can reappear as "sibling"
+  // in that local branch; preserving child/partner avoids layout collisions.
+  if ((existingRole === "child" || existingRole === "partner") && incomingRole === "sibling") {
+    return existingRole;
+  }
+
   const fixedRoles: FamilyRole[] = ["you", "parent", "sibling"];
   if (fixedRoles.includes(existingRole)) return existingRole;
   if (fixedRoles.includes(incomingRole)) return incomingRole;
@@ -136,14 +144,23 @@ function reflowRightColumn(nodes: FamilyNode[], anchorNodeId?: string): FamilyNo
     const orderedGroups = Array.from(groups.values()).sort((a, b) => {
       const aOwnerY = a[0]?.data.ownerY ?? 0;
       const bOwnerY = b[0]?.data.ownerY ?? 0;
-      return aOwnerY - bOwnerY;
+      if (aOwnerY !== bOwnerY) return aOwnerY - bOwnerY;
+
+      const aOwnerId = a[0]?.data.ownerId || "";
+      const bOwnerId = b[0]?.data.ownerId || "";
+      return aOwnerId.localeCompare(bOwnerId);
     });
 
     const flattened: FamilyNode[] = [];
     orderedGroups.forEach((group) => {
       const sorted = [...group].sort((a, b) => {
         if (a.data.role !== b.data.role) return a.data.role === "partner" ? -1 : 1;
-        return a.position.y - b.position.y;
+        if (a.position.y !== b.position.y) return a.position.y - b.position.y;
+
+        const byLabel = (a.data.label || "").localeCompare(b.data.label || "");
+        if (byLabel !== 0) return byLabel;
+
+        return a.id.localeCompare(b.id);
       });
       flattened.push(...sorted);
     });
@@ -362,6 +379,8 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
   const [error, setError] = useState<string | null>(null);
   const [currentCenterId, setCurrentCenterId] = useState<string | null>(null);
   const [currentCenterName, setCurrentCenterName] = useState<string>("");
+  const reactFlowRef = useRef<ReactFlowInstance | null>(null);
+  const lastCenteredRef = useRef<{ id: string; x: number; y: number } | null>(null);
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -468,9 +487,23 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
       );
 
       setNodes((prev) => {
+        const previousPositions = new Map(prev.map((n) => [n.id, { ...n.position }]));
+        const previousNodeIds = new Set(prev.map((n) => n.id));
+
         const byId = new Map(prev.map((n) => [n.id, n]));
 
         branchNodes.forEach((nextNode) => {
+          const allowAncestorExpansion = node.data.role === "parent";
+          const shouldMergeFromExpansion =
+            nextNode.id === node.id ||
+            nextNode.data.role === "partner" ||
+            nextNode.data.role === "child" ||
+            (allowAncestorExpansion && (nextNode.data.role === "parent" || nextNode.data.role === "sibling"));
+
+          if (!shouldMergeFromExpansion) {
+            return;
+          }
+
           const nextWithOwner =
             nextNode.data.role === "partner" || nextNode.data.role === "child"
               ? {
@@ -516,9 +549,25 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
 
         const nextNodes = reflowRightColumn(merged, node.id);
 
+        const stabilizedNodes = nextNodes.map((n) => {
+          const prevPos = previousPositions.get(n.id);
+          if (!prevPos) return n;
+
+          const isAnchorNode =
+            n.data.role === "you" || n.data.role === "parent" || n.data.role === "sibling";
+
+          // Keep anchor rows stable, but always allow right-column nodes
+          // (partner/child) to reflow so added descendants stack correctly.
+          if (previousNodeIds.has(n.id) && isAnchorNode) {
+            return { ...n, position: prevPos };
+          }
+
+          return n;
+        });
+
         setEdges(disableAllEdges());
 
-        return nextNodes;
+        return stabilizedNodes;
       });
 
       setCurrentCenterId(node.id);
@@ -535,10 +584,38 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
   }, []);
 
   useEffect(() => {
+    if (!reactFlowRef.current || !nodes.length || !currentCenterId) return;
+
+    const selectedNode = nodes.find((n) => n.id === currentCenterId);
+    if (!selectedNode) return;
+
+    const lastCentered = lastCenteredRef.current;
+    if (
+      lastCentered &&
+      lastCentered.id === selectedNode.id &&
+      Math.abs(lastCentered.x - selectedNode.position.x) < 0.5 &&
+      Math.abs(lastCentered.y - selectedNode.position.y) < 0.5
+    ) {
+      return;
+    }
+
+    reactFlowRef.current.setCenter(selectedNode.position.x, selectedNode.position.y, {
+      zoom: 1,
+      duration: 700,
+      ease: (t) => 1 - Math.pow(1 - t, 3),
+    });
+
+    lastCenteredRef.current = {
+      id: selectedNode.id,
+      x: selectedNode.position.x,
+      y: selectedNode.position.y,
+    };
+  }, [nodes, currentCenterId]);
+
+  useEffect(() => {
     if (!focusId) return;
-    if (focusId === currentCenterId) return;
     loadPerson(focusId);
-  }, [focusId, currentCenterId]);
+  }, [focusId]);
 
   const recenterOnCurrent = useCallback(() => {
     if (!currentCenterId) return;
@@ -604,7 +681,7 @@ const onNodeClick = useCallback(
 
       <div className="relative grow min-h-0 overflow-hidden border-slate-200 bg-gradient-to-b from-white via-slate-50 to-slate-100 shadow-xl">
       {(loading || error) && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/35">
           <div className="rounded-full bg-white px-5 py-2 text-sm font-semibold shadow-lg text-slate-700">
             {loading ? "Loading family…" : error}
           </div>
@@ -614,12 +691,13 @@ const onNodeClick = useCallback(
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        onInit={(instance) => {
+          reactFlowRef.current = instance;
+        }}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
-        fitView
-        fitViewOptions={{ padding: 0.15 }}
         defaultEdgeOptions={defaultEdgeOptions}
         nodesDraggable={false}
         nodesConnectable={false}

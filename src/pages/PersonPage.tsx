@@ -274,7 +274,7 @@ export const PersonPage: React.FC = () => {
                       label="Parents"
                       value={(form.parents || []).map((p: any) => (typeof p === "object" ? p?.id : p)).filter(Boolean)}
                       onChange={(val: any) => setForm(prev => ({ ...prev, parents: val }))}
-                      keyLabel={["firstName", "lastName"]}
+                      keyLabel={["firstName", "lastName", "birthDate"]}
                       labelDivider=" "
                       multiple
                       preload
@@ -284,7 +284,7 @@ export const PersonPage: React.FC = () => {
                       label="Relationship (spouce, partner, etc.)"
                       value={(form.relationships || []).map((p: any) => (typeof p === "object" ? p?.id : p)).filter(Boolean)}
                       onChange={(val: any) => setForm(prev => ({ ...prev, relationships: val }))}
-                      keyLabel={["firstName", "lastName"]}
+                      keyLabel={["firstName", "lastName", "birthDate"]}
                       labelDivider=" "
                       multiple
                       preload
