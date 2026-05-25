@@ -5,7 +5,7 @@ import TextInput from "@/components/forms/TextInput";
 import PasswordInput from "@/components/forms/PasswordInput";
 import SelectSearch from "@/components/forms/SelectSearch";
 import Checkbox from "@/components/forms/Checkbox";
-import { api } from "../api/axiosClient";
+import { api } from "@/api/axiosClient";
 
 type EditableUser = {
   id: string;

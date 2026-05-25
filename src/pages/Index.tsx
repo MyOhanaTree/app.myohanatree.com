@@ -9,7 +9,7 @@ import TextInput from "@/components/forms/TextInput";
 import SelectDate from "@/components/forms/SelectDate";
 import SelectInput from "@/components/forms/SelectInput";
 
-const FamilyTreePage: React.FC = () => {
+const Page: React.FC = () => {
   const navigate = useNavigate();
   const [focusId, setFocusId] = useState<string | null>(null);
 
@@ -48,7 +48,7 @@ const FamilyTreePage: React.FC = () => {
       if (newId) {
         setCreateOpen(false);
         setCreateForm({ firstName: "", lastName: "", birthDate: undefined, gender: undefined });
-        navigate(`/person/${newId}`);
+        navigate(`/person/${newId}/edit`);
       } else {
         setCreateError("Unable to create person.");  
       }
@@ -107,7 +107,7 @@ const FamilyTreePage: React.FC = () => {
             preload
           />
         </div>
-        <div className="flex grow overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-glow">
+        <div className="flex grow overflow-hidden border border-slate-200 bg-white shadow-glow">
           <FamilyFlow focusId={focusId} />
         </div>
       </div>
@@ -192,4 +192,4 @@ const FamilyTreePage: React.FC = () => {
   );
 };
 
-export default FamilyTreePage;
+export default Page;

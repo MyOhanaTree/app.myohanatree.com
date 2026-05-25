@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "/myohanatree-logo.png";
 import TextInput from "@/components/forms/TextInput";
-import { api } from "../api/axiosClient";
+import { api } from "@/api/axiosClient";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");

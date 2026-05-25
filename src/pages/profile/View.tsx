@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import logo from "/myohanatree-logo.png";
-import { fetchFamilyPerson } from "../api/family";
-import type { FamilyPerson } from "../types/family";
+import { fetchFamilyPerson } from "@/api/family";
+import type { FamilyPerson } from "@/types/family";
 
 export default function Profile() {
   const { user, logout } = useAuth();

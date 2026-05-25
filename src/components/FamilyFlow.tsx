@@ -18,7 +18,6 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 
 import { fetchFamilyPerson } from "../api/family";
-import logo from "/myohanatree-logo.png";
 import type { FamilyPerson, BasicPerson } from "../types/family";
 
 type FamilyRole = "you" | "parent" | "sibling" | "partner" | "child" | "group";
@@ -38,8 +37,15 @@ type FamilyNodeData = {
 type FamilyNode = Node<FamilyNodeData>;
 type FamilyEdge = Edge;
 
-const H_SPACING = 200;
-const V_SPACING = 80;
+const H_SPACING = 225;
+// Vertical spacing between generations (increase to separate rows more)
+const V_SPACING = 130;
+// Partner gap: slightly smaller than horizontal spacing but larger than node width
+// (node min width is 170px). Keeps partner cards tighter than sibling spacing.
+const PARTNER_GAP = 180;
+const PARENT_TO_FIRST_SIBLING_GAP = H_SPACING;
+const GRANDPARENT_SET_MIN_GAP = 420;
+const GRANDPARENT_PARENT_SET_MIN_GAP = 520;
 
 // ------------------ Helpers ------------------
 
@@ -77,15 +83,45 @@ function createNode(
 }
 
 function createEdge(source: string, target: string, label: string): FamilyEdge {
+  // Avoid self-edges
+  if (source === target) {
+    return {
+      id: `skip-self-${source}`,
+      source,
+      target,
+      style: { stroke: "transparent" },
+      type: "default",
+      data: { skip: true },
+    };
+  }
+
+  const stroke = label === "partner" ? "#ec4899" : "#94a3b8";
+  const strokeWidth = label === "partner" ? 2 : 1.5;
+  const curvedTypes = new Set(["parent", "child"]);
+
   return {
     id: `${label}-${source}-${target}`,
     source,
     target,
     style: {
-      stroke: label === "partner" ? "#ec4899" : "#94a3b8",
-      strokeWidth: label === "partner" ? 2 : 1.5,
+      stroke,
+      strokeWidth,
     },
-    type: label === "partner" ? "straight" : "default",
+    type: curvedTypes.has(label) ? "smoothstep" : "default",
+    animated: false,
+    // ensure no arrow heads by default
+    markerEnd: undefined,
+  };
+}
+
+function getNodeCenterPosition(node: FamilyNode, flowInstance: ReactFlowInstance | null) {
+  const flowNode: { width?: number; height?: number } | undefined =
+    (flowInstance?.getNode(node.id) as any) ?? undefined;
+  const width = flowNode?.width ?? 170;
+  const height = flowNode?.height ?? 60;
+  return {
+    x: node.position.x + width / 2,
+    y: node.position.y + height / 2,
   };
 }
 
@@ -102,7 +138,7 @@ function getPersonId(person: Partial<BasicPerson>) {
 }
 
 function mergeRole(existingRole: FamilyRole, incomingRole: FamilyRole): FamilyRole {
-  // Keep right-column relationship roles stable during branch expansion.
+  // Keep descendant-lane relationship roles stable during branch expansion.
   // When opening a child node, shared relatives can reappear as "sibling"
   // in that local branch; preserving child/partner avoids layout collisions.
   if ((existingRole === "child" || existingRole === "partner") && incomingRole === "sibling") {
@@ -120,27 +156,27 @@ function mergeRole(existingRole: FamilyRole, incomingRole: FamilyRole): FamilyRo
   return "child";
 }
 
-function reflowRightColumn(nodes: FamilyNode[], anchorNodeId?: string): FamilyNode[] {
+function reflowBottomRow(nodes: FamilyNode[], anchorNodeId?: string): FamilyNode[] {
   const nodesWithoutBoxes = nodes.filter((n) => !n.data.isGroupBox);
-  const rightNodes = nodesWithoutBoxes.filter((n) => n.data.role === "partner" || n.data.role === "child");
-  if (!rightNodes.length) return nodesWithoutBoxes;
+  const bottomNodes = nodesWithoutBoxes.filter((n) => n.data.role === "child");
+  if (!bottomNodes.length) return nodesWithoutBoxes;
 
   const baseBand = nodesWithoutBoxes.filter(
-    (n) => (n.data.role === "you" || n.data.role === "sibling") && n.position.x === 0
+    (n) => n.data.role === "you" || n.data.role === "sibling"
   );
-  const siblingCenterY = baseBand.length
-    ? (Math.min(...baseBand.map((n) => n.position.y)) + Math.max(...baseBand.map((n) => n.position.y))) / 2
+  const siblingCenterX = baseBand.length
+    ? (Math.min(...baseBand.map((n) => n.position.x)) + Math.max(...baseBand.map((n) => n.position.x))) / 2
     : 0;
 
-  const uniqueColumns = Array.from(new Set(rightNodes.map((n) => n.position.x))).sort((a, b) => a - b);
+  const uniqueRows = Array.from(new Set(bottomNodes.map((n) => n.position.y))).sort((a, b) => a - b);
   const posById = new Map<string, { x: number; y: number }>();
 
-  uniqueColumns.forEach((columnX) => {
-    const columnNodes = rightNodes.filter((n) => Math.abs(n.position.x - columnX) < 0.001);
-    const anchorNode = anchorNodeId ? columnNodes.find((n) => n.id === anchorNodeId) : undefined;
+  uniqueRows.forEach((rowY) => {
+    const rowNodes = bottomNodes.filter((n) => Math.abs(n.position.y - rowY) < 0.001);
+    const anchorNode = anchorNodeId ? rowNodes.find((n) => n.id === anchorNodeId) : undefined;
     const groups = new Map<string, FamilyNode[]>();
 
-    columnNodes.forEach((n) => {
+    rowNodes.forEach((n) => {
       const key = n.data.ownerId || `owner-${n.id}`;
       const list = groups.get(key) || [];
       list.push(n);
@@ -160,8 +196,6 @@ function reflowRightColumn(nodes: FamilyNode[], anchorNodeId?: string): FamilyNo
     const flattened: FamilyNode[] = [];
     orderedGroups.forEach((group) => {
       const sorted = [...group].sort((a, b) => {
-        if (a.data.role !== b.data.role) return a.data.role === "partner" ? -1 : 1;
-
         const aBirth = Number.isFinite(a.data.birthTime) ? (a.data.birthTime as number) : Number.POSITIVE_INFINITY;
         const bBirth = Number.isFinite(b.data.birthTime) ? (b.data.birthTime as number) : Number.POSITIVE_INFINITY;
         if (aBirth !== bBirth) return aBirth - bBirth;
@@ -174,15 +208,15 @@ function reflowRightColumn(nodes: FamilyNode[], anchorNodeId?: string): FamilyNo
       flattened.push(...sorted);
     });
 
-    const startY = siblingCenterY - ((flattened.length - 1) / 2) * V_SPACING;
+    const startX = siblingCenterX - ((flattened.length - 1) / 2) * H_SPACING;
     const anchorIndex = anchorNode ? flattened.findIndex((n) => n.id === anchorNode.id) : -1;
     const anchorOffset =
       anchorNode && anchorIndex >= 0
-        ? anchorNode.position.y - (startY + anchorIndex * V_SPACING)
+        ? anchorNode.position.x - (startX + anchorIndex * H_SPACING)
         : 0;
 
     flattened.forEach((n, i) => {
-      posById.set(n.id, { x: columnX, y: startY + i * V_SPACING + anchorOffset });
+      posById.set(n.id, { x: startX + i * H_SPACING + anchorOffset, y: rowY });
     });
   });
 
@@ -195,8 +229,383 @@ function reflowRightColumn(nodes: FamilyNode[], anchorNodeId?: string): FamilyNo
   return positionedNodes;
 }
 
-function disableAllEdges(): FamilyEdge[] {
-  return [];
+function reflowParentRows(nodes: FamilyNode[]): FamilyNode[] {
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const parentRows = Array.from(
+    new Set(
+      nodes.filter((n) => n.data.role === "parent").map((n) => n.position.y)
+    )
+  );
+  const posById = new Map<string, { x: number; y: number }>();
+
+  parentRows.forEach((rowY) => {
+    const rowParents = nodes.filter(
+      (n) => n.data.role === "parent" && Math.abs(n.position.y - rowY) < 0.001
+    );
+
+    const groups = new Map<string, FamilyNode[]>();
+    rowParents.forEach((n) => {
+      const key = n.data.ownerId || `owner-${n.id}`;
+      const list = groups.get(key) || [];
+      list.push(n);
+      groups.set(key, list);
+    });
+
+    Array.from(groups.values()).forEach((group) => {
+      const groupOwnerId = group[0]?.data.ownerId || "";
+      const owner = groupOwnerId ? byId.get(groupOwnerId) : undefined;
+      const groupCenterX = owner
+        ? owner.position.x
+        : group.reduce((sum, n) => sum + n.position.x, 0) / group.length;
+
+      const sorted = [...group].sort((a, b) => {
+        const aBirth = Number.isFinite(a.data.birthTime) ? (a.data.birthTime as number) : Number.POSITIVE_INFINITY;
+        const bBirth = Number.isFinite(b.data.birthTime) ? (b.data.birthTime as number) : Number.POSITIVE_INFINITY;
+        if (aBirth !== bBirth) return aBirth - bBirth;
+        return (a.data.label || "").localeCompare(b.data.label || "");
+      });
+
+      sorted.forEach((n, index) => {
+        posById.set(n.id, {
+          x: groupCenterX + (index - (sorted.length - 1) / 2) * PARTNER_GAP,
+          y: rowY,
+        });
+      });
+    });
+  });
+
+  return nodes.map((n) => {
+    const pos = posById.get(n.id);
+    if (!pos) return n;
+    return { ...n, position: pos };
+  });
+}
+
+function reflowSiblingPartnerRows(nodes: FamilyNode[], anchorNodeId?: string): FamilyNode[] {
+  const positioned = [...nodes];
+  const byId = new Map(positioned.map((n) => [n.id, n]));
+  const posById = new Map<string, { x: number; y: number }>();
+
+  const anchorRows = Array.from(
+    new Set(
+      positioned
+        .filter((n) => n.data.role === "you" || n.data.role === "sibling")
+        .map((n) => n.position.y)
+    )
+  );
+
+  // We'll align each anchor row to a common center so rows are visually centered to each other.
+  let mainCenterX: number | null = null;
+
+  anchorRows.forEach((rowY) => {
+    const anchors = positioned
+      .filter(
+        (n) =>
+          (n.data.role === "you" || n.data.role === "sibling") &&
+          Math.abs(n.position.y - rowY) < 0.001
+      )
+      .sort((a, b) => a.position.x - b.position.x);
+
+    if (!anchors.length) return;
+    const isDerivedBranchRow = anchors.every((n) => Boolean(n.data.ownerId));
+
+    const firstAnchor = anchors[0]!;
+    let cursorX = firstAnchor.position.x;
+
+    anchors.forEach((anchor) => {
+      const partnerNodes = positioned
+        .filter(
+          (n) =>
+            n.data.role === "partner" &&
+            n.data.ownerId === anchor.id &&
+            Math.abs(n.position.y - rowY) < 0.001
+        )
+        .sort((a, b) => {
+          const aBirth = Number.isFinite(a.data.birthTime) ? (a.data.birthTime as number) : Number.POSITIVE_INFINITY;
+          const bBirth = Number.isFinite(b.data.birthTime) ? (b.data.birthTime as number) : Number.POSITIVE_INFINITY;
+          if (aBirth !== bBirth) return aBirth - bBirth;
+          return a.id.localeCompare(b.id);
+        });
+
+      const anchorX = Math.max(anchor.position.x, cursorX);
+      posById.set(anchor.id, { x: anchorX, y: rowY });
+
+      partnerNodes.forEach((partner, index) => {
+        posById.set(partner.id, { x: anchorX + (index + 1) * PARTNER_GAP, y: rowY });
+      });
+
+      cursorX = anchorX + partnerNodes.length * PARTNER_GAP + H_SPACING;
+    });
+
+    // Compute this row's min/max x from assigned positions (anchors + partners).
+    const xs: number[] = [];
+    anchors.forEach((a) => {
+      const p = posById.get(a.id) || { x: a.position.x, y: a.position.y };
+      xs.push(p.x);
+      // include partners owned by this anchor
+      positioned
+        .filter((n) => n.data.role === "partner" && n.data.ownerId === a.id && Math.abs(n.position.y - rowY) < 0.001)
+        .forEach((pn) => {
+          const pp = posById.get(pn.id) || { x: pn.position.x, y: pn.position.y };
+          xs.push(pp.x);
+        });
+    });
+
+    if (!xs.length) return;
+    if (isDerivedBranchRow) return;
+
+    const rowMin = Math.min(...xs);
+    const rowMax = Math.max(...xs);
+    const rowCenter = (rowMin + rowMax) / 2;
+
+    if (mainCenterX === null) {
+      mainCenterX = rowCenter;
+    } else {
+      const delta = mainCenterX - rowCenter;
+      if (Math.abs(delta) > 0.001) {
+        Array.from(posById.entries()).forEach(([id, pos]) => {
+          if (Math.abs(pos.y - rowY) < 0.001) {
+            posById.set(id, { x: pos.x + delta, y: pos.y });
+          }
+        });
+      }
+    }
+
+    // If an explicit anchorNodeId was requested, shift this row so that node lines up.
+    if (anchorNodeId && posById.has(anchorNodeId)) {
+      const anchorNode = byId.get(anchorNodeId);
+      const computed = posById.get(anchorNodeId);
+      if (anchorNode && computed) {
+        const deltaX = anchorNode.position.x - computed.x;
+        if (Math.abs(deltaX) > 0.001) {
+          Array.from(posById.entries()).forEach(([id, pos]) => {
+            if (Math.abs(pos.y - rowY) < 0.001) {
+              posById.set(id, { x: pos.x + deltaX, y: pos.y });
+            }
+          });
+          // adjust mainCenterX as well so subsequent rows keep alignment
+          mainCenterX = (mainCenterX ?? 0) + deltaX;
+        }
+      }
+    }
+  });
+
+  return positioned.map((n) => {
+    const pos = posById.get(n.id);
+    if (!pos) return n;
+    return { ...n, position: pos };
+  });
+}
+
+function separateGrandparentSiblingSets(nodes: FamilyNode[]): FamilyNode[] {
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const posById = new Map<string, { x: number; y: number }>();
+  const siblingRows = Array.from(
+    new Set(
+      nodes
+        .filter((n) => n.data.role === "sibling" && n.data.ownerId)
+        .map((n) => n.position.y)
+    )
+  );
+  const MIN_SET_GAP = GRANDPARENT_SET_MIN_GAP;
+
+  siblingRows.forEach((rowY) => {
+    const rowSiblings = nodes.filter(
+      (n) =>
+        n.data.role === "sibling" &&
+        n.data.ownerId &&
+        Math.abs(n.position.y - rowY) < 0.001
+    );
+    if (!rowSiblings.length) return;
+
+    const groups = new Map<string, FamilyNode[]>();
+    rowSiblings.forEach((n) => {
+      const ownerId = n.data.ownerId as string;
+      const owner = byId.get(ownerId);
+      if (!owner || owner.data.role !== "parent") return;
+      const list = groups.get(ownerId) || [];
+      list.push(n);
+      groups.set(ownerId, list);
+    });
+
+    if (groups.size < 2) return;
+
+    const segments = Array.from(groups.entries())
+      .map(([ownerId, members]) => {
+        const xs = members.map((m) => m.position.x);
+        const owner = byId.get(ownerId)!;
+        return {
+          ownerId,
+          ownerX: owner.position.x,
+          members,
+          minX: Math.min(...xs),
+          maxX: Math.max(...xs),
+        };
+      })
+      .sort((a, b) => a.ownerX - b.ownerX);
+
+    const left = segments[0];
+    const right = segments[segments.length - 1];
+    if (!left || !right || left.ownerId === right.ownerId) return;
+
+    const currentGap = right.minX - left.maxX;
+    if (currentGap >= MIN_SET_GAP) return;
+
+    const delta = (MIN_SET_GAP - currentGap) / 2;
+    left.members.forEach((m) => posById.set(m.id, { x: m.position.x - delta, y: m.position.y }));
+    right.members.forEach((m) => posById.set(m.id, { x: m.position.x + delta, y: m.position.y }));
+  });
+
+  return nodes.map((n) => {
+    const pos = posById.get(n.id);
+    if (!pos) return n;
+    return { ...n, position: pos };
+  });
+}
+
+function separateGrandparentParentSets(nodes: FamilyNode[]): FamilyNode[] {
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const posById = new Map<string, { x: number; y: number }>();
+  const parentRows = Array.from(
+    new Set(
+      nodes
+        .filter((n) => n.data.role === "parent" && n.data.ownerId)
+        .map((n) => n.position.y)
+    )
+  );
+
+  parentRows.forEach((rowY) => {
+    const rowParents = nodes.filter(
+      (n) =>
+        n.data.role === "parent" &&
+        n.data.ownerId &&
+        Math.abs(n.position.y - rowY) < 0.001
+    );
+    if (!rowParents.length) return;
+
+    const groups = new Map<string, FamilyNode[]>();
+    rowParents.forEach((n) => {
+      const ownerId = n.data.ownerId as string;
+      const owner = byId.get(ownerId);
+      if (!owner || owner.data.role !== "parent") return;
+      const list = groups.get(ownerId) || [];
+      list.push(n);
+      groups.set(ownerId, list);
+    });
+
+    if (groups.size < 2) return;
+
+    const segments = Array.from(groups.entries())
+      .map(([ownerId, members]) => {
+        const xs = members.map((m) => m.position.x);
+        const owner = byId.get(ownerId)!;
+        return {
+          ownerId,
+          ownerX: owner.position.x,
+          members,
+          minX: Math.min(...xs),
+          maxX: Math.max(...xs),
+        };
+      })
+      .sort((a, b) => a.ownerX - b.ownerX);
+
+    const left = segments[0];
+    const right = segments[segments.length - 1];
+    if (!left || !right || left.ownerId === right.ownerId) return;
+
+    const currentGap = right.minX - left.maxX;
+    if (currentGap >= GRANDPARENT_PARENT_SET_MIN_GAP) return;
+
+    const delta = (GRANDPARENT_PARENT_SET_MIN_GAP - currentGap) / 2;
+    left.members.forEach((m) => posById.set(m.id, { x: m.position.x - delta, y: m.position.y }));
+    right.members.forEach((m) => posById.set(m.id, { x: m.position.x + delta, y: m.position.y }));
+  });
+
+  return nodes.map((n) => {
+    const pos = posById.get(n.id);
+    if (!pos) return n;
+    return { ...n, position: pos };
+  });
+}
+
+function computeEdgesFromNodes(nodes: FamilyNode[]): FamilyEdge[] {
+  const edges: FamilyEdge[] = [];
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const pushVerticalEdge = (a: FamilyNode, b: FamilyNode, label: string) => {
+    if (a.id === b.id) return;
+    const upper = a.position.y <= b.position.y ? a : b;
+    const lower = a.position.y <= b.position.y ? b : a;
+    const e = createEdge(upper.id, lower.id, label);
+    if (!e.data || !e.data.skip) {
+      e.sourceHandle = "bottom";
+      e.targetHandle = "top";
+      edges.push(e);
+    }
+  };
+
+  // Partners and children use ownerId for direct connection
+  nodes.forEach((n) => {
+    // Do not draw spouse/partner lines. Draw child edges to all applicable parents.
+    if (n.data.role === "child" && n.data.ownerId && n.data.ownerId !== n.id) {
+      const owner = byId.get(n.data.ownerId as string);
+      if (!owner) return;
+      const parents = new Map<string, FamilyNode>([[owner.id, owner]]);
+
+      // If the owner is a spouse/partner node, also connect child to that partner's owner.
+      if (owner.data.role === "partner" && owner.data.ownerId) {
+        const partnerOwner = byId.get(owner.data.ownerId);
+        if (partnerOwner) {
+          parents.set(partnerOwner.id, partnerOwner);
+        }
+      }
+
+      // If owner has spouse/partner nodes on the same row, connect child to those as well.
+      nodes.forEach((candidate) => {
+        if (
+          candidate.data.role === "partner" &&
+          candidate.data.ownerId === owner.id &&
+          Math.abs(candidate.position.y - owner.position.y) < 0.001
+        ) {
+          parents.set(candidate.id, candidate);
+        }
+      });
+
+      parents.forEach((parentNode) => pushVerticalEdge(parentNode, n, "child"));
+    }
+  });
+
+// Parents: connect each parent to the correct sibling-generation nodes on the owner's row.
+  nodes.forEach((n) => {
+    if (n.data.role !== "parent" || !n.data.ownerId || n.data.ownerId === n.id) return;
+    const owner = byId.get(n.data.ownerId as string);
+    if (!owner) return;
+
+    const isRootOwner = owner.data.role === "you" || owner.data.role === "sibling";
+    const siblings = nodes.filter((m) => {
+      if (m.id === owner.id) return true;
+      if (isRootOwner) {
+        return (
+          (m.data.role === "you" || m.data.role === "sibling") &&
+          Math.abs(m.position.y - owner.position.y) < 0.001
+        );
+      }
+      return (
+        m.data.role === "sibling" &&
+        m.data.ownerId === owner.id &&
+        Math.abs(m.position.y - owner.position.y) < 0.001
+      );
+    });
+
+    siblings.forEach((sibling) => {
+      if (sibling.id === n.id) return;
+      pushVerticalEdge(sibling, n, "parent");
+    });
+  });
+
+  // Deduplicate edges by id
+  const unique = new Map<string, FamilyEdge>();
+  edges.forEach((e) => unique.set(e.id, e));
+  return Array.from(unique.values());
 }
 
 // ------------------ Layout Builder ------------------
@@ -206,7 +615,8 @@ function buildLayout(
   centerX = 0,
   centerY = 0,
   markCurrent = false,
-  centerRole: FamilyRole = "you"
+  centerRole: FamilyRole = "you",
+  parentSiblingDirection: -1 | 1 = -1
 ): {
   nodes: FamilyNode[];
   edges: FamilyEdge[];
@@ -232,53 +642,63 @@ function buildLayout(
   const siblingGroup = [...siblings, center].sort(byBirthDate);
   const centerIndex = siblingGroup.findIndex((p) => getPersonId(p) === centerId);
   const resolvedCenterIndex = centerIndex >= 0 ? centerIndex : 0;
-  const siblingsCenterY =
-    centerY +
-    (((siblingGroup.length - 1) / 2) - resolvedCenterIndex) * V_SPACING;
-  const branchAnchorY = centerRole === "parent" ? centerY : siblingsCenterY;
+  const siblingsCenterX =
+    centerX +
+    (((siblingGroup.length - 1) / 2) - resolvedCenterIndex) * H_SPACING;
+  const branchAnchorX = centerRole === "parent" ? centerX : siblingsCenterX;
+  const partnerLaneWidth = partners.length ? PARTNER_GAP + (partners.length - 1) * PARTNER_GAP : 0;
   nodes.push(createNode(centerId, centerX, centerY, centerRole, center, markCurrent));
 
-  // --- Parents (LEFT) ---
+  // --- Parents (BOTTOM / ROOT-LIKE) ---
   parents.forEach((parent, index) => {
     const parentId = getPersonId(parent);
     if (!parentId) return;
 
-    const y =
-      branchAnchorY +
-      (index - (parents.length - 1) / 2) * V_SPACING;
+    const x =
+      branchAnchorX +
+      (index - (parents.length - 1) / 2) * PARTNER_GAP;
 
-    nodes.push(createNode(parentId, centerX - H_SPACING, y, "parent", parent));
+    nodes.push(
+      createNode(parentId, x, centerY + V_SPACING, "parent", parent, false, {
+        ownerId: centerId,
+        ownerY: centerX,
+      })
+    );
   });
 
   // --- SIBLINGS ORDERED WITH CENTER BY DOB ---
   // Keep current member fixed at y=0 and place siblings relative to that index.
   const siblingsById = new Map(siblings.map((s) => [getPersonId(s), s]));
+  const siblingExtraData = centerRole === "you" ? {} : { ownerId: centerId, ownerY: centerX };
 
-  if (centerRole === "parent") {
-    // Keep parent-branch siblings below the selected parent to avoid
-    // reordering above the existing top-parent row in the main view.
-    siblings.forEach((sibling, index) => {
-      const siblingId = getPersonId(sibling);
-      if (!siblingId || siblingId === centerId) return;
-      const y = centerY + (index + 1) * V_SPACING;
-      nodes.push(createNode(siblingId, centerX, y, "sibling", sibling));
-    });
-  } else {
-    siblingGroup.forEach((personInGroup, index) => {
-      const personInGroupId = getPersonId(personInGroup);
-      if (!personInGroupId || personInGroupId === centerId) return;
+  const siblingSpacing = centerRole === "parent" ? PARTNER_GAP : H_SPACING;
+  const parentSideSiblings = siblingGroup.filter((p) => getPersonId(p) && getPersonId(p) !== centerId);
+  siblingGroup.forEach((personInGroup, index) => {
+    const personInGroupId = getPersonId(personInGroup);
+    if (!personInGroupId || personInGroupId === centerId) return;
 
-      const sibling = siblingsById.get(personInGroupId);
-      if (!sibling) return;
+    const sibling = siblingsById.get(personInGroupId);
+    if (!sibling) return;
 
-      const y = centerY + (index - resolvedCenterIndex) * V_SPACING;
+    let x = centerX;
+    if (centerRole === "parent") {
+      // For parent-centered expansion: place all siblings on the selected side.
+      const sideIndex = parentSideSiblings.findIndex((p) => getPersonId(p) === personInGroupId);
+      const offset = sideIndex >= 0 ? sideIndex : index;
+      x =
+        centerX +
+        parentSiblingDirection *
+          (PARENT_TO_FIRST_SIBLING_GAP + offset * siblingSpacing);
+    } else {
+      const relativeIndex = index - resolvedCenterIndex;
+      const siblingShift = relativeIndex > 0 ? partnerLaneWidth : 0;
+      x = centerX + relativeIndex * siblingSpacing + siblingShift;
+    }
 
-      nodes.push(createNode(personInGroupId, centerX, y, "sibling", sibling));
-    });
-  }
+    nodes.push(createNode(personInGroupId, x, centerY, "sibling", sibling, false, siblingExtraData));
+  });
 
-  // --- SPOUSE + CHILDREN (ONE RIGHT COLUMN, TOP TO BOTTOM) ---
-  const familyRightX = centerX + H_SPACING;
+  // --- PARTNERS (SAME ROW AS CENTER, TIGHTER GAP) ---
   const partnerItems = partners
     .map((partner) => ({
       id: getPersonId(partner),
@@ -287,6 +707,19 @@ function buildLayout(
     }))
     .filter((item) => Boolean(item.id) && item.id !== centerId);
 
+  partnerItems.forEach((item, index) => {
+    const x = centerX + (index + 1) * PARTNER_GAP;
+    nodes.push(
+      createNode(item.id, x, centerY, item.role, item.person, false, {
+        ownerId: centerId,
+        ownerY: centerX,
+      })
+    );
+    // partner edges intentionally not added here; edges are computed later
+  });
+
+  // --- CHILDREN (ONE TOP ROW, LEFT TO RIGHT) ---
+  const familyTopY = centerY - V_SPACING;
   const childItems = children
     .map((child) => ({
       id: getPersonId(child),
@@ -295,20 +728,16 @@ function buildLayout(
     }))
     .filter((item) => Boolean(item.id));
 
-  const rightColumnItems = [...partnerItems, ...childItems];
-  const rightColumnCenterOffset = (rightColumnItems.length - 1) / 2;
+  const bottomRowCenterOffset = (childItems.length - 1) / 2;
 
-  rightColumnItems.forEach((item, index) => {
-    const y = branchAnchorY + (index - rightColumnCenterOffset) * V_SPACING;
+  childItems.forEach((item, index) => {
+    const x = centerX + (index - bottomRowCenterOffset) * H_SPACING;
     nodes.push(
-      createNode(item.id, familyRightX, y, item.role, item.person, false, {
+      createNode(item.id, x, familyTopY, item.role, item.person, false, {
         ownerId: centerId,
-        ownerY: centerY,
+        ownerY: centerX,
       })
     );
-    if (item.role === "partner" && y !== centerY && centerRole !== "parent") {
-      edges.push(createEdge(centerId, item.id, item.role));
-    }
   });
 
   return { nodes, edges };
@@ -317,17 +746,8 @@ function buildLayout(
 
 // ------------------ Node Renderer ------------------
 
-const roleToColor: Record<FamilyRole, string> = {
-  you: "#0ea5e9",
-  parent: "#6366f1",
-  sibling: "#22c55e",
-  partner: "#ec4899",
-  child: "#f97316",
-  group: "#cbd5e1",
-};
-
 function FamilyNodeRenderer({ data }: { data: FamilyNodeData }) {
-  const { label, subLabel, role, isCurrent } = data;
+  const { label, subLabel, isCurrent } = data;
 
   if (data.isGroupBox) {
     return <div className="h-full w-full rounded-xl border border-slate-200/90 bg-white/55" />;
@@ -335,8 +755,8 @@ function FamilyNodeRenderer({ data }: { data: FamilyNodeData }) {
 
   const cardStyle = isCurrent
     ? {
-        borderColor: roleToColor[role],
-        boxShadow: `0 0 0 2px ${roleToColor[role]}33`,
+        borderColor: '#22c55e',
+        boxShadow: `0 0 0 2px #22c55e33`,
       }
     : undefined;
 
@@ -345,17 +765,10 @@ function FamilyNodeRenderer({ data }: { data: FamilyNodeData }) {
       className="rounded-lg bg-white px-3 py-2 shadow-md border border-slate-200 w-auto min-w-[170px] max-w-[170px] overflow-hidden"
       style={cardStyle}
     >
-      <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
-      <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
+      <Handle id="top" type="target" position={Position.Top} style={{ opacity: 0 }} />
+      <Handle id="bottom" type="source" position={Position.Bottom} style={{ opacity: 0 }} />
 
-      <div className="flex items-start gap-2 overflow-hidden">
-        <div className="w-2">
-          <span
-            className="flex h-2 w-2 rounded-full"
-            style={{ backgroundColor: roleToColor[role] }}
-          />
-        </div>
-
+      <div className="flex items-start overflow-hidden">
         <div className="text-xs font-semibold leading-tight truncate flex-grow text-slate-800">
           {label}
         </div>
@@ -380,6 +793,16 @@ const nodeTypes = {
 
 type FamilyFlowProps = { focusId?: string | null };
 
+type FamilyFlowCache = {
+  nodes: FamilyNode[];
+  edges: FamilyEdge[];
+  currentCenterId: string | null;
+  currentCenterName: string;
+  expandedIds: string[];
+};
+
+let lastFamilyFlowCache: FamilyFlowCache | null = null;
+
 const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
   const expandedIdsRef = useRef<Set<string>>(new Set());
 
@@ -389,6 +812,7 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
   const [error, setError] = useState<string | null>(null);
   const [currentCenterId, setCurrentCenterId] = useState<string | null>(null);
   const [currentCenterName, setCurrentCenterName] = useState<string>("");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const reactFlowRef = useRef<ReactFlowInstance | null>(null);
   const lastCenteredRef = useRef<{ id: string; x: number; y: number } | null>(null);
 
@@ -401,6 +825,28 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
     (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
     []
   );
+
+  useEffect(() => {
+    if (!lastFamilyFlowCache) return;
+    setNodes(lastFamilyFlowCache.nodes);
+    setEdges(lastFamilyFlowCache.edges);
+    setCurrentCenterId(lastFamilyFlowCache.currentCenterId);
+    setCurrentCenterName(lastFamilyFlowCache.currentCenterName);
+    expandedIdsRef.current = new Set(lastFamilyFlowCache.expandedIds);
+    setLoading(false);
+    setError(null);
+  }, []);
+
+  useEffect(() => {
+    if (!nodes.length) return;
+    lastFamilyFlowCache = {
+      nodes,
+      edges,
+      currentCenterId,
+      currentCenterName,
+      expandedIds: Array.from(expandedIdsRef.current),
+    };
+  }, [nodes, edges, currentCenterId, currentCenterName]);
 
   const loadPerson = async (id?: string) => {
     setLoading(true);
@@ -431,7 +877,7 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
                 data: {
                   ...n.data,
                   ownerId: siblingNode.id,
-                  ownerY: siblingNode.position.y,
+                  ownerY: siblingNode.position.x,
                 },
               };
             });
@@ -460,8 +906,14 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
         mergedById.set(n.id, n);
       });
 
-      const nextNodes = reflowRightColumn(Array.from(mergedById.values()));
-      const nextEdges = disableAllEdges();
+      const nextNodes = separateGrandparentParentSets(
+        reflowParentRows(
+          separateGrandparentSiblingSets(
+            reflowSiblingPartnerRows(reflowBottomRow(Array.from(mergedById.values())))
+          )
+        )
+      );
+      const nextEdges = computeEdgesFromNodes(nextNodes);
 
       setNodes(nextNodes);
       setEdges(nextEdges);
@@ -493,7 +945,10 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
         node.position.x,
         node.position.y,
         false,
-        node.data.role
+        node.data.role,
+        node.data.role === "parent"
+          ? node.position.x >= (node.data.ownerY ?? node.position.x) ? 1 : -1
+          : -1
       );
 
       setNodes((prev) => {
@@ -521,7 +976,7 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
                   data: {
                     ...nextNode.data,
                     ownerId: node.id,
-                    ownerY: node.position.y,
+                    ownerY: node.position.x,
                   },
                 }
               : nextNode;
@@ -557,25 +1012,37 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
           },
         }));
 
-        const nextNodes = reflowRightColumn(merged, node.id);
+        const nextNodes = separateGrandparentParentSets(
+          reflowParentRows(
+            separateGrandparentSiblingSets(
+              reflowSiblingPartnerRows(reflowBottomRow(merged, node.id), node.id)
+            )
+          )
+        );
 
         const stabilizedNodes = nextNodes.map((n) => {
           const prevPos = previousPositions.get(n.id);
           if (!prevPos) return n;
 
-          const isAnchorNode =
-            n.data.role === "you" || n.data.role === "parent" || n.data.role === "sibling";
+          const isClickedNode = n.id === node.id;
+          const isClickedParentPeer =
+            node.data.role === "parent" &&
+            n.data.role === "parent" &&
+            n.data.ownerId === node.data.ownerId &&
+            Math.abs(n.position.y - node.position.y) < 0.001;
+          const isStableAnchor = isClickedNode || isClickedParentPeer;
 
-          // Keep anchor rows stable, but always allow right-column nodes
-          // (partner/child) to reflow so added descendants stack correctly.
-          if (previousNodeIds.has(n.id) && isAnchorNode) {
+          // Keep the clicked node fixed. For parent expansion, also keep its
+          // existing parent pair fixed to prevent the opposite parent from shifting.
+          if (previousNodeIds.has(n.id) && isStableAnchor) {
             return { ...n, position: prevPos };
           }
 
           return n;
         });
 
-        setEdges(disableAllEdges());
+        const computedEdges = computeEdgesFromNodes(stabilizedNodes);
+        setEdges(computedEdges);
 
         return stabilizedNodes;
       });
@@ -590,7 +1057,9 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
   }, []);
 
   useEffect(() => {
-    loadPerson();
+    if (!lastFamilyFlowCache) {
+      loadPerson();
+    }
   }, []);
 
   useEffect(() => {
@@ -599,26 +1068,27 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
     const selectedNode = nodes.find((n) => n.id === currentCenterId);
     if (!selectedNode) return;
 
+    const centerPos = getNodeCenterPosition(selectedNode, reactFlowRef.current);
+
     const lastCentered = lastCenteredRef.current;
     if (
       lastCentered &&
       lastCentered.id === selectedNode.id &&
-      Math.abs(lastCentered.x - selectedNode.position.x) < 0.5 &&
-      Math.abs(lastCentered.y - selectedNode.position.y) < 0.5
+      Math.abs(lastCentered.x - centerPos.x) < 0.5 &&
+      Math.abs(lastCentered.y - centerPos.y) < 0.5
     ) {
       return;
     }
 
-    reactFlowRef.current.setCenter(selectedNode.position.x, selectedNode.position.y, {
+    reactFlowRef.current.setCenter(centerPos.x, centerPos.y, {
       zoom: 1,
       duration: 700,
-      ease: (t) => 1 - Math.pow(1 - t, 3),
     });
 
     lastCenteredRef.current = {
       id: selectedNode.id,
-      x: selectedNode.position.x,
-      y: selectedNode.position.y,
+      x: centerPos.x,
+      y: centerPos.y,
     };
   }, [nodes, currentCenterId]);
 
@@ -627,22 +1097,67 @@ const FamilyFlowInner: React.FC<FamilyFlowProps> = ({ focusId }) => {
     loadPerson(focusId);
   }, [focusId]);
 
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isFullscreen]);
+
+  const recenterToNode = useCallback(
+    (nodeId: string, duration = 700, forceZoom?: number) => {
+      const flow = reactFlowRef.current;
+      if (!flow) return;
+      const selectedNode = nodes.find((n) => n.id === nodeId);
+      if (!selectedNode) return;
+
+      const centerPos = getNodeCenterPosition(selectedNode, flow);
+      flow.setCenter(centerPos.x, centerPos.y, {
+        zoom: forceZoom ?? flow.getZoom(),
+        duration,
+      });
+    },
+    [nodes]
+  );
+
   const recenterOnCurrent = useCallback(() => {
     if (!currentCenterId) return;
-    loadPerson(currentCenterId);
-  }, [currentCenterId]);
+    recenterToNode(currentCenterId, 900);
+  }, [currentCenterId, recenterToNode]);
+
+  useEffect(() => {
+    if (!currentCenterId || !nodes.length) return;
+    let frame2: number | null = null;
+    let settleTimer: number | null = null;
+    const frame1 = window.requestAnimationFrame(() => {
+      frame2 = window.requestAnimationFrame(() => {
+        recenterToNode(currentCenterId, 700);
+      });
+      settleTimer = window.setTimeout(() => {
+        recenterToNode(currentCenterId, 350);
+      }, 180);
+    });
+    return () => {
+      window.cancelAnimationFrame(frame1);
+      if (frame2 !== null) window.cancelAnimationFrame(frame2);
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+    };
+  }, [isFullscreen, currentCenterId, nodes.length, recenterToNode]);
+
+  useEffect(() => {
+    if (!currentCenterId) return;
+    const flow = reactFlowRef.current;
+    if (!flow) return;
+    recenterToNode(currentCenterId, 700, 1);
+  }, [nodes, currentCenterId, recenterToNode]);
 
 const onNodeClick = useCallback(
     (_: unknown, node: Node<FamilyNodeData>) => {
       if (node.data.isGroupBox) return;
       setCurrentCenterName(node.data.label || "Unknown");
       setCurrentCenterId(node.id);
-
-      const isParentSiblingNode = node.data.role === "sibling" && node.position.x < 0;
-      if (isParentSiblingNode) {
-        loadPerson(node.id);
-        return;
-      }
 
       expandPerson(node);
 
@@ -667,12 +1182,19 @@ const onNodeClick = useCallback(
   );
 
   return (
-    <div className="grow min-h-0 flex flex-col">
+    <div className={isFullscreen ? "fixed inset-0 z-40 flex min-h-0 flex-col bg-white" : "grow min-h-0 flex flex-col"}>
       <div className="flex items-center justify-between border border-slate-200 bg-white px-3 py-2 text-sm">
         <div className="text-slate-700">
           Currently viewing: <span className="font-semibold text-slate-900">{currentCenterName || "Unknown"}</span>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsFullscreen((prev) => !prev)}
+            className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            {isFullscreen ? "Exit full screen" : "Full screen"}
+          </button>
           <button
             type="button"
             onClick={recenterOnCurrent}
@@ -729,9 +1251,7 @@ const onNodeClick = useCallback(
             borderRadius: 8,
           }}
           pannable
-          nodeStrokeColor={(n) =>
-            roleToColor[(n.data as FamilyNodeData).role]
-          }
+          nodeStrokeColor="#f97316"
           nodeColor="#fff"
         />
 

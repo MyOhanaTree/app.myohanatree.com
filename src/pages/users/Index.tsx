@@ -2,8 +2,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "/myohanatree-logo.png";
 import TextInput from "@/components/forms/TextInput";
-import { api } from "../api/axiosClient";
-import { useAuth } from "../context/AuthContext";
+import { api } from "@/api/axiosClient";
+import { useAuth } from "@/context/AuthContext";
 
 type UserRecord = {
   id: string;

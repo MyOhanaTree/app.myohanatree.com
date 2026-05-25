@@ -2,8 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import logo from "/myohanatree-logo.png";
 import PasswordInput from "@/components/forms/PasswordInput";
-import TextInput from "@/components/forms/TextInput";
-import { api } from "../api/axiosClient";
+import { api } from "@/api/axiosClient";
 
 type TokenStatus = "idle" | "checking" | "valid" | "invalid";
 

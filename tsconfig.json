@@ -16,10 +16,9 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
+    "noUncheckedIndexedAccess": true,    
+    "paths": {      
+      "@/*": ["./src/*"]
     },
     "types": ["vite/client"]
   },
